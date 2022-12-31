@@ -16,11 +16,6 @@ namespace WinUI3Utilities;
 
 public static class AppHelper
 {
-    private static MicaController? _backdropController;
-
-    private static WindowsSystemDispatcherQueueHelper? _dispatcherQueueHelper;
-
-    private static SystemBackdropConfiguration? _systemBackdropConfiguration;
 
     public static async Task BeforeLaunch()
     {
@@ -54,58 +49,21 @@ public static class AppHelper
             _ => new(800, 600)
         };
 
-    public static void TryApplyMica()
-    {
-        if (MicaController.IsSupported())
-        {
-            _dispatcherQueueHelper = new WindowsSystemDispatcherQueueHelper();
-            _dispatcherQueueHelper.EnsureWindowsSystemDispatcherQueueController();
-
-            _systemBackdropConfiguration = new SystemBackdropConfiguration();
-            CurrentContext.Window.Activated += WindowOnActivated;
-            CurrentContext.Window.Closed += WindowOnClosed;
-            ((FrameworkElement)CurrentContext.Window.Content).ActualThemeChanged += OnActualThemeChanged;
-
-            _systemBackdropConfiguration.IsInputActive = true;
-            SetConfigurationSourceTheme();
-
-            _backdropController = new MicaController();
-
-            _ = _backdropController.AddSystemBackdropTarget(CurrentContext.Window.As<ICompositionSupportsSystemBackdrop>());
-            _backdropController.SetSystemBackdropConfiguration(_systemBackdropConfiguration);
-        }
-    }
-
-    private static void OnActualThemeChanged(FrameworkElement sender, object args)
-    {
-        if (_systemBackdropConfiguration is not null)
-            SetConfigurationSourceTheme();
-    }
-
-    private static void SetConfigurationSourceTheme() =>
-        _systemBackdropConfiguration!.Theme = CurrentContext.Window.Content switch
-        {
-            FrameworkElement { ActualTheme: ElementTheme.Dark } => SystemBackdropTheme.Dark,
-            FrameworkElement { ActualTheme: ElementTheme.Light } => SystemBackdropTheme.Light,
-            FrameworkElement { ActualTheme: ElementTheme.Default } => SystemBackdropTheme.Default,
-            _ => _systemBackdropConfiguration!.Theme
-        };
-
-    private static void WindowOnClosed(object sender, WindowEventArgs args)
-    {
-        if (_backdropController is not null)
-        {
-            _backdropController.Dispose();
-            _backdropController = null;
-        }
-
-        CurrentContext.Window.Activated -= WindowOnActivated;
-        _systemBackdropConfiguration = null;
-    }
-
-    private static void WindowOnActivated(object sender, WindowActivatedEventArgs args)
-        => _systemBackdropConfiguration!.IsInputActive = args.WindowActivationState is not WindowActivationState.Deactivated;
-
+    /// <summary>
+    /// <code>
+    /// RegisterUnhandledExceptionHandler();
+    /// 
+    /// CurrentContext.AppWindow.Title = CurrentContext.Title;
+    /// CurrentContext.AppWindow.Resize(size);
+    /// CurrentContext.AppWindow.Show();
+    /// if (CurrentContext.IconPath is "")
+    /// CurrentContext.AppWindow.SetIcon(CurrentContext.IconPath);
+    /// 
+    /// TitleBarHelper.InitializeTitleBar();
+    /// MicaHelper.TryApplyMica();
+    /// </code>
+    /// </summary>
+    /// <param name="size"></param>
     public static void InitializeAsync(SizeInt32 size)
     {
         RegisterUnhandledExceptionHandler();
@@ -113,11 +71,11 @@ public static class AppHelper
         CurrentContext.AppWindow.Title = CurrentContext.Title;
         CurrentContext.AppWindow.Resize(size);
         CurrentContext.AppWindow.Show();
-        if (CurrentContext.IconPath is "")
+        if (CurrentContext.IconPath is not "")
             CurrentContext.AppWindow.SetIcon(CurrentContext.IconPath);
 
         TitleBarHelper.InitializeTitleBar();
-        TryApplyMica();
+        MicaHelper.TryApplyMica();
     }
 
     #region DebugHelper
@@ -162,6 +120,7 @@ public static class AppHelper
             }
 #endif
     }
+
     /// <summary>
     ///     Exit the notification after pushing an <see cref="ApplicationExitingMessage" />
     ///     to the <see cref="EventChannel" />
