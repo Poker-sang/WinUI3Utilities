@@ -1,6 +1,7 @@
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
+using WinRT;
 
 namespace WinUI3Utilities;
 
@@ -33,6 +34,7 @@ public class MicaHelper
             _backdropController.SetSystemBackdropConfiguration(_systemBackdropConfiguration);
         }
     }
+
     private static void WindowOnActivated(object sender, WindowActivatedEventArgs args)
         => _systemBackdropConfiguration!.IsInputActive = args.WindowActivationState is not WindowActivationState.Deactivated;
 

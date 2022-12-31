@@ -64,7 +64,7 @@ public static class AppHelper
     /// </code>
     /// </summary>
     /// <param name="size"></param>
-    public static void InitializeAsync(SizeInt32 size)
+    public static void Initialize(SizeInt32 size)
     {
         RegisterUnhandledExceptionHandler();
 
