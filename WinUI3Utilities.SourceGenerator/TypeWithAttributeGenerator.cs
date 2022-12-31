@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 
 namespace WinUI3Utilities.SourceGenerator;
@@ -16,14 +15,17 @@ public class TypeWithAttributeGenerator : IIncrementalGenerator
     /// <returns>生成的代码</returns>
     private delegate string? TypeWithAttribute(INamedTypeSymbol typeSymbol, ImmutableArray<AttributeData> attributeList);
 
+    private const string AttributeNamespace = "WinUI3Utilities.Attributes.";
+
     /// <summary>
     /// 需要生成的Attribute
     /// </summary>
     private static readonly Dictionary<string, TypeWithAttribute> _attributes = new()
     {
-        { "WinUI3Utilities.Attributes.GenerateConstructorAttribute", WinUI3Utilities.SourceGenerator.TypeWithAttributeDelegates.GenerateConstructor },
-        { "WinUI3Utilities.Attributes.AppContextAttribute`1", WinUI3Utilities.SourceGenerator.TypeWithAttributeDelegates.AppContext },
-        { "WinUI3Utilities.Attributes.DependencyPropertyAttribute`1", WinUI3Utilities.SourceGenerator.TypeWithAttributeDelegates.DependencyProperty }
+        { AttributeNamespace + "GenerateConstructorAttribute", TypeWithAttributeDelegates.GenerateConstructor },
+        { AttributeNamespace + "AppContextAttribute`1", TypeWithAttributeDelegates.AppContext },
+        { AttributeNamespace + "DependencyPropertyAttribute`1", TypeWithAttributeDelegates.DependencyProperty },
+        { AttributeNamespace + "SettingsViewModelAttribute`1", TypeWithAttributeDelegates.SettingsViewModel }
     };
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
