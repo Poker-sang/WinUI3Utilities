@@ -17,6 +17,12 @@
         <Title>$(AssemblyName)</Title>
         <RepositoryUrl>git@github.com:Poker-sang/WinUI3Utilities.git</RepositoryUrl>
         <PackageProjectUrl>https://github.com/Poker-sang/WinUI3Utilities</PackageProjectUrl>
+        <AssemblyVersion></AssemblyVersion>
+        <FileVersion>1.0.1</FileVersion>
+        <VersionPrefix>$(AssemblyVersion)</VersionPrefix>
+        <AssemblyVersion>1.0.1</AssemblyVersion>
+        <FileVersion>$(AssemblyVersion)</FileVersion>
+        <Version>$(AssemblyVersion)</Version>
     </PropertyGroup>
 
     <ItemGroup>
