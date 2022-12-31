@@ -20,7 +20,7 @@ internal static partial class TypeWithAttributeDelegates
         var type = attribute.AttributeClass.TypeArguments[0];
 
         var staticClassName = "static WinUI3Utilities.Misc";
-        var methodName = "Cast";
+        var methodName = "ToNotNull";
 
         string? configKey = null;
 

@@ -1,7 +1,6 @@
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
@@ -11,7 +10,7 @@ using static WinUI3Utilities.SourceGenerator.Utilities;
 namespace WinUI3Utilities.SourceGenerator;
 
 [Generator]
-public class LocalizationResourcesGenerator : IIncrementalGenerator
+public class LocalizedStringResourcesGenerator : IIncrementalGenerator
 {
     private const string AttributeName = "WinUI3Utilities.Attributes.LocalizedStringResourcesAttribute";
     private const string SourceItemGroupMetadata = "build_metadata.AdditionalFiles.SourceItemGroup";
@@ -21,6 +20,7 @@ public class LocalizationResourcesGenerator : IIncrementalGenerator
                 AttributeName,
                 (_, _) => true,
                 (syntaxContext, _) => syntaxContext)
+            .Select((t, _) => (t.TargetSymbol.ContainingNamespace.ToDisplayString(), t.Attributes[0]))
             .Combine(context.AdditionalTextsProvider
                 .Combine(context.AnalyzerConfigOptionsProvider)
                 .Where(t => t.Right.GetOptions(t.Left).TryGetValue(SourceItemGroupMetadata, out var sourceItemGroup)
@@ -28,29 +28,27 @@ public class LocalizationResourcesGenerator : IIncrementalGenerator
                             && t.Left.Path.EndsWith(".resw"))
                 .Select((tuple, _) => tuple.Left).Collect());
 
-        context.RegisterSourceOutput(attributes, (spc, source) => Execute(spc, source.Left, source.Right));
+        context.RegisterSourceOutput(attributes, (spc, source)
+            => spc.AddSource($"{source.Left.Item1}.LocalizedStringResources.g.cs", Execute(source.Left, source.Right)));
     }
 
-    public void Execute(SourceProductionContext spc, GeneratorAttributeSyntaxContext asc, ImmutableArray<AdditionalText> additionalTexts)
+    public string Execute((string Namespace, AttributeData Attribute) data, ImmutableArray<AdditionalText> additionalTexts)
     {
-        for (var i = 0; i < asc.Attributes.Length; ++i)
-        {
-            var attribute = asc.Attributes[i];
-            var fileName = Path.GetFileNameWithoutExtension(attribute.ConstructorArguments[0].Value as string) ?? asc.TargetSymbol.Name;
-            var extension = Path.GetExtension(attribute.ConstructorArguments[0].Value as string) ?? "resw";
-            var additionalText = additionalTexts.SingleOrDefault(t => Path.GetFileNameWithoutExtension(t.Path) == fileName && Path.GetExtension(t.Path) == extension);
-            if (additionalText is null)
-                continue;
-            var doc = XDocument.Parse(additionalText.GetText()?.ToString()!);
-
-            var source = new StringBuilder($@"#nullable enable
+        var source = new StringBuilder($@"#nullable enable
 
 using Microsoft.Windows.ApplicationModel.Resources;
 
-namespace {asc.TargetSymbol.ContainingNamespace};
+namespace {data.Namespace};
+");
+        foreach (var additionalText in additionalTexts)
+        {
+            var fileName = Path.GetFileNameWithoutExtension(additionalText.Path)!;
 
-partial class {asc.TargetSymbol.Name} 
-{{   
+            var doc = XDocument.Parse(additionalText.GetText()?.ToString()!);
+
+            _ = source.AppendLine($@"
+public static class {fileName}Resources
+{{
     private static readonly ResourceLoader _resourceLoader = new(ResourceLoader.GetDefaultResourceFilePath(), ""{Path.GetFileNameWithoutExtension(additionalText.Path)}"");
 ");
             if (doc.XPathSelectElements("//data") is { } elements)
@@ -60,11 +58,11 @@ partial class {asc.TargetSymbol.Name}
                     if (name.Contains("["))
                         continue;
 
-                    _ = source.AppendLine(@$"{Spacing(1)}public readonly string {new Regex(@"\.|\:|\[|\]").Replace(name, "")} = _resourceLoader.GetString(""{name.Replace('.', '/')}"");");
+                    _ = source.AppendLine(@$"{Spacing(1)}public static readonly string {new Regex(@"\.|\:|\[|\]").Replace(name, "")} = _resourceLoader.GetString(""{name.Replace('.', '/')}"");");
                 }
 
-            _ = source.AppendLine("}");
-            spc.AddSource($"{asc.TargetSymbol.Name}{i}.StringResources.g.cs", source.ToString());
+            _ = source.AppendLine("}").AppendLine();
         }
+        return source.ToString();
     }
 }
