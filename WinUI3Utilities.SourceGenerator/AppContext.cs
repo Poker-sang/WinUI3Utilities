@@ -52,7 +52,7 @@ internal static partial class TypeWithAttributeDelegates
         var classBegin = @$"
 namespace {typeSymbol.ContainingNamespace.ToDisplayString()};
 
-public static partial class {name}
+partial class {name}
 {{
     private static ApplicationDataContainer _configurationContainer = null!;
 

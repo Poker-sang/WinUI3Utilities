@@ -4,7 +4,7 @@ using Microsoft.UI.Xaml;
 namespace WinUI3Utilities.Attributes;
 
 /// <summary>
-/// Generate code
+/// Generate:
 /// <code>
 /// <see langword="public static readonly"/> <see cref="DependencyProperty"/> Property = <see cref="DependencyProperty"/>.Register("Field", <see langword="typeof"/>(Type), <see langword="typeof"/>(TClass), <see langword="new"/> <see cref="PropertyMetadata"/>(DefaultValue, OnPropertyChanged));
 /// <br/>

@@ -7,12 +7,49 @@ using Windows.Foundation.Metadata;
 
 namespace WinUI3Utilities;
 
+/// <summary>
+/// A set of methods for title bar
+/// </summary>
 public static class TitleBarHelper
 {
+    /// <summary>
+    /// Simply call <see cref="UpdateAppTitleMargin"/>, should be invoked by <see cref="NavigationView.PaneClosing"/>
+    /// </summary>
+    /// <remarks>
+    /// Assign Prerequisites:
+    /// <list type="bullet">
+    /// <item><term><see cref="CurrentContext.TitleTextBlock"/></term></item>
+    /// </list>
+    /// </remarks>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     public static void PaneClosing(NavigationView sender, NavigationViewPaneClosingEventArgs e) => UpdateAppTitleMargin(sender);
 
+    /// <summary>
+    /// Simply call <see cref="UpdateAppTitleMargin"/>, should be invoked by <see cref="NavigationView.PaneOpening"/>
+    /// </summary>
+    /// <remarks>
+    /// Assign Prerequisites:
+    /// <list type="bullet">
+    /// <item><term><see cref="CurrentContext.TitleTextBlock"/></term></item>
+    /// </list>
+    /// </remarks>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     public static void PaneOpening(NavigationView sender, object e) => UpdateAppTitleMargin(sender);
 
+    /// <summary>
+    /// Should be invoked by <see cref="NavigationView.DisplayModeChanged"/>
+    /// </summary>
+    /// <remarks>
+    /// Assign Prerequisites:
+    /// <list type="bullet">
+    /// <item><term><see cref="CurrentContext.TitleBar"/></term></item>
+    /// <item><term><see cref="CurrentContext.TitleTextBlock"/></term></item>
+    /// </list>
+    /// </remarks>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     public static void DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs e)
     {
         var currentMargin = CurrentContext.TitleBar.Margin;
@@ -23,7 +60,17 @@ public static class TitleBarHelper
         UpdateAppTitleMargin(sender);
     }
 
-    public static void UpdateAppTitleMargin(NavigationView sender)
+    /// <summary>
+    /// Update app title margin when <see cref="NavigationView"/> changed
+    /// </summary>
+    /// <remarks>
+    /// Assign Prerequisites:
+    /// <list type="bullet">
+    /// <item><term><see cref="CurrentContext.TitleTextBlock"/></term></item>
+    /// </list>
+    /// </remarks>
+    /// <param name="navigationView"></param>
+    public static void UpdateAppTitleMargin(NavigationView navigationView)
     {
         const int smallLeftIndent = 4, largeLeftIndent = 24;
 
@@ -31,8 +78,8 @@ public static class TitleBarHelper
         {
             CurrentContext.TitleTextBlock.TranslationTransition = new();
 
-            CurrentContext.TitleTextBlock.Translation = (sender.DisplayMode is NavigationViewDisplayMode.Expanded && sender.IsPaneOpen) ||
-                     sender.DisplayMode is NavigationViewDisplayMode.Minimal
+            CurrentContext.TitleTextBlock.Translation = (navigationView.DisplayMode is NavigationViewDisplayMode.Expanded && navigationView.IsPaneOpen) ||
+                     navigationView.DisplayMode is NavigationViewDisplayMode.Minimal
                 ? new(smallLeftIndent, 0, 0)
                 : new System.Numerics.Vector3(largeLeftIndent, 0, 0);
         }
@@ -40,21 +87,33 @@ public static class TitleBarHelper
         {
             var currentMargin = CurrentContext.TitleTextBlock.Margin;
 
-            CurrentContext.TitleTextBlock.Margin = (sender.DisplayMode is NavigationViewDisplayMode.Expanded && sender.IsPaneOpen) ||
-                     sender.DisplayMode is NavigationViewDisplayMode.Minimal
+            CurrentContext.TitleTextBlock.Margin = (navigationView.DisplayMode is NavigationViewDisplayMode.Expanded && navigationView.IsPaneOpen) ||
+                     navigationView.DisplayMode is NavigationViewDisplayMode.Minimal
                 ? new() { Left = smallLeftIndent, Top = currentMargin.Top, Right = currentMargin.Right, Bottom = currentMargin.Bottom }
                 : new Thickness { Left = largeLeftIndent, Top = currentMargin.Top, Right = currentMargin.Right, Bottom = currentMargin.Bottom };
         }
     }
 
-    public static void InitializeTitleBar()
+    /// <summary>
+    /// Customize title bar when supported
+    /// </summary>
+    /// <remarks>
+    /// Assign Prerequisites:
+    /// <list type="bullet">
+    /// <item><term><see cref="CurrentContext.App"/></term></item>
+    /// <item><term><see cref="CurrentContext.Window"/></term></item>
+    /// </list>
+    /// </remarks>
+    /// <returns>Whether customization of title bar is supported</returns>
+    public static bool TryCustomizeTitleBar()
     {
-        if (AppWindowTitleBar.IsCustomizationSupported())
-        {
-            CurrentContext.AppTitleBar.ExtendsContentIntoTitleBar = true;
-            CurrentContext.AppTitleBar.ButtonBackgroundColor = Colors.Transparent;
-            CurrentContext.AppTitleBar.ButtonHoverBackgroundColor = ((SolidColorBrush)CurrentContext.App.Resources["SystemControlBackgroundBaseLowBrush"]).Color;
-            CurrentContext.AppTitleBar.ButtonForegroundColor = ((SolidColorBrush)CurrentContext.App.Resources["SystemControlForegroundBaseHighBrush"]).Color;
-        }
+        if (!AppWindowTitleBar.IsCustomizationSupported()) 
+            return false;
+
+        CurrentContext.AppTitleBar.ExtendsContentIntoTitleBar = true;
+        CurrentContext.AppTitleBar.ButtonBackgroundColor = Colors.Transparent;
+        CurrentContext.AppTitleBar.ButtonHoverBackgroundColor = ((SolidColorBrush)CurrentContext.App.Resources["SystemControlBackgroundBaseLowBrush"]).Color;
+        CurrentContext.AppTitleBar.ButtonForegroundColor = ((SolidColorBrush)CurrentContext.App.Resources["SystemControlForegroundBaseHighBrush"]).Color;
+        return true;
     }
 }

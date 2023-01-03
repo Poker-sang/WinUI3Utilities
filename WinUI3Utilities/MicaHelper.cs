@@ -5,63 +5,83 @@ using WinRT;
 
 namespace WinUI3Utilities;
 
+/// <summary>
+/// A set of methods for <see cref="Window"/>
+/// </summary>
 public class MicaHelper
 {
-    private static MicaController? _backdropController;
+    /// <summary>
+    /// Backdrop controller
+    /// </summary>
+    public static MicaController? BackdropController { get; private set; }
+
+    /// <summary>
+    /// System backdrop configuration
+    /// </summary>
+    public static SystemBackdropConfiguration? SystemBackdropConfiguration { get; private set; }
 
     private static WindowsSystemDispatcherQueueHelper? _dispatcherQueueHelper;
 
-    private static SystemBackdropConfiguration? _systemBackdropConfiguration;
-
-    public static void TryApplyMica()
+    /// <summary>
+    /// Apply mica when supported
+    /// </summary>
+    /// <remarks>
+    /// Assign Prerequisites:
+    /// <list type="bullet">
+    /// <item><term><see cref="CurrentContext.Window"/></term></item>
+    /// </list>
+    /// </remarks>
+    /// <returns>Whether mica is supported</returns>
+    public static bool TryApplyMica()
     {
-        if (MicaController.IsSupported())
-        {
-            _dispatcherQueueHelper = new WindowsSystemDispatcherQueueHelper();
-            _dispatcherQueueHelper.EnsureWindowsSystemDispatcherQueueController();
+        if (!MicaController.IsSupported())
+            return false;
 
-            _systemBackdropConfiguration = new SystemBackdropConfiguration();
-            CurrentContext.Window.Activated += WindowOnActivated;
-            CurrentContext.Window.Closed += WindowOnClosed;
-            ((FrameworkElement)CurrentContext.Window.Content).ActualThemeChanged += OnActualThemeChanged;
+        _dispatcherQueueHelper = new WindowsSystemDispatcherQueueHelper();
+        _dispatcherQueueHelper.EnsureWindowsSystemDispatcherQueueController();
 
-            _systemBackdropConfiguration.IsInputActive = true;
-            SetConfigurationSourceTheme();
+        SystemBackdropConfiguration = new SystemBackdropConfiguration();
+        CurrentContext.Window.Activated += WindowOnActivated;
+        CurrentContext.Window.Closed += WindowOnClosed;
+        ((FrameworkElement)CurrentContext.Window.Content).ActualThemeChanged += OnActualThemeChanged;
 
-            _backdropController = new MicaController();
+        SystemBackdropConfiguration.IsInputActive = true;
+        SetConfigurationSourceTheme();
 
-            _ = _backdropController.AddSystemBackdropTarget(CurrentContext.Window.As<ICompositionSupportsSystemBackdrop>());
-            _backdropController.SetSystemBackdropConfiguration(_systemBackdropConfiguration);
-        }
+        BackdropController = new MicaController();
+
+        _ = BackdropController.AddSystemBackdropTarget(CurrentContext.Window.As<ICompositionSupportsSystemBackdrop>());
+        BackdropController.SetSystemBackdropConfiguration(SystemBackdropConfiguration);
+        return true;
     }
 
     private static void WindowOnActivated(object sender, WindowActivatedEventArgs args)
-        => _systemBackdropConfiguration!.IsInputActive = args.WindowActivationState is not WindowActivationState.Deactivated;
+        => SystemBackdropConfiguration!.IsInputActive = args.WindowActivationState is not WindowActivationState.Deactivated;
 
     private static void WindowOnClosed(object sender, WindowEventArgs args)
     {
-        if (_backdropController is not null)
+        if (BackdropController is not null)
         {
-            _backdropController.Dispose();
-            _backdropController = null;
+            BackdropController.Dispose();
+            BackdropController = null;
         }
 
         CurrentContext.Window.Activated -= WindowOnActivated;
-        _systemBackdropConfiguration = null;
+        SystemBackdropConfiguration = null;
     }
 
     private static void OnActualThemeChanged(FrameworkElement sender, object args)
     {
-        if (_systemBackdropConfiguration is not null)
+        if (SystemBackdropConfiguration is not null)
             SetConfigurationSourceTheme();
     }
 
     private static void SetConfigurationSourceTheme() =>
-        _systemBackdropConfiguration!.Theme = CurrentContext.Window.Content switch
+        SystemBackdropConfiguration!.Theme = CurrentContext.Window.Content switch
         {
             FrameworkElement { ActualTheme: ElementTheme.Dark } => SystemBackdropTheme.Dark,
             FrameworkElement { ActualTheme: ElementTheme.Light } => SystemBackdropTheme.Light,
             FrameworkElement { ActualTheme: ElementTheme.Default } => SystemBackdropTheme.Default,
-            _ => _systemBackdropConfiguration!.Theme
+            _ => SystemBackdropConfiguration!.Theme
         };
 }

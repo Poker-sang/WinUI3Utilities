@@ -52,7 +52,7 @@ partial class {name}
                 $@"
     {{
         get => {settingName}.{property.Name};
-        set => SetProperty({settingName}.{property.Name}, value, {settingName}, (setting, value) => setting.{property.Name} = value);
+        set => SetProperty({settingName}.{property.Name}, value, {settingName}, (@setting, @value) => @setting.{property.Name} = @value);
     }}"));
         }
 

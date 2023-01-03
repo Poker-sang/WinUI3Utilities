@@ -5,18 +5,21 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.WinUI;
-using Microsoft.UI.Composition;
-using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
 using Windows.Graphics;
-using WinRT;
 
 namespace WinUI3Utilities;
 
+/// <summary>
+/// A set of methods for <see cref="Application"/>
+/// </summary>
 public static class AppHelper
 {
-
+    /// <summary>
+    /// Not implemented yet
+    /// </summary>
+    /// <returns></returns>
     public static async Task BeforeLaunch()
     {
         // AppInstance.GetCurrent().Activated += (_, arguments) => ActivationRegistrar.Dispatch(arguments);
@@ -33,21 +36,11 @@ public static class AppHelper
     }
 
     /// <summary>
-    /// Are we Windows 11 or not?
-    /// Windows 11 starts with 10.0.22000
+    /// Is it Windows 11 or not?
     /// </summary>
-    public static bool IsWindows11() => Environment.OSVersion.Version.Build >= 22000;
+    /// <remarks>Windows 11 starts with 10.0.22000</remarks>
+    public static bool IsWindows11 => Environment.OSVersion.Version.Build >= 22000;
 
-    /// <summary>
-    /// Calculate the window size by current resolution
-    /// </summary>
-    public static SizeInt32 PredetermineEstimatedWindowSize() =>
-        UIHelper.GetScreenSize() switch
-        {
-            ( >= 2560, >= 1440) => new(1600, 900),
-            ( > 1600, > 900) => new(1280, 720),
-            _ => new(800, 600)
-        };
 
     /// <summary>
     /// <code>
@@ -59,11 +52,18 @@ public static class AppHelper
     /// if (CurrentContext.IconPath is "")
     /// CurrentContext.AppWindow.SetIcon(CurrentContext.IconPath);
     /// 
-    /// TitleBarHelper.InitializeTitleBar();
-    /// MicaHelper.TryApplyMica();
+    /// _ = TitleBarHelper.TryCustomizeTitleBar();
+    /// _ = MicaHelper.TryApplyMica();
     /// </code>
     /// </summary>
-    /// <param name="size"></param>
+    /// <remarks>
+    /// Assign Prerequisites:
+    /// <list type="bullet">
+    /// <item><term><see cref="CurrentContext.Window"/></term></item>
+    /// <item><term><see cref="CurrentContext.App"/></term></item>
+    /// </list>
+    /// </remarks>
+    /// <param name="size">The size of <see cref="CurrentContext.Window"/></param>
     public static void Initialize(SizeInt32 size)
     {
         RegisterUnhandledExceptionHandler();
@@ -74,12 +74,27 @@ public static class AppHelper
         if (CurrentContext.IconPath is not "")
             CurrentContext.AppWindow.SetIcon(CurrentContext.IconPath);
 
-        TitleBarHelper.InitializeTitleBar();
-        MicaHelper.TryApplyMica();
+        _ = TitleBarHelper.TryCustomizeTitleBar();
+        _ = MicaHelper.TryApplyMica();
     }
 
     #region DebugHelper
 
+    /// <summary>
+    /// Method to register exception handler
+    /// </summary>
+    /// <remarks>
+    /// Registered events:
+    /// <list type="bullet">
+    /// <item><term><see cref="Application.UnhandledException"/></term></item>
+    /// <item><term><see cref="TaskScheduler.UnobservedTaskException"/></term></item>
+    /// <item><term><see cref="AppDomain.UnhandledException"/></term></item>
+    /// </list>
+    /// Assign Prerequisites:
+    /// <list type="bullet">
+    /// <item><term><see cref="CurrentContext.App"/></term></item>
+    /// </list>
+    /// </remarks>
     public static void RegisterUnhandledExceptionHandler()
     {
         CurrentContext.App.UnhandledException += async (_, args) =>
@@ -107,31 +122,38 @@ public static class AppHelper
         };
 
 #if DEBUG
-        // ReSharper disable once UnusedParameter.Local
         static Task UncaughtExceptionHandler(Exception e)
         {
             Debugger.Break();
             return Task.CompletedTask;
         }
 #elif RELEASE
-            Task UncaughtExceptionHandler(Exception e)
-            {
-                return ShowExceptionDialogAsync(e);
-            }
+        Task UncaughtExceptionHandler(Exception e)
+        {
+            return ShowExceptionDialogAsync(e);
+        }
 #endif
     }
 
     /// <summary>
-    ///     Exit the notification after pushing an <see cref="ApplicationExitingMessage" />
-    ///     to the <see cref="EventChannel" />
+    /// Exit the notification after pushing an <see cref="ApplicationExitingMessage" /> to the <see cref="EventChannel" />
     /// </summary>
-    /// <returns></returns>
+    /// <remarks>
+    /// Registered events:
+    /// Assign Prerequisites:
+    /// <list type="bullet">
+    /// <item><term><see cref="CurrentContext.App"/></term></item>
+    /// </list>
+    /// </remarks>
     public static void ExitWithPushedNotification()
     {
         _ = WeakReferenceMessenger.Default.Send(new ApplicationExitingMessage());
-        Application.Current.Exit();
+        CurrentContext.App.Exit();
     }
 
+    /// <summary>
+    /// Application exiting message
+    /// </summary>
     public record ApplicationExitingMessage;
 
     #endregion
