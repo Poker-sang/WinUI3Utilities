@@ -9,11 +9,11 @@ namespace WinUI3Utilities.Attributes;
 /// <remarks>
 /// <seealso href="https://platform.uno/blog/using-msbuild-items-and-properties-in-c-9-source-generators/"/><br/>
 /// <strong>This Attribute Should Only Appear ONCE Per Project</strong><br/>
-/// To use this Attribute, first you should add this region to your csproj file
+/// To use this Attribute, at first, you should add this region to your .csproj file
 /// <code>
 /// &lt;<see langword="Target"/> Name="InjectAdditionalFiles" BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun"&gt;
 ///     &lt;<see langword="ItemGroup"/>&gt;
-///         &lt;AdditionalFiles Include="@(PRIResource)" SourceItemGroup="PRIResource" /&gt;
+///         &lt;<see langword="AdditionalFiles"/> Include="@(PRIResource)" SourceItemGroup="PRIResource" /&gt;
 ///     &lt;/<see langword="ItemGroup"/>&gt;
 /// &lt;/<see langword="Target"/>&gt;
 /// &lt;<see langword="ItemGroup"/>&gt;
@@ -24,7 +24,7 @@ namespace WinUI3Utilities.Attributes;
 /// <code>
 /// &lt;<see langword="ItemGroup"/>&gt;
 ///     &lt;<see langword="PRIResource"/> Include="XXX\APage.resw" /&gt;
-///     &lt;<see langword="PRIResource"/> Include="XXX\BResource.resw" /&gt;
+///     &lt;<see langword="PRIResource"/> Include="XXX\BWindow.resw" /&gt;
 ///     ...
 /// &lt;/<see langword="ItemGroup"/>&gt;
 /// </code>
@@ -37,15 +37,15 @@ namespace WinUI3Utilities.Attributes;
 /// Code will generate:
 /// <code>
 /// <see langword="namespace"/> YourNamespace;<br/>
-/// <see langword="public static class"/> APage
+/// <see langword="public static class"/> APageResource
 /// {
-///     <see langword="private static readonly"/> <see cref="ResourceLoader"/> _resourceLoader = new(<see cref="ResourceLoader.GetDefaultResourceFilePath"/>, "APage");
+///     <see langword="private static readonly"/> <see cref="ResourceLoader"/> _resourceLoader = <see langword="new"/>(<see cref="ResourceLoader.GetDefaultResourceFilePath"/>, "APageResource");
 ///     <see langword="public static readonly string"/> TextAPath = _resourceLoader.GetString("TextA/Path");
 ///     <see langword="public static readonly string"/> TextBPath = _resourceLoader.GetString("TextB/Path");
 /// }<br/>
-/// <see langword="public static class"/> BResource
+/// <see langword="public static class"/> BWindowResource
 /// {
-///     <see langword="private static readonly"/> <see cref="ResourceLoader"/> _resourceLoader = new(<see cref="ResourceLoader.GetDefaultResourceFilePath"/>, "BResource");
+///     <see langword="private static readonly"/> <see cref="ResourceLoader"/> _resourceLoader = <see langword="new"/>(<see cref="ResourceLoader.GetDefaultResourceFilePath"/>, "BWindowResource");
 ///     <see langword="public static readonly string"/> ResourceAPath = _resourceLoader.GetString("ResourceA/Path");
 ///     <see langword="public static readonly string"/> ResourceBPath = _resourceLoader.GetString("ResourceB/Path");
 /// }
