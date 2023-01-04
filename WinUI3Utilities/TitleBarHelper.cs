@@ -39,7 +39,8 @@ public static class TitleBarHelper
     public static void PaneOpening(NavigationView sender, object e) => UpdateAppTitleMargin(sender);
 
     /// <summary>
-    /// Should be invoked by <see cref="NavigationView.DisplayModeChanged"/>
+    /// Should be invoked by <see cref="NavigationView.DisplayModeChanged"/><br/>
+    /// Update app title's and its text block's margin when <see cref="NavigationView.DisplayMode"/> changed
     /// </summary>
     /// <remarks>
     /// Assign Prerequisites:
@@ -53,7 +54,7 @@ public static class TitleBarHelper
     public static void DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs e)
     {
         var currentMargin = CurrentContext.TitleBar.Margin;
-        CurrentContext.TitleBar.Margin = sender.DisplayMode is NavigationViewDisplayMode.Minimal
+        CurrentContext.TitleBar.Margin = sender.DisplayMode is NavigationViewDisplayMode.Minimal && sender.IsBackButtonVisible is not NavigationViewBackButtonVisible.Collapsed
             ? new() { Left = sender.CompactPaneLength * 2, Top = currentMargin.Top, Right = currentMargin.Right, Bottom = currentMargin.Bottom }
             : new Thickness { Left = sender.CompactPaneLength, Top = currentMargin.Top, Right = currentMargin.Right, Bottom = currentMargin.Bottom };
 
@@ -61,7 +62,7 @@ public static class TitleBarHelper
     }
 
     /// <summary>
-    /// Update app title margin when <see cref="NavigationView"/> changed
+    /// Update app title text block's margin when <see cref="NavigationView.DisplayMode"/> changed
     /// </summary>
     /// <remarks>
     /// Assign Prerequisites:
@@ -107,7 +108,7 @@ public static class TitleBarHelper
     /// <returns>Whether customization of title bar is supported</returns>
     public static bool TryCustomizeTitleBar()
     {
-        if (!AppWindowTitleBar.IsCustomizationSupported()) 
+        if (!AppWindowTitleBar.IsCustomizationSupported())
             return false;
 
         CurrentContext.AppTitleBar.ExtendsContentIntoTitleBar = true;
