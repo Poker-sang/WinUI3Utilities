@@ -9,7 +9,7 @@ namespace WinUI3Utilities.Attributes;
 /// <remarks>
 /// <seealso href="https://platform.uno/blog/using-msbuild-items-and-properties-in-c-9-source-generators/"/><br/>
 /// <strong>This Attribute Should Only Appear ONCE Per Project</strong><br/>
-/// To use this Attribute, at first, you should add this region to your .csproj file
+/// To use this Attribute, at first, you should add this region to your .csproj file:
 /// <code>
 /// &lt;<see langword="Target"/> Name="InjectAdditionalFiles" BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun"&gt;
 ///     &lt;<see langword="ItemGroup"/>&gt;
@@ -28,13 +28,13 @@ namespace WinUI3Utilities.Attributes;
 ///     ...
 /// &lt;/<see langword="ItemGroup"/>&gt;
 /// </code>
-/// And when you write:
+/// And declare a type as a namespace provider:
 /// <code>
 /// <see langword="namespace"/> YourNamespace;
 /// [<see cref="LocalizedStringResourcesAttribute"/>]<br/>
 /// <see langword="file record"/> AnyName;
 /// </code>
-/// Code will generate:
+/// The code will be generated:
 /// <code>
 /// <see langword="namespace"/> YourNamespace;<br/>
 /// <see langword="public static class"/> APageResource
