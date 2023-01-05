@@ -28,15 +28,13 @@ namespace WinUI3Utilities.Attributes;
 ///     ...
 /// &lt;/<see langword="ItemGroup"/>&gt;
 /// </code>
-/// And declare a type as a namespace provider:
+/// And declare an attribute with a namespace provided:
 /// <code>
-/// <see langword="namespace"/> YourNamespace;
-/// [<see cref="LocalizedStringResourcesAttribute"/>]<br/>
-/// <see langword="file record"/> AnyName;
+/// [<see langword="assembly"/>: <see cref="LocalizedStringResourcesAttribute"/>(<see langword="nameof"/>(YourNamespace))]<br/>
 /// </code>
 /// The code will be generated:
 /// <code>
-/// <see langword="namespace"/> YourNamespace;<br/>
+/// <see langword="namespace"/> <see cref="SpecifiedNamespace"/>;<br/>
 /// <see langword="public static class"/> APageResource
 /// {
 ///     <see langword="private static readonly"/> <see cref="ResourceLoader"/> _resourceLoader = <see langword="new"/>(<see cref="ResourceLoader.GetDefaultResourceFilePath"/>, "APageResource");
@@ -52,8 +50,18 @@ namespace WinUI3Utilities.Attributes;
 /// ...
 /// </code>
 /// </remarks>
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
+[AttributeUsage(AttributeTargets.Assembly)]
 public sealed class LocalizedStringResourcesAttribute : Attribute
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="specifiedNamespace">In which namespace the code will be generated</param>
+    public LocalizedStringResourcesAttribute(string specifiedNamespace) => SpecifiedNamespace = specifiedNamespace;
 
+    /// <summary>
+    /// In which namespace the code will be generated
+    /// </summary>
+    public string SpecifiedNamespace { get; set; }
 }
+

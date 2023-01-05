@@ -20,7 +20,7 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
                 AttributeName,
                 (_, _) => true,
                 (syntaxContext, _) => syntaxContext)
-            .Select((t, _) => (t.TargetSymbol.ContainingNamespace.ToDisplayString(), t.Attributes[0]))
+            .Select((t, _) => t.Attributes[0])
             .Combine(context.AdditionalTextsProvider
                 .Combine(context.AnalyzerConfigOptionsProvider)
                 .Where(t => t.Right.GetOptions(t.Left).TryGetValue(SourceItemGroupMetadata, out var sourceItemGroup)
@@ -28,17 +28,24 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
                             && t.Left.Path.EndsWith(".resw"))
                 .Select((tuple, _) => tuple.Left).Collect());
 
-        context.RegisterSourceOutput(attributes, (spc, source)
-            => spc.AddSource($"{source.Left.Item1}.LocalizedStringResources.g.cs", Execute(source.Left, source.Right)));
+        context.RegisterSourceOutput(attributes, (spc, source) =>
+        {
+            if (Execute(source.Left, source.Right) is { } s)
+                spc.AddSource($"WinUI3Utilities.Generator.LocalizedStringResources.g.cs", s);
+        });
     }
 
-    public string Execute((string Namespace, AttributeData Attribute) data, ImmutableArray<AdditionalText> additionalTexts)
+    public string? Execute(AttributeData attribute, ImmutableArray<AdditionalText> additionalTexts)
     {
+        if (attribute.ConstructorArguments.Length < 1 || attribute.ConstructorArguments[0].Value is not string specifiedNamespace)
+            return null;
+
         var source = new StringBuilder($@"#nullable enable
 
 using Microsoft.Windows.ApplicationModel.Resources;
 
-namespace {data.Namespace};
+namespace {specifiedNamespace};
+
 ");
         foreach (var additionalText in additionalTexts)
         {

@@ -18,8 +18,8 @@ public sealed class DependencyPropertyAttribute<T> : Attribute
     /// <summary>
     /// <inheritdoc cref="DependencyPropertyAttribute{T}"/>
     /// </summary>
-    /// <param name="name">property name</param>
-    /// <param name="propertyChanged">the name of the method, which called when property changed</param>
+    /// <param name="name">Property name</param>
+    /// <param name="propertyChanged">The name of the method, which called when property changed</param>
     public DependencyPropertyAttribute(string name, string propertyChanged = "")
     {
         Name = name;
@@ -27,28 +27,29 @@ public sealed class DependencyPropertyAttribute<T> : Attribute
     }
 
     /// <summary>
-    /// Property name.
+    /// Property name
     /// </summary>
     public string Name { get; }
 
     /// <summary>
-    /// The name of the method, which called when property changed.
+    /// The name of the method, which called when property changed
     /// </summary>
     public string PropertyChanged { get; }
 
     /// <summary>
     /// Whether property setter is public
     /// </summary>
+    /// <remarks>default: <see langword="true"/></remarks>
     public bool IsSetterPublic { get; init; } = true;
 
     /// <summary>
-    /// Whether property type is nullable (nullable-references are not allowed).
+    /// Whether property type is nullable (nullable-references are not allowed)
     /// </summary>
     /// <remarks>default: <see langword="true"/></remarks>
     public bool IsNullable { get; init; } = true;
 
     /// <summary>
-    /// Default value of property.
+    /// Default value of property
     /// </summary>
     /// <remarks>default: <see cref="DependencyProperty.UnsetValue"/></remarks>
     public string DefaultValue { get; init; } = "DependencyProperty.UnsetValue";
