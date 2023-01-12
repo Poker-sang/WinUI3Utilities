@@ -19,7 +19,7 @@ namespace WinUI3Utilities.Attributes;
 /// </code>
 /// Generate:
 /// <code>
-/// <see langword="partial class"/> specifiedClass
+/// <see langword="partial class"/> SpecifiedClass
 /// {
 ///     [Attribute1]
 ///     <see langword="public"/> Type1 Property1

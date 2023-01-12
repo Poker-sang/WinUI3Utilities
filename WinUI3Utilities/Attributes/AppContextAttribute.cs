@@ -9,7 +9,7 @@ namespace WinUI3Utilities.Attributes;
 /// <remarks>
 /// Generate:
 /// <code>
-/// <see langword="partial class"/> specifiedClass
+/// <see langword="partial class"/> SpecifiedClass
 /// {
 ///     <see langword="private static"/> <see cref="ApplicationDataContainer"/> _configurationContainer = <see langword="null"/>!;
 /// 

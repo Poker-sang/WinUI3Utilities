@@ -8,12 +8,36 @@ namespace WinUI3Utilities;
 /// <summary>
 /// A set of methods for <see cref="Window"/>
 /// </summary>
-public class MicaHelper
+public static class BackdropHelper
 {
     /// <summary>
-    /// Backdrop controller
+    /// BackdropType
     /// </summary>
-    public static MicaController? BackdropController { get; private set; }
+    public enum BackdropType
+    {
+        /// <summary>
+        /// none
+        /// </summary>
+        None,
+        /// <summary>
+        /// acrylic
+        /// </summary>
+        Acrylic,
+        /// <summary>
+        /// mica
+        /// </summary>
+        Mica
+    }
+
+    /// <summary>
+    /// mica controller
+    /// </summary>
+    public static MicaController? MicaController { get; private set; }
+
+    /// <summary>
+    /// acrylic controller
+    /// </summary>
+    public static DesktopAcrylicController? AcrylicController { get; private set; }
 
     /// <summary>
     /// System backdrop configuration
@@ -37,22 +61,50 @@ public class MicaHelper
         if (!MicaController.IsSupported())
             return false;
 
+        Init(MicaController = new MicaController());
+
+        return true;
+    }
+
+    /// <summary>
+    /// Apply acrylic when supported
+    /// </summary>
+    /// <remarks>
+    /// Assign Prerequisites:
+    /// <list type="bullet">
+    /// <item><term><see cref="CurrentContext.Window"/></term></item>
+    /// </list>
+    /// </remarks>
+    /// <returns>Whether acrylic is supported</returns>
+    public static bool TryApplyAcrylic()
+    {
+        if (!DesktopAcrylicController.IsSupported())
+            return false;
+
+        Init(AcrylicController = new DesktopAcrylicController());
+
+        return true;
+    }
+
+    private static void Init(ISystemBackdropControllerWithTargets controller)
+    {
         _dispatcherQueueHelper = new WindowsSystemDispatcherQueueHelper();
         _dispatcherQueueHelper.EnsureWindowsSystemDispatcherQueueController();
 
+
+        // Hooking up the policy object
         SystemBackdropConfiguration = new SystemBackdropConfiguration();
         CurrentContext.Window.Activated += WindowOnActivated;
         CurrentContext.Window.Closed += WindowOnClosed;
         ((FrameworkElement)CurrentContext.Window.Content).ActualThemeChanged += OnActualThemeChanged;
 
+        // Initial configuration state
         SystemBackdropConfiguration.IsInputActive = true;
         SetConfigurationSourceTheme();
 
-        BackdropController = new MicaController();
-
-        _ = BackdropController.AddSystemBackdropTarget(CurrentContext.Window.As<ICompositionSupportsSystemBackdrop>());
-        BackdropController.SetSystemBackdropConfiguration(SystemBackdropConfiguration);
-        return true;
+        // Enable the system backdrop
+        _ = controller.AddSystemBackdropTarget(CurrentContext.Window.As<ICompositionSupportsSystemBackdrop>());
+        controller.SetSystemBackdropConfiguration(SystemBackdropConfiguration);
     }
 
     private static void WindowOnActivated(object sender, WindowActivatedEventArgs args)
@@ -60,10 +112,18 @@ public class MicaHelper
 
     private static void WindowOnClosed(object sender, WindowEventArgs args)
     {
-        if (BackdropController is not null)
+        // Make sure any Mica/Acrylic controller is disposed so it doesn't try to
+        // use CurrentContext.Window closed window.
+        if (MicaController is not null)
         {
-            BackdropController.Dispose();
-            BackdropController = null;
+            MicaController.Dispose();
+            MicaController = null;
+        }
+
+        if (AcrylicController is not null)
+        {
+            AcrylicController.Dispose();
+            AcrylicController = null;
         }
 
         CurrentContext.Window.Activated -= WindowOnActivated;
