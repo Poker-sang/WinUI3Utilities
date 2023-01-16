@@ -1,6 +1,6 @@
-using PInvoke;
 using Windows.Graphics;
 using Microsoft.UI.Xaml;
+using WinUI3Utilities.PlatformInvoke.User32;
 
 namespace WinUI3Utilities;
 
@@ -18,7 +18,7 @@ public static class WindowHelper
     /// <item><term><see cref="CurrentContext.Window"/></term></item>
     /// </list>
     /// </remarks>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T">Target type</typeparam>
     /// <param name="obj"></param>
     /// <returns><paramref name="obj"/></returns>
     public static T InitializeWithWindow<T>(this T obj)
@@ -34,11 +34,11 @@ public static class WindowHelper
     /// </summary>
     /// <returns>Screen size</returns>
     public static (int, int) GetScreenSize()
-        => (User32.GetSystemMetrics(User32.SystemMetric.SM_CXSCREEN), User32.GetSystemMetrics(User32.SystemMetric.SM_CYSCREEN));
+        => (User32.GetSystemMetrics(SystemMetric.CxScreen), User32.GetSystemMetrics(SystemMetric.CyScreen));
 
 
     /// <summary>
-    /// Calculate the window size by current resolution
+    /// Calculate the window size by current screen size
     /// </summary>
     /// <returns>
     /// <remarks>
@@ -49,7 +49,7 @@ public static class WindowHelper
     /// </list>
     /// </remarks>
     /// </returns>
-    public static SizeInt32 PredetermineEstimatedWindowSize() =>
+    public static SizeInt32 EstimatedWindowSize() =>
         GetScreenSize() switch
         {
             ( >= 2560, >= 1440) => new(1600, 900),

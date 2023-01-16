@@ -5,7 +5,7 @@ Useful template methods for WinUI3 projects
 ## Build
 
 ![.NET](https://img.shields.io/badge/.Net-7.0-512BD4?&style=for-the-badge&logo=.NET&logoColor=white)
-![Windows](https://img.shields.io/badge/Windows-10.0.19041-#0078D6?&style=for-the-badge&logo=Windows&logoColor=white)
+![Windows](https://img.shields.io/badge/Windows-10.0.19041-0078D6?&style=for-the-badge&logo=Windows&logoColor=white)
 
 ## Project Link 
 

@@ -20,7 +20,7 @@ internal static partial class TypeWithAttributeDelegates
             return null;
 
         var name = typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-        var namespaces = new HashSet<string> { typeSymbol.ContainingNamespace.ToDisplayString() };
+        var namespaces = new HashSet<string>();
         var usedTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
         const string nullable = "#nullable enable\n";
         var classBegin = @$"namespace {typeSymbol.ContainingNamespace.ToDisplayString()};
@@ -31,7 +31,8 @@ partial class {name}
         const string classEnd = @"}";
 
         foreach (var property in type.GetMembers().Where(property =>
-                         property is { Kind: SymbolKind.Property } and not { Name: "EqualityContract" }
+                         property is { Kind: SymbolKind.Property }
+                             and not { Name: "EqualityContract" }
                          && !property.GetAttributes().Any(propertyAttribute =>
                              propertyAttribute.AttributeClass!.Name is "SettingsViewModelExclusionAttribute"))
                      .Cast<IPropertySymbol>())
@@ -48,7 +49,7 @@ partial class {name}
             }
 
             propertySentences.Add(Spacing(1) + Regex.Replace(
-                property.DeclaringSyntaxReferences[0].GetSyntax().ToString(), @"{[\s\S]+}",
+                property.DeclaringSyntaxReferences[0].GetSyntax().ToString(), @"{[\s\S]+}[\s\S]*",
                 $@"
     {{
         get => {settingName}.{property.Name};
@@ -57,10 +58,12 @@ partial class {name}
         }
 
 
-        var namespaceNames = namespaces.Skip(1).Aggregate("", (current, ns) => current + $"using {ns};\n");
         var allPropertySentences = propertySentences.Aggregate("\n", (current, ps) => current + $"{ps}\n\n");
         allPropertySentences = allPropertySentences.Substring(0, allPropertySentences.Length - 1);
-        var compilationUnit = nullable + namespaceNames + classBegin + allPropertySentences + classEnd;
-        return compilationUnit;
+        return namespaces.GenerateFileHeader()
+            .AppendLine(classBegin)
+            .AppendLine(allPropertySentences)
+            .AppendLine(classEnd)
+            .ToString();
     }
 }

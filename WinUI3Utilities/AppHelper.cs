@@ -1,10 +1,7 @@
 using System;
 using System.Diagnostics;
-using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.Messaging;
-using CommunityToolkit.WinUI;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
 using Windows.Graphics;
@@ -58,8 +55,8 @@ public static class AppHelper
     /// <remarks>
     /// Assign Prerequisites:
     /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.Window"/></term></item>
     /// <item><term><see cref="CurrentContext.App"/></term></item>
+    /// <item><term><see cref="CurrentContext.Window"/></term></item>
     /// </list>
     /// </remarks>
     /// <param name="size">The size of <see cref="CurrentContext.Window"/></param>
@@ -112,54 +109,32 @@ public static class AppHelper
     {
         func ??= UncaughtExceptionHandler;
 
-        CurrentContext.App.UnhandledException += async (_, args) =>
+        CurrentContext.App.UnhandledException += (o, args) =>
         {
             args.Handled = true;
-            await CurrentContext.Window.DispatcherQueue.EnqueueAsync(() => func(args.Exception));
+            _ = CurrentContext.Window.DispatcherQueue.TryEnqueue(() => func(args.Exception));
         };
 
-        TaskScheduler.UnobservedTaskException += async (_, args) =>
+        TaskScheduler.UnobservedTaskException += (o, args) =>
         {
             args.SetObserved();
-            await CurrentContext.Window.DispatcherQueue.EnqueueAsync(() => func(args.Exception));
+            _ = CurrentContext.Window.DispatcherQueue.TryEnqueue(() => func(args.Exception));
         };
 
-        AppDomain.CurrentDomain.UnhandledException += async (_, args) =>
+        AppDomain.CurrentDomain.UnhandledException += (o, args) =>
         {
             if (args.ExceptionObject is Exception e)
-                await CurrentContext.Window.DispatcherQueue.EnqueueAsync(() => func(e));
+                _ = CurrentContext.Window.DispatcherQueue.TryEnqueue(() => func(e));
             else
-                ExitWithPushedNotification();
+                CurrentContext.App.Exit();
         };
 
         static Task UncaughtExceptionHandler(Exception e)
         {
-            Debug.WriteLine(e);
             Debugger.Break();
             return Task.CompletedTask;
         }
     }
-
-    /// <summary>
-    /// Exit the notification after pushing an <see cref="ApplicationExitingMessage" /> to the <see cref="EventChannel" />
-    /// </summary>
-    /// <remarks>
-    /// Registered events:
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.App"/></term></item>
-    /// </list>
-    /// </remarks>
-    public static void ExitWithPushedNotification()
-    {
-        _ = WeakReferenceMessenger.Default.Send(new ApplicationExitingMessage());
-        CurrentContext.App.Exit();
-    }
-
-    /// <summary>
-    /// Application exiting message
-    /// </summary>
-    public record ApplicationExitingMessage;
 
     #endregion
 }

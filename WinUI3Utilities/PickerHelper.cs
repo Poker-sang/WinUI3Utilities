@@ -18,8 +18,8 @@ public static class PickerHelper
     /// <param name="suggestedStartLocation"></param>
     /// <param name="viewMode"></param>
     /// <returns></returns>
-    public static async Task<StorageFolder> PickSingleFolderAsync(PickerLocationId suggestedStartLocation = PickerLocationId.Desktop, PickerViewMode viewMode = PickerViewMode.Thumbnail)
-        => await new FolderPicker
+    public static IAsyncOperation<StorageFolder?> PickSingleFolderAsync(PickerLocationId suggestedStartLocation = PickerLocationId.Desktop, PickerViewMode viewMode = PickerViewMode.Thumbnail)
+        => new FolderPicker
         {
             FileTypeFilter = { "*" }, /*不加会崩溃*/
             SuggestedStartLocation = suggestedStartLocation,
@@ -32,8 +32,8 @@ public static class PickerHelper
     /// <param name="suggestedStartLocation"></param>
     /// <param name="viewMode"></param>
     /// <returns></returns>
-    public static async Task<StorageFile> PickSingleFileAsync(PickerLocationId suggestedStartLocation = PickerLocationId.Desktop, PickerViewMode viewMode = PickerViewMode.Thumbnail)
-        => await new FileOpenPicker
+    public static IAsyncOperation<StorageFile?> PickSingleFileAsync(PickerLocationId suggestedStartLocation = PickerLocationId.Desktop, PickerViewMode viewMode = PickerViewMode.Thumbnail)
+        => new FileOpenPicker
         {
             FileTypeFilter = { "*" },
             SuggestedStartLocation = suggestedStartLocation,
@@ -46,8 +46,8 @@ public static class PickerHelper
     /// <param name="suggestedStartLocation"></param>
     /// <param name="viewMode"></param>
     /// <returns></returns>
-    public static async Task<IReadOnlyList<StorageFile>> PickMultipleFilesAsync(PickerLocationId suggestedStartLocation = PickerLocationId.Desktop, PickerViewMode viewMode = PickerViewMode.Thumbnail)
-        => await new FileOpenPicker
+    public static IAsyncOperation<IReadOnlyList<StorageFile>> PickMultipleFilesAsync(PickerLocationId suggestedStartLocation = PickerLocationId.Desktop, PickerViewMode viewMode = PickerViewMode.Thumbnail)
+        => new FileOpenPicker
         {
             FileTypeFilter = { "*" },
             SuggestedStartLocation = suggestedStartLocation,
