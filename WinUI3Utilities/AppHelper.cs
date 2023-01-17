@@ -62,7 +62,7 @@ public static class AppHelper
     /// <param name="size">The size of <see cref="CurrentContext.Window"/></param>
     /// <param name="backdropType">Backdrop of <see cref="CurrentContext.Window"/></param>
     /// <param name="handler">Unhandled exception handler</param>
-    public static void Initialize(SizeInt32 size, BackdropHelper.BackdropType backdropType = BackdropHelper.BackdropType.Mica, Func<Exception, Task>? handler = null)
+    public static void Initialize(SizeInt32 size, BackdropHelper.BackdropType backdropType = BackdropHelper.BackdropType.MicaAlt, Func<Exception, Task>? handler = null)
     {
         RegisterUnhandledExceptionHandler(handler);
 
@@ -81,6 +81,9 @@ public static class AppHelper
                 _ = BackdropHelper.TryApplyAcrylic();
                 break;
             case BackdropHelper.BackdropType.Mica:
+                _ = BackdropHelper.TryApplyMica(false);
+                break;
+            case BackdropHelper.BackdropType.MicaAlt:
                 _ = BackdropHelper.TryApplyMica();
                 break;
             default:

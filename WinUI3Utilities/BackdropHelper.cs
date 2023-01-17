@@ -26,7 +26,11 @@ public static class BackdropHelper
         /// <summary>
         /// mica
         /// </summary>
-        Mica
+        Mica,
+        /// <summary>
+        /// mica alt
+        /// </summary>
+        MicaAlt
     }
 
     /// <summary>
@@ -49,6 +53,7 @@ public static class BackdropHelper
     /// <summary>
     /// Apply mica when supported
     /// </summary>
+    /// <param name="useMicaAlt"></param>
     /// <remarks>
     /// Assign Prerequisites:
     /// <list type="bullet">
@@ -56,12 +61,12 @@ public static class BackdropHelper
     /// </list>
     /// </remarks>
     /// <returns>Whether mica is supported</returns>
-    public static bool TryApplyMica()
+    public static bool TryApplyMica(bool useMicaAlt = true)
     {
         if (!MicaController.IsSupported())
             return false;
 
-        Init(MicaController = new MicaController());
+        Init(MicaController = new MicaController { Kind = useMicaAlt ? MicaKind.BaseAlt : MicaKind.Base });
 
         return true;
     }
