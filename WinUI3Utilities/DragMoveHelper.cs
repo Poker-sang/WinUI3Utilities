@@ -90,7 +90,7 @@ public static class DragMoveHelper
 
     private static void RootPointerMoved(object sender, PointerRoutedEventArgs e)
     {
-        var properties = e.GetCurrentPoint((UIElement)sender).Properties;
+        var properties = e.GetCurrentPoint(sender.To<UIElement>()).Properties;
         if (properties.IsLeftButtonPressed)
         {
             _ = User32.GetCursorPos(out var pt);
@@ -112,7 +112,7 @@ public static class DragMoveHelper
 
     private static void RootPointerReleased(object sender, PointerRoutedEventArgs e)
     {
-        ((UIElement)sender).ReleasePointerCaptures();
+        sender.To<UIElement>().ReleasePointerCaptures();
         _moving = false;
     }
 

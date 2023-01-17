@@ -17,7 +17,7 @@ public static class Misc
     /// <param name="obj"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T? To<T>(this object? obj) where T : notnull => (T?)obj;
+    public static T To<T>(this object? obj) => (T)obj!;
 
     /// <summary>
     /// Force conversion of <paramref name="obj"/> to type <typeparamref name="T"/>, throw when <paramref name="obj"/> is <see langword="null"/>
@@ -30,7 +30,7 @@ public static class Misc
     public static T ToNotNull<T>(this object? obj) where T : notnull
     {
         if (obj is null)
-            ThrowHelper.InvalidCast();
+            ThrowHelper.ArgumentNull(obj);
         return (T)obj;
     }
 

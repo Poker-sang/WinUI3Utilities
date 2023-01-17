@@ -18,7 +18,7 @@ public static class ThrowHelper
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     [DoesNotReturn]
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static void ArgumentOutOfRange(object? actualValue = null, string? message = null, [CallerArgumentExpression(nameof(actualValue))] string? paraName = null)
+    public static void ArgumentOutOfRange<T>(T? actualValue, string? message = null, [CallerArgumentExpression(nameof(actualValue))] string? paraName = null)
         => throw new ArgumentOutOfRangeException(paraName, actualValue, message);
 
     /// <summary>
@@ -38,6 +38,18 @@ public static class ThrowHelper
     [DoesNotReturn]
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static void InvalidCast(string? message = null) => throw new InvalidCastException(message);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <param name="message"></param>
+    /// <param name="paraName"></param>
+    /// <exception cref="ArgumentNullException"></exception>
+    [DoesNotReturn]
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void ArgumentNull<T>(T? obj, string? message = null, [CallerArgumentExpression(nameof(obj))] string? paraName = null)
+        => throw new ArgumentNullException(paraName, message);
 
     /// <summary>
     /// 

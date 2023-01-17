@@ -22,13 +22,12 @@ internal static partial class TypeWithAttributeDelegates
         var name = typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
         var namespaces = new HashSet<string>();
         var usedTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
-        const string nullable = "#nullable enable\n";
         var classBegin = @$"namespace {typeSymbol.ContainingNamespace.ToDisplayString()};
 
 partial class {name}
 {{";
         var propertySentences = new List<string>();
-        const string classEnd = @"}";
+        const string classEnd = "}";
 
         foreach (var property in type.GetMembers().Where(property =>
                          property is { Kind: SymbolKind.Property }
@@ -49,7 +48,7 @@ partial class {name}
             }
 
             propertySentences.Add(Spacing(1) + Regex.Replace(
-                property.DeclaringSyntaxReferences[0].GetSyntax().ToString(), @"{[\s\S]+}[\s\S]*",
+                property.DeclaringSyntaxReferences[0].GetSyntax().ToString(), @"\s*{[\s\S]+}[\s\S]*",
                 $@"
     {{
         get => {settingName}.{property.Name};
@@ -58,8 +57,8 @@ partial class {name}
         }
 
 
-        var allPropertySentences = propertySentences.Aggregate("\n", (current, ps) => current + $"{ps}\n\n");
-        allPropertySentences = allPropertySentences.Substring(0, allPropertySentences.Length - 1);
+        var allPropertySentences = propertySentences.Aggregate("", (current, ps) => current + $"{ps}\n\n");
+        allPropertySentences = allPropertySentences.Substring(0, allPropertySentences.Length - 2);
         return namespaces.GenerateFileHeader()
             .AppendLine(classBegin)
             .AppendLine(allPropertySentences)
