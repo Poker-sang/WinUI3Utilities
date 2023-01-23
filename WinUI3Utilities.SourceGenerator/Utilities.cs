@@ -11,6 +11,9 @@ namespace WinUI3Utilities.SourceGenerator;
 
 internal static class Utilities
 {
+    internal const string AttributeNamespace = "WinUI3Utilities.Attributes.";
+    internal const string DisableSourceGeneratorAttribute = AttributeNamespace + "DisableSourceGeneratorAttribute";
+
     internal static INamedTypeSymbol ObjectSymbol { get; set; } = null!;
 
     #region Abstract Syntax Tree Generate

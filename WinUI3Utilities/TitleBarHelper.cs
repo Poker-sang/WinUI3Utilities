@@ -113,6 +113,7 @@ public static class TitleBarHelper
 
         CurrentContext.AppTitleBar.ExtendsContentIntoTitleBar = true;
         CurrentContext.AppTitleBar.ButtonBackgroundColor = Colors.Transparent;
+        CurrentContext.AppTitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
         CurrentContext.AppTitleBar.ButtonHoverBackgroundColor = CurrentContext.App.Resources["SystemControlBackgroundBaseLowBrush"].To<SolidColorBrush>().Color;
         CurrentContext.AppTitleBar.ButtonForegroundColor = CurrentContext.App.Resources["SystemControlForegroundBaseHighBrush"].To<SolidColorBrush>().Color;
         return true;
