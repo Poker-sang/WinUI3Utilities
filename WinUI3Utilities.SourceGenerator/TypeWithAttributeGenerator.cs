@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 
 namespace WinUI3Utilities.SourceGenerator;
@@ -16,6 +17,8 @@ public class TypeWithAttributeGenerator : IIncrementalGenerator
     private delegate string? TypeWithAttribute(INamedTypeSymbol typeSymbol, ImmutableArray<AttributeData> attributeList);
 
     private const string AttributeNamespace = "WinUI3Utilities.Attributes.";
+
+    private const string DisableSourceGeneratorAttribute = "DisableSourceGeneratorAttribute";
 
     /// <summary>
     /// 需要生成的Attribute
@@ -36,9 +39,19 @@ public class TypeWithAttributeGenerator : IIncrementalGenerator
                 attribute.Key,
                 (_, _) => true,
                 (syntaxContext, _) => syntaxContext
-            );
-            context.RegisterSourceOutput(generatorAttributes, (spc, ga) =>
+            ).Combine(context.CompilationProvider);
+
+
+
+            context.RegisterSourceOutput(generatorAttributes, (spc, tuple) =>
             {
+                var (ga, compilation) = tuple;
+
+                if (compilation.Assembly.GetAttributes().Any(attrData => attrData.AttributeClass?.ToString() == AttributeNamespace + DisableSourceGeneratorAttribute))
+                {
+                    return;
+                }
+
                 if (ga.TargetSymbol is not INamedTypeSymbol symbol)
                     return;
                 if (attribute.Value(symbol, ga.Attributes) is { } source)
