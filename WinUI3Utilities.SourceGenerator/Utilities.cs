@@ -87,13 +87,31 @@ internal static class Utilities
     /// <summary>
     /// Generate the following code
     /// <code>
-    /// DependencyProperty.Register("<paramref name="propertyName" />", typeof(<paramref name="type" />), typeof(<paramref name="specificClass" />), <paramref name="metadataCreation" />);
+    /// DependencyProperty.Register(nameof(<paramref name="propertyName" />), typeof(<paramref name="type" />), typeof(<paramref name="specificClass" />), <paramref name="metadataCreation" />);
     /// </code>
     /// </summary>
     /// <returns>Registration</returns>
     internal static InvocationExpressionSyntax GetRegistration(string propertyName, ITypeSymbol type, ITypeSymbol specificClass, ExpressionSyntax metadataCreation) => InvocationExpression(MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression, IdentifierName("DependencyProperty"), IdentifierName("Register")))
-            .AddArgumentListArguments(Argument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(propertyName))), Argument(TypeOfExpression(type.GetTypeSyntax(false))), Argument(TypeOfExpression(specificClass.GetTypeSyntax(false))), Argument(metadataCreation));
+            .AddArgumentListArguments(Argument(NameOfExpression(propertyName)), Argument(TypeOfExpression(type.GetTypeSyntax(false))), Argument(TypeOfExpression(specificClass.GetTypeSyntax(false))), Argument(metadataCreation));
+
+    /// <summary>
+    /// Generate the following code
+    /// <code>
+    /// nameof(<paramref name="name" />)
+    /// </code>
+    /// </summary>
+    /// <returns>NameOfExpression</returns>
+    internal static InvocationExpressionSyntax NameOfExpression(string name) => NameOfExpression(IdentifierName(name));
+
+    /// <summary>
+    /// Generate the following code
+    /// <code>
+    /// nameof(<paramref name="expressionSyntax" />)
+    /// </code>
+    /// </summary>
+    /// <returns>NameOfExpression</returns>
+    internal static InvocationExpressionSyntax NameOfExpression(ExpressionSyntax expressionSyntax) => InvocationExpression(IdentifierName("nameof"), ArgumentList().AddArguments(Argument(expressionSyntax)));
 
     /// <summary>
     /// Generate the following code
