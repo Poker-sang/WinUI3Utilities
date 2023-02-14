@@ -11,7 +11,8 @@ namespace WinUI3Utilities;
 public static class Misc
 {
     /// <summary>
-    /// Force conversion of <paramref name="obj"/> to type <typeparamref name="T"/>?
+    /// Cast <paramref name="obj"/> to type <typeparamref name="T"/> without null check<br/>
+    /// <strong>This is not Force conversion</strong>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="obj"></param>
@@ -20,19 +21,15 @@ public static class Misc
     public static T To<T>(this object? obj) => (T)obj!;
 
     /// <summary>
-    /// Force conversion of <paramref name="obj"/> to type <typeparamref name="T"/>, throw when <paramref name="obj"/> is <see langword="null"/>
+    /// Cast of <paramref name="obj"/> to type <typeparamref name="T"/>, throw when <paramref name="obj"/> is <see langword="null"/><br/>
+    /// <strong>This is not Force conversion</strong>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="obj"></param>
     /// <returns></returns>
     /// <exception cref="InvalidCastException"/>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T ToNotNull<T>(this object? obj) where T : notnull
-    {
-        if (obj is null)
-            ThrowHelper.ArgumentNull(obj);
-        return (T)obj;
-    }
+    public static T ToNotNull<T>(this object? obj) where T : notnull => obj is null ? ThrowHelper.ArgumentNull<object, T>(obj) : (T)obj;
 
     /// <summary>
     /// Try get and return the value of <paramref name="target"/>. If <paramref name="target"/> is <see langword="null"/>,
