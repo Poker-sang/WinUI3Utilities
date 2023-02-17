@@ -1,6 +1,6 @@
 using WinUI3Utilities.PlatformInvoke.CoreMessaging;
 
-namespace WinUI3Utilities;
+namespace WinUI3Utilities.Internal;
 
 internal class WindowsSystemDispatcherQueueHelper
 {

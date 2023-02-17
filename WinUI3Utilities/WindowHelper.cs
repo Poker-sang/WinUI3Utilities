@@ -1,6 +1,10 @@
+using System.ComponentModel;
 using Windows.Graphics;
 using Microsoft.UI.Xaml;
 using WinUI3Utilities.PlatformInvoke.User32;
+using Microsoft.UI.Windowing;
+using Microsoft.UI;
+using WinUI3Utilities.PlatformInvoke.Shcore;
 
 namespace WinUI3Utilities;
 
@@ -36,7 +40,6 @@ public static class WindowHelper
     public static (int, int) GetScreenSize()
         => (User32.GetSystemMetrics(SystemMetric.CxScreen), User32.GetSystemMetrics(SystemMetric.CyScreen));
 
-
     /// <summary>
     /// Calculate the window size by current screen size
     /// </summary>
@@ -56,4 +59,29 @@ public static class WindowHelper
             ( > 1600, > 900) => new(1280, 720),
             _ => new(800, 600)
         };
+
+    /// <summary>
+    /// Get Scale Adjustment
+    /// </summary>
+    /// <remarks>
+    /// Assign Prerequisites:
+    /// <list type="bullet">
+    /// <item><term><see cref="CurrentContext.Window"/></term></item>
+    /// </list>
+    /// </remarks>
+    /// <returns>scale factor percent</returns>
+    /// <exception cref="Win32Exception"/>
+    public static double GetScaleAdjustment()
+    {
+        var displayArea = DisplayArea.GetFromWindowId(CurrentContext.WindowId, DisplayAreaFallback.Primary);
+        var hMonitor = Win32Interop.GetMonitorFromDisplayId(displayArea.DisplayId);
+
+        // Get DPI.
+        var result = Shcore.GetDpiForMonitor(hMonitor, MonitorDpiType.MdtDefault, out var dpiX, out _);
+        if (result != 0)
+            throw new Win32Exception("Could not get DPI for monitor.");
+
+        var scaleFactorPercent = (uint)(((long)dpiX * 100 + (96 >> 1)) / 96);
+        return scaleFactorPercent / 100.0;
+    }
 }
