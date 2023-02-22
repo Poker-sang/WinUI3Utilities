@@ -17,7 +17,7 @@ public static class AppHelper
     /// Not implemented yet
     /// </summary>
     /// <returns></returns>
-    public static async Task BeforeLaunch()
+    private static async Task BeforeLaunch()
     {
         // AppInstance.GetCurrent().Activated += (_, arguments) => ActivationRegistrar.Dispatch(arguments);
         // InitializeComponent();
@@ -42,12 +42,14 @@ public static class AppHelper
     /// <code>
     /// <see cref="RegisterUnhandledExceptionHandler"/><br/>
     /// <br/>
+    ///
+    /// <see cref="CurrentContext.App"/>.Resources["NavigationViewContentMargin"] = <see langword="new"/> <see cref="Thickness"/>(0, 48, 0, 0);
     /// <see cref="CurrentContext.AppWindow"/>.Title = <see cref="CurrentContext.Title"/>;<br/>
     /// <see cref="CurrentContext.AppWindow"/>.Resize(<paramref name="size"/>);<br/>
-    /// <see cref="CurrentContext.AppWindow"/>.Show();
-    /// if (<see cref="CurrentContext.IconPath"/> <see langword="is"/> "")
+    /// <see cref="CurrentContext.AppWindow"/>.Show();<br/>
+    /// <see langword="if"/> (<see cref="CurrentContext.IconPath"/> <see langword="is"/> "")
     ///     <see cref="CurrentContext.AppWindow"/>.SetIcon(<see cref="CurrentContext.IconPath"/>);
-    /// 
+    ///
     /// _ = <see cref="TitleBarHelper.TryCustomizeTitleBar"/>;<br/>
     /// <see cref="BackdropHelper"/>... // try apply backdrop (depends on <paramref name="backdropType"/>)
     /// </code>
@@ -66,6 +68,7 @@ public static class AppHelper
     {
         RegisterUnhandledExceptionHandler(handler);
 
+        CurrentContext.App.Resources["NavigationViewContentMargin"] = new Thickness(0, 48, 0, 0);
         CurrentContext.AppWindow.Title = CurrentContext.Title;
         CurrentContext.AppWindow.Resize(size);
         CurrentContext.AppWindow.Show();
@@ -73,22 +76,14 @@ public static class AppHelper
             CurrentContext.AppWindow.SetIcon(CurrentContext.IconPath);
 
         _ = TitleBarHelper.TryCustomizeTitleBar();
-        switch (backdropType)
+        _ = backdropType switch
         {
-            case BackdropHelper.BackdropType.None:
-                break;
-            case BackdropHelper.BackdropType.Acrylic:
-                _ = BackdropHelper.TryApplyAcrylic();
-                break;
-            case BackdropHelper.BackdropType.Mica:
-                _ = BackdropHelper.TryApplyMica(false);
-                break;
-            case BackdropHelper.BackdropType.MicaAlt:
-                _ = BackdropHelper.TryApplyMica();
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(backdropType), backdropType, null);
-        }
+            BackdropHelper.BackdropType.None => false,
+            BackdropHelper.BackdropType.Acrylic => BackdropHelper.TryApplyAcrylic(),
+            BackdropHelper.BackdropType.Mica => BackdropHelper.TryApplyMica(false),
+            BackdropHelper.BackdropType.MicaAlt => BackdropHelper.TryApplyMica(),
+            _ => ThrowHelper.ArgumentOutOfRange<BackdropHelper.BackdropType, bool>(backdropType)
+        };
     }
 
     #region DebugHelper
