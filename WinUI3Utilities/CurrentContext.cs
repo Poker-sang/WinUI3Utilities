@@ -110,11 +110,6 @@ public static class CurrentContext
     public static string Title { get; set; } = "";
 
     /// <summary>
-    /// The path of icon, of <see cref="Window"/>
-    /// </summary>
-    public static string IconPath { get; set; } = "";
-
-    /// <summary>
     /// The title bar of <see cref="Window"/>
     /// </summary>
     public static FrameworkElement TitleBar { get; set; } = null!;

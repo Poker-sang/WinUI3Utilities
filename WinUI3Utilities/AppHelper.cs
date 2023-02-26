@@ -43,13 +43,11 @@ public static class AppHelper
     /// <see cref="RegisterUnhandledExceptionHandler"/><br/>
     /// <br/>
     ///
-    /// <see cref="CurrentContext.App"/>.Resources["NavigationViewContentMargin"] = <see langword="new"/> <see cref="Thickness"/>(0, 48, 0, 0);
+    /// <see cref="CurrentContext.App"/>.Resources["NavigationViewContentMargin"] = <see langword="new"/> <see cref="Thickness"/>(0, 48, 0, 0);<br/>
     /// <see cref="CurrentContext.AppWindow"/>.Title = <see cref="CurrentContext.Title"/>;<br/>
     /// <see cref="CurrentContext.AppWindow"/>.Resize(<paramref name="size"/>);<br/>
     /// <see cref="CurrentContext.AppWindow"/>.Show();<br/>
-    /// <see langword="if"/> (<see cref="CurrentContext.IconPath"/> <see langword="is"/> "")
-    ///     <see cref="CurrentContext.AppWindow"/>.SetIcon(<see cref="CurrentContext.IconPath"/>);
-    ///
+    /// 
     /// _ = <see cref="TitleBarHelper.TryCustomizeTitleBar"/>;<br/>
     /// <see cref="BackdropHelper"/>... // try apply backdrop (depends on <paramref name="backdropType"/>)
     /// </code>
@@ -72,9 +70,7 @@ public static class AppHelper
         CurrentContext.AppWindow.Title = CurrentContext.Title;
         CurrentContext.AppWindow.Resize(size);
         CurrentContext.AppWindow.Show();
-        if (CurrentContext.IconPath is not "")
-            CurrentContext.AppWindow.SetIcon(CurrentContext.IconPath);
-
+        
         _ = TitleBarHelper.TryCustomizeTitleBar();
         _ = backdropType switch
         {

@@ -12,35 +12,35 @@ namespace WinUI3Utilities;
 public static class BackdropHelper
 {
     /// <summary>
-    /// BackdropType
+    /// Backdrop type
     /// </summary>
     public enum BackdropType
     {
         /// <summary>
-        /// none
+        /// None
         /// </summary>
         None,
         /// <summary>
-        /// acrylic
+        /// Acrylic
         /// </summary>
         Acrylic,
         /// <summary>
-        /// mica
+        /// Mica
         /// </summary>
         Mica,
         /// <summary>
-        /// mica alt
+        /// Mica alt
         /// </summary>
         MicaAlt
     }
 
     /// <summary>
-    /// mica controller
+    /// Mica controller
     /// </summary>
     public static MicaController? MicaController { get; private set; }
 
     /// <summary>
-    /// acrylic controller
+    /// Acrylic controller
     /// </summary>
     public static DesktopAcrylicController? AcrylicController { get; private set; }
 
