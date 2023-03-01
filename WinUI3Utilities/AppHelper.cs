@@ -55,7 +55,6 @@ public static class AppHelper
     /// <remarks>
     /// Assign Prerequisites:
     /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.App"/></term></item>
     /// <item><term><see cref="CurrentContext.Window"/></term></item>
     /// </list>
     /// </remarks>
@@ -70,14 +69,14 @@ public static class AppHelper
         CurrentContext.AppWindow.Title = CurrentContext.Title;
         CurrentContext.AppWindow.Resize(size);
         CurrentContext.AppWindow.Show();
-        
-        _ = TitleBarHelper.TryCustomizeTitleBar();
+
+        _ = TitleBarHelper.TryCustomizeTitleBar(CurrentContext.AppTitleBar);
         _ = backdropType switch
         {
             BackdropHelper.BackdropType.None => false,
-            BackdropHelper.BackdropType.Acrylic => BackdropHelper.TryApplyAcrylic(),
-            BackdropHelper.BackdropType.Mica => BackdropHelper.TryApplyMica(false),
-            BackdropHelper.BackdropType.MicaAlt => BackdropHelper.TryApplyMica(),
+            BackdropHelper.BackdropType.Acrylic => BackdropHelper.TryApplyAcrylic(CurrentContext.Window),
+            BackdropHelper.BackdropType.Mica => BackdropHelper.TryApplyMica(CurrentContext.Window, false),
+            BackdropHelper.BackdropType.MicaAlt => BackdropHelper.TryApplyMica(CurrentContext.Window),
             _ => ThrowHelper.ArgumentOutOfRange<BackdropHelper.BackdropType, bool>(backdropType)
         };
     }
@@ -93,10 +92,6 @@ public static class AppHelper
     /// <item><term><see cref="Application.UnhandledException"/></term></item>
     /// <item><term><see cref="TaskScheduler.UnobservedTaskException"/></term></item>
     /// <item><term><see cref="AppDomain.UnhandledException"/></term></item>
-    /// </list>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.App"/></term></item>
     /// </list>
     /// </remarks>
     public static void RegisterUnhandledExceptionHandler(Func<Exception, Task>? func = null)

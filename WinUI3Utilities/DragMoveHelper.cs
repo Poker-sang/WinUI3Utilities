@@ -77,7 +77,7 @@ public static class DragMoveHelper
 
     private static void RootPointerPressed(object sender, PointerRoutedEventArgs e)
     {
-        var element = (UIElement)sender;
+        var element = sender.To<UIElement>();
         var properties = e.GetCurrentPoint(element).Properties;
         if (properties.IsLeftButtonPressed)
         {

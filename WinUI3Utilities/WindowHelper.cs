@@ -13,9 +13,7 @@ namespace WinUI3Utilities;
 /// </summary>
 public static class WindowHelper
 {
-    /// <summary>
-    /// Call <see cref="WinRT.Interop.InitializeWithWindow.Initialize"/> and return <paramref name="obj"/> itself
-    /// </summary>
+    /// <inheritdoc cref="InitializeWithWindow{T}(T, nint)"/>
     /// <remarks>
     /// Assign Prerequisites:
     /// <list type="bullet">
@@ -25,10 +23,19 @@ public static class WindowHelper
     /// <typeparam name="T">Target type</typeparam>
     /// <param name="obj"></param>
     /// <returns><paramref name="obj"/></returns>
-    public static T InitializeWithWindow<T>(this T obj)
+    public static T InitializeWithWindow<T>(this T obj) => obj.InitializeWithWindow(CurrentContext.HWnd);
+
+    /// <summary>
+    /// Call <see cref="WinRT.Interop.InitializeWithWindow.Initialize"/> and return <paramref name="obj"/> itself
+    /// </summary>
+    /// <typeparam name="T">Target type</typeparam>
+    /// <param name="obj"></param>
+    /// <param name="hWnd"></param>
+    /// <returns><paramref name="obj"/></returns>
+    public static T InitializeWithWindow<T>(this T obj, nint hWnd)
     {
         // When running on win32, FileOpenPicker needs to know the top-level hWnd via IInitializeWithWindow::Initialize.
-        WinRT.Interop.InitializeWithWindow.Initialize(obj, CurrentContext.HWnd);
+        WinRT.Interop.InitializeWithWindow.Initialize(obj, hWnd);
         return obj;
     }
 
@@ -59,21 +66,17 @@ public static class WindowHelper
             ( > 1600, > 900) => new(1280, 720),
             _ => new(800, 600)
         };
-
+    /// 
     /// <summary>
     /// Get Scale Adjustment
     /// </summary>
-    /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.Window"/></term></item>
-    /// </list>
-    /// </remarks>
     /// <returns>scale factor percent</returns>
     /// <exception cref="Win32Exception"/>
-    public static double GetScaleAdjustment()
+    /// <param name="windowId"></param>
+    /// <exception cref="Win32Exception"></exception>
+    public static double GetScaleAdjustment(WindowId windowId)
     {
-        var displayArea = DisplayArea.GetFromWindowId(CurrentContext.WindowId, DisplayAreaFallback.Primary);
+        var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
         var hMonitor = Win32Interop.GetMonitorFromDisplayId(displayArea.DisplayId);
 
         // Get DPI.

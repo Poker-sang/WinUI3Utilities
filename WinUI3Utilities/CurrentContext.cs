@@ -16,7 +16,7 @@ public static class CurrentContext
     /// <summary>
     /// App instance
     /// </summary>
-    public static Application App { get; set; } = null!;
+    public static Application App => Application.Current;
 
     /// <summary>
     /// Main window instance

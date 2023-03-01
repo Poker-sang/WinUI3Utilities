@@ -14,7 +14,7 @@ public static class FrameworkElementHelper
     /// <param name="frameworkElement"></param>
     /// <returns></returns>
     public static T GetDataContext<T>(this FrameworkElement frameworkElement)
-        => (T)frameworkElement.DataContext;
+        => frameworkElement.DataContext.To<T>();
 
     /// <summary>
     /// Get <see cref="FrameworkElement.DataContext"/> and cast
@@ -23,7 +23,7 @@ public static class FrameworkElementHelper
     /// <param name="frameworkElement"></param>
     /// <returns></returns>
     public static T GetDataContext<T>(this object frameworkElement)
-        => ((FrameworkElement)frameworkElement).GetDataContext<T>();
+        => frameworkElement.To<FrameworkElement>().GetDataContext<T>();
 
     /// <summary>
     /// Get <see cref="FrameworkElement.Tag"/> and cast
@@ -32,7 +32,7 @@ public static class FrameworkElementHelper
     /// <param name="frameworkElement"></param>
     /// <returns></returns>
     public static T GetTag<T>(this FrameworkElement frameworkElement)
-        => (T)frameworkElement.Tag;
+        => frameworkElement.Tag.To<T>();
 
     /// <summary>
     /// Get <see cref="FrameworkElement.Tag"/> and cast
@@ -41,5 +41,5 @@ public static class FrameworkElementHelper
     /// <param name="frameworkElement"></param>
     /// <returns></returns>
     public static T GetTag<T>(this object frameworkElement)
-        => (T)((FrameworkElement)frameworkElement).Tag;
+        => frameworkElement.To<FrameworkElement>().GetTag<T>();
 }

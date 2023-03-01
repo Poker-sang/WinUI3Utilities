@@ -4,6 +4,8 @@ using System.Linq;
 using Windows.Graphics;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI;
+using WinRT.Interop;
 
 namespace WinUI3Utilities;
 
@@ -16,20 +18,14 @@ public static class DragZoneHelper
     /// Calculate dragging-zones of <see cref="CurrentContext.Window"/> (title bar)<br/>
     /// <strong>You MUST transform the rectangles with <see cref="WindowHelper.GetScaleAdjustment"/> before calling <see cref="AppWindowTitleBar.SetDragRectangles"/></strong>
     /// </summary>
-    /// <remarks>
-    /// Assign Prerequisites
-    /// <list type="bullet">
-    /// <item><term><see cref="Window"/></term></item>
-    /// </list>
-    /// </remarks>
+    /// <param name="viewportWidth"></param>
     /// <param name="dragZoneHeight"></param>
     /// <param name="dragZoneLeftIntent"></param>
     /// <param name="nonDraggingZones"></param>
     /// <returns></returns>
-    public static IEnumerable<RectInt32> GetDragZones(int dragZoneHeight, int dragZoneLeftIntent, IEnumerable<RectInt32> nonDraggingZones)
+    public static IEnumerable<RectInt32> GetDragZones(int viewportWidth, int dragZoneHeight, int dragZoneLeftIntent, IEnumerable<RectInt32> nonDraggingZones)
     {
-        var windowWidth = CurrentContext.AppWindow.Size.Width;
-        var draggingZonesX = new List<Range> { new(dragZoneLeftIntent, windowWidth) };
+        var draggingZonesX = new List<Range> { new(dragZoneLeftIntent, viewportWidth) };
         var draggingZonesY = new List<IEnumerable<Range>> { new[] { new Range(0, dragZoneHeight) } };
 
         foreach (var nonDraggingZone in nonDraggingZones)
@@ -110,22 +106,20 @@ public static class DragZoneHelper
     }
 
     /// <summary>
-    /// Set dragging-zones of <see cref="CurrentContext.Window"/> (title bar)
+    /// Set dragging-zones of title bar
     /// </summary>
-    /// <remarks>
-    /// Assign Prerequisites
-    /// <list type="bullet">
-    /// <item><term><see cref="Window"/></term></item>
-    /// </list>
-    /// </remarks>
-    /// <param name="dragZoneHeight">1</param>
-    /// <param name="dragZoneLeftIntent">2</param>
-    /// <param name="nonDraggingZones">3</param>
-    public static void SetDragZones(int dragZoneHeight = 48, int dragZoneLeftIntent = 0, IEnumerable<RectInt32>? nonDraggingZones = null)
+    /// <param name="window"></param>
+    /// <param name="dragZoneHeight"></param>
+    /// <param name="dragZoneLeftIntent"></param>
+    /// <param name="nonDraggingZones"></param>
+    public static void SetDragZones(Window window, int dragZoneHeight = 48, int dragZoneLeftIntent = 0, IEnumerable<RectInt32>? nonDraggingZones = null)
     {
-        var scaleAdjustment = WindowHelper.GetScaleAdjustment();
-        CurrentContext.AppTitleBar.SetDragRectangles(
-            GetDragZones(dragZoneHeight, dragZoneLeftIntent, nonDraggingZones ?? Array.Empty<RectInt32>())
+        var hWnd = WindowNative.GetWindowHandle(window);
+        var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
+        var appWindow = AppWindow.GetFromWindowId(windowId);
+        var scaleAdjustment = WindowHelper.GetScaleAdjustment(windowId);
+        appWindow.TitleBar.SetDragRectangles(
+            GetDragZones(appWindow.Size.Width, dragZoneHeight, dragZoneLeftIntent, nonDraggingZones ?? Array.Empty<RectInt32>())
                 .Select(rect => new RectInt32(
                         (int)(rect.X * scaleAdjustment),
                         (int)(rect.Y * scaleAdjustment),
@@ -133,6 +127,19 @@ public static class DragZoneHelper
                         (int)(rect.Height * scaleAdjustment)))
                 .ToArray());
     }
+
+    /// <inheritdoc cref="SetDragZones(Window, int, int, IEnumerable{RectInt32})"/>
+    /// <remarks>
+    /// Assign Prerequisites
+    /// <list type="bullet">
+    /// <item><term><see cref="CurrentContext.Window"/></term></item>
+    /// </list>
+    /// </remarks>
+    /// <param name="dragZoneHeight"></param>
+    /// <param name="dragZoneLeftIntent"></param>
+    /// <param name="nonDraggingZones"></param>
+    public static void SetDragZones(int dragZoneHeight = 48, int dragZoneLeftIntent = 0, IEnumerable<RectInt32>? nonDraggingZones = null)
+        => SetDragZones(CurrentContext.Window, dragZoneHeight, dragZoneLeftIntent, nonDraggingZones);
 
     /// <inheritdoc cref="SetDragZones(int, int, IEnumerable{RectInt32}?)"/>
     public static void SetDragZones(int dragZoneHeight, int dragZoneLeftIntent, params RectInt32[] nonDraggingZonesArray)
@@ -178,27 +185,27 @@ public static class DragZoneHelper
     public static void SetDragZones(params FrameworkElement[] frameworkElementsArray)
         => SetDragZones(frameworkElements: frameworkElementsArray);
 
-    private record Range(int Lower, int Upper)
-    {
-        public int Distance => Upper - Lower;
-
-        private bool Intersects(Range other) => other.Lower <= Upper && other.Upper >= Lower;
-
-        public static IEnumerable<Range> operator -(Range minuend, Range subtrahend)
-        {
-            if (!minuend.Intersects(subtrahend))
-            {
-                yield return minuend;
-                yield break;
-            }
-            if (minuend.Lower < subtrahend.Lower)
-                yield return minuend with { Upper = subtrahend.Lower - 1 };
-            if (minuend.Upper > subtrahend.Upper)
-                yield return subtrahend with { Lower = minuend.Upper + 1 };
-        }
-
-        public static IEnumerable<Range> operator -(IEnumerable<Range> minuends, Range subtrahend)
-            => minuends.SelectMany(minuend => minuend - subtrahend);
-    }
 }
 
+file record Range(int Lower, int Upper)
+{
+    public int Distance => Upper - Lower;
+
+    private bool Intersects(Range other) => other.Lower <= Upper && other.Upper >= Lower;
+
+    public static IEnumerable<Range> operator -(Range minuend, Range subtrahend)
+    {
+        if (!minuend.Intersects(subtrahend))
+        {
+            yield return minuend;
+            yield break;
+        }
+        if (minuend.Lower < subtrahend.Lower)
+            yield return minuend with { Upper = subtrahend.Lower - 1 };
+        if (minuend.Upper > subtrahend.Upper)
+            yield return subtrahend with { Lower = minuend.Upper + 1 };
+    }
+
+    public static IEnumerable<Range> operator -(IEnumerable<Range> minuends, Range subtrahend)
+        => minuends.SelectMany(minuend => minuend - subtrahend);
+}

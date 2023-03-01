@@ -18,7 +18,7 @@
         <Title>$(AssemblyName)</Title>
         <RepositoryUrl>git@github.com:Poker-sang/WinUI3Utilities.git</RepositoryUrl>
         <PackageProjectUrl>https://github.com/Poker-sang/WinUI3Utilities</PackageProjectUrl>
-        <AssemblyVersion>1.0.10</AssemblyVersion>
+        <AssemblyVersion>1.0.11</AssemblyVersion>
         <FileVersion>$(AssemblyVersion)</FileVersion>
         <VersionPrefix>$(AssemblyVersion)</VersionPrefix>
         <Version>$(AssemblyVersion)</Version>
@@ -26,20 +26,24 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.230118.102" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.230217.4" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.755" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\WinUI3Utilities.SourceGenerator\WinUI3Utilities.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <None Include="..\$(AssemblyName).SourceGenerator\$(OutputPath)\..\netstandard2.0\$(AssemblyName).SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-        <None Include="..\LICENSE">
+        <None Include="..\LICENSE" Link="Nuget Info\LICENSE">
           <Pack>True</Pack>
           <PackagePath>\</PackagePath>
         </None>
-        <None Include="..\README.md">
+        <None Include="..\README.md" Link="Nuget Info\README.md">
           <Pack>True</Pack>
           <PackagePath>\</PackagePath>
         </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Nuget Info\" />
     </ItemGroup>
 </Project>

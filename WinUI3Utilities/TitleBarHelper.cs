@@ -23,7 +23,7 @@ public static class TitleBarHelper
     /// </remarks>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    public static void PaneClosing(NavigationView sender, NavigationViewPaneClosingEventArgs e) => UpdateAppTitleMargin(sender);
+    public static void PaneClosing(NavigationView sender, NavigationViewPaneClosingEventArgs e) => UpdateAppTitleMargin(sender, CurrentContext.TitleTextBlock);
 
     /// <summary>
     /// Simply call <see cref="UpdateAppTitleMargin"/>, should be invoked by <see cref="NavigationView.PaneOpening"/>
@@ -36,12 +36,9 @@ public static class TitleBarHelper
     /// </remarks>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    public static void PaneOpening(NavigationView sender, object e) => UpdateAppTitleMargin(sender);
+    public static void PaneOpening(NavigationView sender, object e) => UpdateAppTitleMargin(sender, CurrentContext.TitleTextBlock);
 
-    /// <summary>
-    /// Should be invoked by <see cref="NavigationView.DisplayModeChanged"/><br/>
-    /// Update app title's and its text block's margin when <see cref="NavigationView.DisplayMode"/> changed
-    /// </summary>
+    /// <inheritdoc cref="DisplayModeChanged(FrameworkElement, TextBlock, NavigationView)"/>
     /// <remarks>
     /// Assign Prerequisites:
     /// <list type="bullet">
@@ -51,44 +48,49 @@ public static class TitleBarHelper
     /// </remarks>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    public static void DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs e)
-    {
-        var currentMargin = CurrentContext.TitleBar.Margin;
-        CurrentContext.TitleBar.Margin = sender.DisplayMode is NavigationViewDisplayMode.Minimal && sender.IsBackButtonVisible is not NavigationViewBackButtonVisible.Collapsed
-            ? new() { Left = sender.CompactPaneLength * 2, Top = currentMargin.Top, Right = currentMargin.Right, Bottom = currentMargin.Bottom }
-            : new Thickness { Left = sender.CompactPaneLength, Top = currentMargin.Top, Right = currentMargin.Right, Bottom = currentMargin.Bottom };
+    public static void DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs e) 
+        => DisplayModeChanged(CurrentContext.TitleBar, CurrentContext.TitleTextBlock, sender);
 
-        UpdateAppTitleMargin(sender);
+    /// <summary>
+    /// Should be invoked by <see cref="NavigationView.DisplayModeChanged"/><br/>
+    /// Update app title's and its text block's margin when <see cref="NavigationView.DisplayMode"/> changed
+    /// </summary>
+    /// <param name="titleBar"></param>
+    /// <param name="textBlock"></param>
+    /// <param name="navigationView"></param>
+    public static void DisplayModeChanged(FrameworkElement titleBar, TextBlock textBlock, NavigationView navigationView)
+    {
+        var currentMargin = titleBar.Margin;
+        titleBar.Margin = navigationView.DisplayMode is NavigationViewDisplayMode.Minimal && navigationView.IsBackButtonVisible is not NavigationViewBackButtonVisible.Collapsed
+            ? new() { Left = navigationView.CompactPaneLength * 2, Top = currentMargin.Top, Right = currentMargin.Right, Bottom = currentMargin.Bottom }
+            : new Thickness { Left = navigationView.CompactPaneLength, Top = currentMargin.Top, Right = currentMargin.Right, Bottom = currentMargin.Bottom };
+
+        UpdateAppTitleMargin(navigationView, textBlock);
     }
 
     /// <summary>
-    /// Update app title text block's margin when <see cref="NavigationView.DisplayMode"/> changed
+    /// Update app <paramref name="titleTextBlock"/>'s margin when <see cref="NavigationView.DisplayMode"/> changed
     /// </summary>
-    /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.TitleTextBlock"/></term></item>
-    /// </list>
-    /// </remarks>
     /// <param name="navigationView"></param>
-    public static void UpdateAppTitleMargin(NavigationView navigationView)
+    /// <param name="titleTextBlock"></param>
+    public static void UpdateAppTitleMargin(NavigationView navigationView, TextBlock titleTextBlock)
     {
         const int smallLeftIndent = 4, largeLeftIndent = 24;
 
         if (ApiInformation.IsApiContractPresent("Windows.Foundation.UniversalApiContract", 7))
         {
-            CurrentContext.TitleTextBlock.TranslationTransition = new();
+            titleTextBlock.TranslationTransition = new();
 
-            CurrentContext.TitleTextBlock.Translation = (navigationView.DisplayMode is NavigationViewDisplayMode.Expanded && navigationView.IsPaneOpen) ||
-                     navigationView.DisplayMode is NavigationViewDisplayMode.Minimal
+            titleTextBlock.Translation = (navigationView.DisplayMode is NavigationViewDisplayMode.Expanded && navigationView.IsPaneOpen) ||
+                                         navigationView.DisplayMode is NavigationViewDisplayMode.Minimal
                 ? new(smallLeftIndent, 0, 0)
                 : new System.Numerics.Vector3(largeLeftIndent, 0, 0);
         }
         else
         {
-            var currentMargin = CurrentContext.TitleTextBlock.Margin;
+            var currentMargin = titleTextBlock.Margin;
 
-            CurrentContext.TitleTextBlock.Margin = (navigationView.DisplayMode is NavigationViewDisplayMode.Expanded && navigationView.IsPaneOpen) ||
+            titleTextBlock.Margin = (navigationView.DisplayMode is NavigationViewDisplayMode.Expanded && navigationView.IsPaneOpen) ||
                      navigationView.DisplayMode is NavigationViewDisplayMode.Minimal
                 ? new() { Left = smallLeftIndent, Top = currentMargin.Top, Right = currentMargin.Right, Bottom = currentMargin.Bottom }
                 : new Thickness { Left = largeLeftIndent, Top = currentMargin.Top, Right = currentMargin.Right, Bottom = currentMargin.Bottom };
@@ -98,24 +100,17 @@ public static class TitleBarHelper
     /// <summary>
     /// Customize title bar when supported
     /// </summary>
-    /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.App"/></term></item>
-    /// <item><term><see cref="CurrentContext.Window"/></term></item>
-    /// </list>
-    /// </remarks>
     /// <returns>Whether customization of title bar is supported</returns>
-    public static bool TryCustomizeTitleBar()
+    public static bool TryCustomizeTitleBar(AppWindowTitleBar appWindowTitleBar)
     {
         if (!AppWindowTitleBar.IsCustomizationSupported())
             return false;
 
-        CurrentContext.AppTitleBar.ExtendsContentIntoTitleBar = true;
-        CurrentContext.AppTitleBar.ButtonBackgroundColor = Colors.Transparent;
-        CurrentContext.AppTitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
-        CurrentContext.AppTitleBar.ButtonHoverBackgroundColor = CurrentContext.App.Resources["SystemControlBackgroundBaseLowBrush"].To<SolidColorBrush>().Color;
-        CurrentContext.AppTitleBar.ButtonForegroundColor = CurrentContext.App.Resources["SystemControlForegroundBaseHighBrush"].To<SolidColorBrush>().Color;
+        appWindowTitleBar.ExtendsContentIntoTitleBar = true;
+        appWindowTitleBar.ButtonBackgroundColor = Colors.Transparent;
+        appWindowTitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+        appWindowTitleBar.ButtonHoverBackgroundColor = CurrentContext.App.Resources["SystemControlBackgroundBaseLowBrush"].To<SolidColorBrush>().Color;
+        appWindowTitleBar.ButtonForegroundColor = CurrentContext.App.Resources["SystemControlForegroundBaseHighBrush"].To<SolidColorBrush>().Color;
         return true;
     }
 }
