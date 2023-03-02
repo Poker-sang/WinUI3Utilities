@@ -38,7 +38,7 @@ public static class TitleBarHelper
     /// <param name="e"></param>
     public static void PaneOpening(NavigationView sender, object e) => UpdateAppTitleMargin(sender, CurrentContext.TitleTextBlock);
 
-    /// <inheritdoc cref="DisplayModeChanged(FrameworkElement, TextBlock, NavigationView)"/>
+    /// <inheritdoc cref="DisplayModeChangedTitleBar(FrameworkElement, TextBlock, NavigationView)"/>
     /// <remarks>
     /// Assign Prerequisites:
     /// <list type="bullet">
@@ -49,7 +49,7 @@ public static class TitleBarHelper
     /// <param name="sender"></param>
     /// <param name="e"></param>
     public static void DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs e) 
-        => DisplayModeChanged(CurrentContext.TitleBar, CurrentContext.TitleTextBlock, sender);
+        => DisplayModeChangedTitleBar(CurrentContext.TitleBar, CurrentContext.TitleTextBlock, sender);
 
     /// <summary>
     /// Should be invoked by <see cref="NavigationView.DisplayModeChanged"/><br/>
@@ -58,7 +58,7 @@ public static class TitleBarHelper
     /// <param name="titleBar"></param>
     /// <param name="textBlock"></param>
     /// <param name="navigationView"></param>
-    public static void DisplayModeChanged(FrameworkElement titleBar, TextBlock textBlock, NavigationView navigationView)
+    public static void DisplayModeChangedTitleBar(FrameworkElement titleBar, TextBlock textBlock, NavigationView navigationView)
     {
         var currentMargin = titleBar.Margin;
         titleBar.Margin = navigationView.DisplayMode is NavigationViewDisplayMode.Minimal && navigationView.IsBackButtonVisible is not NavigationViewBackButtonVisible.Collapsed
