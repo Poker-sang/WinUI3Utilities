@@ -15,3 +15,7 @@ Useful template methods for WinUI3 projects
 ## Contact Me
 
 [![Poker](https://img.shields.io/badge/Poker-poker__sang@outlook.com-0078D4?style=for-the-badge&logo=microsoft-outlook&logoColor=white)](mailto:poker_sang@outlook.com)
+
+## License
+
+[MIT License](https://github.com/Poker-sang/WinUI3Utilities/blob/master/LICENSE)
