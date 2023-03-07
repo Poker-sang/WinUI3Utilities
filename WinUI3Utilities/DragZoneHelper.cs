@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Windows.Graphics;
+using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
-using Microsoft.UI;
+using Windows.Graphics;
 using WinRT.Interop;
 
 namespace WinUI3Utilities;
@@ -117,7 +117,7 @@ public static class DragZoneHelper
         var hWnd = WindowNative.GetWindowHandle(window);
         var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
         var appWindow = AppWindow.GetFromWindowId(windowId);
-        var scaleAdjustment = WindowHelper.GetScaleAdjustment(windowId);
+        var scaleAdjustment = WindowHelper.GetScaleAdjustment(window);
         appWindow.TitleBar.SetDragRectangles(
             GetDragZones(appWindow.Size.Width, dragZoneHeight, dragZoneLeftIntent, nonDraggingZones ?? Array.Empty<RectInt32>())
                 .Select(rect => new RectInt32(
@@ -184,7 +184,6 @@ public static class DragZoneHelper
     /// </param>
     public static void SetDragZones(params FrameworkElement[] frameworkElementsArray)
         => SetDragZones(frameworkElements: frameworkElementsArray);
-
 }
 
 file record Range(int Lower, int Upper)

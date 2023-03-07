@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using Windows.Graphics;
 
-namespace WinUI3Utilities.PlatformInvoke.User32;
+namespace WinUI3Utilities.Internal.PlatformInvoke.User32;
 
 internal static partial class User32
 {

@@ -1,10 +1,6 @@
-using System.ComponentModel;
-using Windows.Graphics;
 using Microsoft.UI.Xaml;
-using WinUI3Utilities.PlatformInvoke.User32;
-using Microsoft.UI.Windowing;
-using Microsoft.UI;
-using WinUI3Utilities.PlatformInvoke.Shcore;
+using Windows.Graphics;
+using WinUI3Utilities.Internal.PlatformInvoke.User32;
 
 namespace WinUI3Utilities;
 
@@ -66,25 +62,20 @@ public static class WindowHelper
             ( > 1600, > 900) => new(1280, 720),
             _ => new(800, 600)
         };
-    /// 
+
     /// <summary>
     /// Get Scale Adjustment
     /// </summary>
     /// <returns>scale factor percent</returns>
-    /// <exception cref="Win32Exception"/>
-    /// <param name="windowId"></param>
-    /// <exception cref="Win32Exception"></exception>
-    public static double GetScaleAdjustment(WindowId windowId)
-    {
-        var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
-        var hMonitor = Win32Interop.GetMonitorFromDisplayId(displayArea.DisplayId);
+    /// <param name="window"></param>
+    public static double GetScaleAdjustment(Window window) => window.Content.XamlRoot.RasterizationScale;
 
-        // Get DPI.
-        var result = Shcore.GetDpiForMonitor(hMonitor, MonitorDpiType.MdtDefault, out var dpiX, out _);
-        if (result != 0)
-            throw new Win32Exception("Could not get DPI for monitor.");
-
-        var scaleFactorPercent = (uint)(((long)dpiX * 100 + (96 >> 1)) / 96);
-        return scaleFactorPercent / 100.0;
-    }
+    /// <inheritdoc cref="GetScaleAdjustment"/>
+    /// <remarks>
+    /// Assign Prerequisites:
+    /// <list type="bullet">
+    /// <item><term><see cref="CurrentContext.Window"/></term></item>
+    /// </list>
+    /// </remarks>
+    public static double ScaleAdjustment => GetScaleAdjustment(CurrentContext.Window);
 }

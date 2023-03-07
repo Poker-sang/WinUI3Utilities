@@ -28,5 +28,5 @@ namespace WinUI3Utilities.Attributes;
 [AttributeUsage(AttributeTargets.Assembly)]
 public class DisableSourceGeneratorAttribute : Attribute
 {
-    
+
 }

@@ -1,4 +1,4 @@
-using WinUI3Utilities.PlatformInvoke.CoreMessaging;
+using WinUI3Utilities.Internal.PlatformInvoke.CoreMessaging;
 
 namespace WinUI3Utilities.Internal;
 

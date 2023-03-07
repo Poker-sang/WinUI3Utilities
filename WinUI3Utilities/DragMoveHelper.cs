@@ -1,8 +1,8 @@
 using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Input;
 using Windows.Graphics;
-using WinUI3Utilities.PlatformInvoke.User32;
+using WinUI3Utilities.Internal.PlatformInvoke.User32;
 
 namespace WinUI3Utilities;
 

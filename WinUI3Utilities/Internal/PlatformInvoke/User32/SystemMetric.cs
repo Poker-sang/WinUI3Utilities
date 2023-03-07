@@ -1,4 +1,4 @@
-namespace WinUI3Utilities.PlatformInvoke.User32;
+namespace WinUI3Utilities.Internal.PlatformInvoke.User32;
 
 internal enum SystemMetric
 {
@@ -110,7 +110,7 @@ internal enum SystemMetric
     ShuttingDown = 0x2000,
 
     RemoteControl = 0x2001,
-    
+
     CaretBlinkingEnabled = 0x2002,
 
     ConvertiblesLateMode = 0x2003,

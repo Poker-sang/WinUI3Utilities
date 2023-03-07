@@ -1,4 +1,3 @@
-using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
@@ -6,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Xml.XPath;
+using Microsoft.CodeAnalysis;
 using static WinUI3Utilities.SourceGenerator.Utilities;
 
 namespace WinUI3Utilities.SourceGenerator;

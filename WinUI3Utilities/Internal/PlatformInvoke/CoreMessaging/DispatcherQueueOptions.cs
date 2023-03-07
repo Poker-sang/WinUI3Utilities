@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace WinUI3Utilities.PlatformInvoke.CoreMessaging;
+namespace WinUI3Utilities.Internal.PlatformInvoke.CoreMessaging;
 
 [StructLayout(LayoutKind.Sequential)]
 internal struct DispatcherQueueOptions

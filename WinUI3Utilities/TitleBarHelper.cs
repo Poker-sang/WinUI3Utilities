@@ -48,7 +48,7 @@ public static class TitleBarHelper
     /// </remarks>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    public static void DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs e) 
+    public static void DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs e)
         => DisplayModeChangedTitleBar(CurrentContext.TitleBar, CurrentContext.TitleTextBlock, sender);
 
     /// <summary>
