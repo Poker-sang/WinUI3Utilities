@@ -15,9 +15,7 @@ namespace WinUI3Utilities.Attributes;
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
 public sealed class DependencyPropertyAttribute<T> : Attribute
 {
-    /// <summary>
     /// <inheritdoc cref="DependencyPropertyAttribute{T}"/>
-    /// </summary>
     /// <param name="name">Property name</param>
     /// <param name="propertyChanged">The name of the method, which called when property changed</param>
     public DependencyPropertyAttribute(string name, string propertyChanged = "")

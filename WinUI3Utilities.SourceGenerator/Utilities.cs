@@ -11,7 +11,7 @@ namespace WinUI3Utilities.SourceGenerator;
 
 internal static class Utilities
 {
-    internal const string AttributeNamespace = "WinUI3Utilities.Attributes.";
+    internal const string AttributeNamespace = $"{nameof(WinUI3Utilities)}.Attributes.";
     internal const string DisableSourceGeneratorAttribute = AttributeNamespace + "DisableSourceGeneratorAttribute";
 
     internal static INamedTypeSymbol ObjectSymbol { get; set; } = null!;
@@ -261,7 +261,9 @@ internal static class Utilities
 
         _ = usedTypes.Add(symbol);
 
-        var ns = symbol.ContainingNamespace;
+        if (symbol.ContainingNamespace is not { } ns)
+            return;
+
         if (!SymbolEqualityComparer.Default.Equals(ns, contextType.ContainingNamespace))
             _ = namespaces.Add(ns.ToDisplayString());
 

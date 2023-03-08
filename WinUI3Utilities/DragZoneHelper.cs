@@ -15,17 +15,52 @@ namespace WinUI3Utilities;
 public static class DragZoneHelper
 {
     /// <summary>
-    /// Calculate dragging-zones of <see cref="CurrentContext.Window"/> (title bar)<br/>
+    /// Info type for <see cref="DragZoneHelper"/>
+    /// </summary>
+    public record DragZoneInfo
+    {
+        /// <summary>
+        /// Create instance with <see cref="NonDraggingZones"/> set
+        /// </summary>
+        /// <param name="nonDragZones"></param>
+        public DragZoneInfo(params RectInt32[] nonDragZones)
+        {
+            NonDraggingZones = nonDragZones;
+        }
+
+        /// <summary>
+        /// Default: 48
+        /// </summary>
+        public int DragZoneHeight { get; set; } = 48;
+
+        /// <summary>
+        /// Default: 0
+        /// </summary>
+        public int DragZoneLeftIndent { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public IEnumerable<RectInt32> NonDraggingZones { get; set; }
+
+        /// <summary>
+        /// Default: <see langword="false"/>
+        /// </summary>
+        public bool ExcludeDebugToolbarArea { get; set; }
+    }
+
+    /// <summary>
+    /// Calculate dragging-zones of title bar<br/>
     /// <strong>You MUST transform the rectangles with <see cref="WindowHelper.GetScaleAdjustment"/> before calling <see cref="AppWindowTitleBar.SetDragRectangles"/></strong>
     /// </summary>
     /// <param name="viewportWidth"></param>
     /// <param name="dragZoneHeight"></param>
-    /// <param name="dragZoneLeftIntent"></param>
+    /// <param name="dragZoneLeftIndent"></param>
     /// <param name="nonDraggingZones"></param>
     /// <returns></returns>
-    public static IEnumerable<RectInt32> GetDragZones(int viewportWidth, int dragZoneHeight, int dragZoneLeftIntent, IEnumerable<RectInt32> nonDraggingZones)
+    public static IEnumerable<RectInt32> GetDragZones(int viewportWidth, int dragZoneHeight, int dragZoneLeftIndent, IEnumerable<RectInt32> nonDraggingZones)
     {
-        var draggingZonesX = new List<Range> { new(dragZoneLeftIntent, viewportWidth) };
+        var draggingZonesX = new List<Range> { new(dragZoneLeftIndent, viewportWidth) };
         var draggingZonesY = new List<IEnumerable<Range>> { new[] { new Range(0, dragZoneHeight) } };
 
         foreach (var nonDraggingZone in nonDraggingZones)
@@ -39,7 +74,7 @@ public static class DragZoneHelper
                 var xResult = (x - xSubtrahend).ToArray();
                 if (xResult.Length is 1 && xResult[0] == x)
                     continue;
-                var yResult = (y - ySubtrahend).ToArray();
+                var yResult = y - ySubtrahend;
                 switch (xResult.Length)
                 {
                     case 0:
@@ -66,8 +101,6 @@ public static class DragZoneHelper
                                 x with { Lower = xResult[0].Lower }
                             });
                         }
-
-                        ++i;
                         break;
                     case 2:
                         draggingZonesX.RemoveAt(i);
@@ -79,10 +112,10 @@ public static class DragZoneHelper
                             xSubtrahend,
                             x with { Lower = xResult[1].Lower }
                         });
-                        ++i;
-                        ++i;
                         break;
                 }
+
+                i += xResult.Length;
             }
         }
 
@@ -109,81 +142,46 @@ public static class DragZoneHelper
     /// Set dragging-zones of title bar
     /// </summary>
     /// <param name="window"></param>
-    /// <param name="dragZoneHeight"></param>
-    /// <param name="dragZoneLeftIntent"></param>
-    /// <param name="nonDraggingZones"></param>
-    public static void SetDragZones(Window window, int dragZoneHeight = 48, int dragZoneLeftIntent = 0, IEnumerable<RectInt32>? nonDraggingZones = null)
+    /// <param name="info"></param>
+    public static void SetDragZones(Window window, DragZoneInfo info)
     {
-        var hWnd = WindowNative.GetWindowHandle(window);
-        var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
-        var appWindow = AppWindow.GetFromWindowId(windowId);
+        var appWindow = GetAppWindow(window);
         var scaleAdjustment = WindowHelper.GetScaleAdjustment(window);
+        var windowWidth = (int)(appWindow.Size.Width / scaleAdjustment);
+        var nonDraggingZones = info.NonDraggingZones ?? Array.Empty<RectInt32>();
+
+        if (info.ExcludeDebugToolbarArea)
+            nonDraggingZones = nonDraggingZones.Concat(new RectInt32[] { new((windowWidth - DebugToolbarWidth) / 2, 0, DebugToolbarWidth, DebugToolbarHeight) });
+
         appWindow.TitleBar.SetDragRectangles(
-            GetDragZones(appWindow.Size.Width, dragZoneHeight, dragZoneLeftIntent, nonDraggingZones ?? Array.Empty<RectInt32>())
+            GetDragZones(windowWidth, info.DragZoneHeight, info.DragZoneLeftIndent, nonDraggingZones)
                 .Select(rect => new RectInt32(
-                        (int)(rect.X * scaleAdjustment),
-                        (int)(rect.Y * scaleAdjustment),
-                        (int)(rect.Width * scaleAdjustment),
-                        (int)(rect.Height * scaleAdjustment)))
+                    (int)(rect.X * scaleAdjustment),
+                    (int)(rect.Y * scaleAdjustment),
+                    (int)(rect.Width * scaleAdjustment),
+                    (int)(rect.Height * scaleAdjustment)))
                 .ToArray());
     }
 
-    /// <inheritdoc cref="SetDragZones(Window, int, int, IEnumerable{RectInt32})"/>
+    /// <inheritdoc cref="SetDragZones(Window, DragZoneInfo)"/>
     /// <remarks>
     /// Assign Prerequisites
     /// <list type="bullet">
     /// <item><term><see cref="CurrentContext.Window"/></term></item>
     /// </list>
     /// </remarks>
-    /// <param name="dragZoneHeight"></param>
-    /// <param name="dragZoneLeftIntent"></param>
-    /// <param name="nonDraggingZones"></param>
-    public static void SetDragZones(int dragZoneHeight = 48, int dragZoneLeftIntent = 0, IEnumerable<RectInt32>? nonDraggingZones = null)
-        => SetDragZones(CurrentContext.Window, dragZoneHeight, dragZoneLeftIntent, nonDraggingZones);
+    public static void SetDragZones(DragZoneInfo info)
+        => SetDragZones(CurrentContext.Window, info);
 
-    /// <inheritdoc cref="SetDragZones(int, int, IEnumerable{RectInt32}?)"/>
-    public static void SetDragZones(int dragZoneHeight, int dragZoneLeftIntent, params RectInt32[] nonDraggingZonesArray)
-        => SetDragZones(dragZoneHeight, dragZoneLeftIntent, nonDraggingZones: nonDraggingZonesArray);
+    private const int DebugToolbarWidth = 217;
+    private const int DebugToolbarHeight = 25;
 
-    /// <inheritdoc cref="SetDragZones(int, int, IEnumerable{RectInt32}?)"/>
-    public static void SetDragZones(params RectInt32[] nonDraggingZonesSingle)
-        => SetDragZones(nonDraggingZones: nonDraggingZonesSingle);
-
-    /// <inheritdoc cref="SetDragZones(int, int, IEnumerable{RectInt32}?)"/>
-    /// <param name="frameworkElements">The zones of <see cref="FrameworkElement"/>s that we need to exclude<br/>
-    /// Implementation:<br/>
-    /// <code>
-    /// <paramref name="frameworkElements"/>.Select(t => <see langword="new"/> <see cref="RectInt32"/>(
-    ///     (<see langword="int"/>) t.Margin.Left,
-    ///     (<see langword="int"/>) t.Margin.Top,
-    ///     (<see langword="int"/>) t.ActualWidth,
-    ///     (<see langword="int"/>) t.ActualHeight)
-    /// </code>
-    /// </param>
-#pragma warning disable CS1573
-    public static void SetDragZones(int dragZoneHeight = 48, int dragZoneLeftIntent = 0, IEnumerable<RectInt32>? nonDraggingZones = null, params FrameworkElement[] frameworkElements)
-#pragma warning restore CS1573
-        => SetDragZones(dragZoneHeight, dragZoneLeftIntent, (nonDraggingZones ?? Array.Empty<RectInt32>())
-            .Concat(frameworkElements
-                .Select(t => new RectInt32(
-                    (int)t.Margin.Left,
-                    (int)t.Margin.Top,
-                    (int)t.ActualWidth,
-                    (int)t.ActualHeight))));
-
-    /// <inheritdoc cref="SetDragZones(int, int, IEnumerable{RectInt32}?, FrameworkElement[])"/>
-    /// <param name="frameworkElementsArray">The zones of <see cref="FrameworkElement"/>s that we need to exclude<br/>
-    /// Implementation:<br/>
-    /// <code>
-    /// <paramref name="frameworkElementsArray"/>.Select(t => <see langword="new"/> <see cref="RectInt32"/>(
-    ///     (<see langword="int"/>) t.Margin.Left,
-    ///     (<see langword="int"/>) t.Margin.Top,
-    ///     (<see langword="int"/>) t.ActualWidth,
-    ///     (<see langword="int"/>) t.ActualHeight)
-    /// </code>
-    /// </param>
-    public static void SetDragZones(params FrameworkElement[] frameworkElementsArray)
-        => SetDragZones(frameworkElements: frameworkElementsArray);
+    private static AppWindow GetAppWindow(Window window)
+    {
+        var hWnd = WindowNative.GetWindowHandle(window);
+        var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
+        return AppWindow.GetFromWindowId(windowId);
+    }
 }
 
 file record Range(int Lower, int Upper)
@@ -200,9 +198,9 @@ file record Range(int Lower, int Upper)
             yield break;
         }
         if (minuend.Lower < subtrahend.Lower)
-            yield return minuend with { Upper = subtrahend.Lower - 1 };
+            yield return minuend with { Upper = subtrahend.Lower };
         if (minuend.Upper > subtrahend.Upper)
-            yield return subtrahend with { Lower = minuend.Upper + 1 };
+            yield return minuend with { Lower = subtrahend.Upper };
     }
 
     public static IEnumerable<Range> operator -(IEnumerable<Range> minuends, Range subtrahend)

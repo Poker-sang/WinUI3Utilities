@@ -102,7 +102,7 @@ public static class CurrentContext
     /// <item><term><see cref="Window"/></term></item>
     /// </list>
     /// </remarks>
-    public static OverlappedPresenter OverlappedPresenter => (OverlappedPresenter)AppWindow.Presenter;
+    public static OverlappedPresenter OverlappedPresenter => AppWindow.Presenter.To<OverlappedPresenter>();
 
     /// <summary>
     /// The title of <see cref="Window"/>

@@ -66,8 +66,8 @@ public static class WindowHelper
     /// <summary>
     /// Get Scale Adjustment
     /// </summary>
-    /// <returns>scale factor percent</returns>
     /// <param name="window"></param>
+    /// <returns>scale factor percent</returns>
     public static double GetScaleAdjustment(Window window) => window.Content.XamlRoot.RasterizationScale;
 
     /// <inheritdoc cref="GetScaleAdjustment"/>
