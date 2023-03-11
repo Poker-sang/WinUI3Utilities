@@ -14,7 +14,10 @@ public static class SnackBarHelper
     /// </summary>
     public static TeachingTip RootSnackBar { get; set; } = null!;
 
-    private static DateTime _hideSnakeBarTime;
+    /// <remarks>
+    /// Value type members require property to enable thread sharing
+    /// </remarks>
+    private static DateTime HideSnakeBarTime { get; set; }
 
     /// <summary>
     /// Show <see cref="RootSnackBar"/>
@@ -50,17 +53,17 @@ public static class SnackBarHelper
     /// <param name="message"><see cref="TeachingTip.Title"/></param>
     /// <param name="severity"><see cref="TeachingTip.IconSource"/></param>
     /// <param name="hint"><see cref="TeachingTip.Subtitle"/></param>
-    /// <param name="mSec">Automatically hide after <paramref name="mSec"/> microseconds</param>
+    /// <param name="mSec">Automatically hide after <paramref name="mSec"/> milliseconds</param>
     /// <param name="isLightDismissEnabled"><see cref="TeachingTip.IsLightDismissEnabled"/></param>
     public static async void ShowAndHide(string message, Severity severity = Severity.Ok, string hint = "", int mSec = 3000, bool isLightDismissEnabled = true)
     {
-        _hideSnakeBarTime = DateTime.Now + TimeSpan.FromMicroseconds(mSec - 100);
+        HideSnakeBarTime = DateTime.Now + TimeSpan.FromMilliseconds(mSec - 100);
 
         Show(message, severity, hint, isLightDismissEnabled);
 
         await Task.Delay(mSec);
 
-        if (DateTime.Now > _hideSnakeBarTime)
+        if (DateTime.Now > HideSnakeBarTime)
             RootSnackBar.IsOpen = false;
     }
 
