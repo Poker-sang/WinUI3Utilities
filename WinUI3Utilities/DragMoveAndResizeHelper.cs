@@ -6,6 +6,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using Windows.Graphics;
+using WinUI3Utilities.Interfaces;
 using WinUI3Utilities.Internal.PlatformInvoke.User32;
 
 namespace WinUI3Utilities;
@@ -42,16 +43,6 @@ public static class DragMoveAndResizeHelper
         /// Default: <see cref="WindowHelper.GetScreenSize"/>
         /// </summary>
         public (int X, int Y) MaximumSize { get; set; } = WindowHelper.GetScreenSize();
-
-        /// <summary>
-        /// Default: <see cref="CurrentContext.AppWindow"/>
-        /// </summary>
-        public AppWindow AppWindow { get; set; } = CurrentContext.AppWindow;
-
-        /// <summary>
-        /// <see cref="Microsoft.UI.Windowing.AppWindow.Presenter"/>
-        /// </summary>
-        public OverlappedPresenter OverlappedPresenter => AppWindow.Presenter.To<OverlappedPresenter>();
     }
 
     /// <summary>
@@ -96,10 +87,11 @@ public static class DragMoveAndResizeHelper
     /// </summary>
     /// <param name="element"></param>
     /// <param name="info"></param>
-    public static void SetDragMove(UIElement element, DragMoveAndResizeInfo info)
+    /// <param name="windowInfo">Default: <see cref="CurrentContext.WindowInfo"/></param>
+    public static void SetDragMove(UIElement element, DragMoveAndResizeInfo info, IWindowInfo? windowInfo = null)
     {
         _pointerPressed = (o, e) => RootPointerPressed(o, e, info);
-        _pointerMoved = (o, e) => RootPointerMoved(o, e, info);
+        _pointerMoved = (o, e) => RootPointerMoved(o, e, info, windowInfo ?? CurrentContext.WindowInfo);
         element.PointerPressed += _pointerPressed;
         element.PointerMoved += _pointerMoved;
         element.PointerReleased += RootPointerReleased;
@@ -200,7 +192,7 @@ public static class DragMoveAndResizeHelper
         _ = User32.GetCursorPos(out _lastPoint);
     }
 
-    private static void RootPointerMoved(object sender, PointerRoutedEventArgs e, DragMoveAndResizeInfo info)
+    private static void RootPointerMoved(object sender, PointerRoutedEventArgs e, DragMoveAndResizeInfo info, IWindowInfo windowInfo)
     {
         var frameworkElement = sender.To<FrameworkElement>();
         var pointer = e.GetCurrentPoint(frameworkElement);
@@ -213,7 +205,7 @@ public static class DragMoveAndResizeHelper
 
         var pointerShape = InputSystemCursorShape.Arrow;
 
-        if (info.OverlappedPresenter.State is not OverlappedPresenterState.Maximized && info.Mode.HasFlag(Mode.Resize))
+        if (windowInfo.OverlappedPresenter.State is not OverlappedPresenterState.Maximized && info.Mode.HasFlag(Mode.Resize))
         {
             var left = position._x < info.MinimumOffset;
             var top = position._y < info.MinimumOffset;
@@ -251,23 +243,23 @@ public static class DragMoveAndResizeHelper
         if (offset < info.MinimumOffset)
             return;
 
-        if (info.OverlappedPresenter.State is OverlappedPresenterState.Maximized)
+        if (windowInfo.OverlappedPresenter.State is OverlappedPresenterState.Maximized)
         {
             if (_type is PointerOperationType.Move)
             {
-                var originalSize = info.AppWindow.Size;
-                info.OverlappedPresenter.Restore();
-                var size = info.AppWindow.Size;
+                var originalSize = windowInfo.AppWindow.Size;
+                windowInfo.OverlappedPresenter.Restore();
+                var size = windowInfo.AppWindow.Size;
                 var rate = 1 - (double)size.Width / originalSize.Width;
-                info.AppWindow.Move(new((int)(point.X * rate), (int)(point.Y * rate)));
+                windowInfo.AppWindow.Move(new((int)(point.X * rate), (int)(point.Y * rate)));
             }
         }
         else
         {
-            var xPos = info.AppWindow.Position.X;
-            var yPos = info.AppWindow.Position.Y;
-            var xSize = info.AppWindow.Size.Width;
-            var ySize = info.AppWindow.Size.Height;
+            var xPos = windowInfo.AppWindow.Position.X;
+            var yPos = windowInfo.AppWindow.Position.Y;
+            var xSize = windowInfo.AppWindow.Size.Width;
+            var ySize = windowInfo.AppWindow.Size.Height;
 
             if (_type.HasFlag(PointerOperationType.Top))
             {
@@ -300,7 +292,7 @@ public static class DragMoveAndResizeHelper
                     xPos += xOffset;
             }
 
-            info.AppWindow.MoveAndResize(new(xPos, yPos, xSize, ySize));
+            windowInfo.AppWindow.MoveAndResize(new(xPos, yPos, xSize, ySize));
         }
 
         _lastPoint.X = point.X;

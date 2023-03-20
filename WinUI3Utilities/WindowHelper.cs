@@ -9,27 +9,17 @@ namespace WinUI3Utilities;
 /// </summary>
 public static class WindowHelper
 {
-    /// <inheritdoc cref="InitializeWithWindow{T}(T, nint)"/>
-    /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.Window"/></term></item>
-    /// </list>
-    /// </remarks>
-    /// <typeparam name="T">Target type</typeparam>
-    /// <param name="obj"></param>
-    /// <returns><paramref name="obj"/></returns>
-    public static T InitializeWithWindow<T>(this T obj) => obj.InitializeWithWindow(CurrentContext.HWnd);
-
     /// <summary>
     /// Call <see cref="WinRT.Interop.InitializeWithWindow.Initialize"/> and return <paramref name="obj"/> itself
     /// </summary>
     /// <typeparam name="T">Target type</typeparam>
     /// <param name="obj"></param>
-    /// <param name="hWnd"></param>
+    /// <param name="hWnd">Default: <see cref="CurrentContext.HWnd"/></param>
     /// <returns><paramref name="obj"/></returns>
-    public static T InitializeWithWindow<T>(this T obj, nint hWnd)
+    public static T InitializeWithWindow<T>(this T obj, nint hWnd = 0)
     {
+        if (hWnd is 0)
+            hWnd = CurrentContext.HWnd;
         // When running on win32, FileOpenPicker needs to know the top-level hWnd via IInitializeWithWindow::Initialize.
         WinRT.Interop.InitializeWithWindow.Initialize(obj, hWnd);
         return obj;
@@ -66,16 +56,7 @@ public static class WindowHelper
     /// <summary>
     /// Get Scale Adjustment
     /// </summary>
-    /// <param name="window"></param>
+    /// <param name="window">Default: <see cref="CurrentContext.Window"/></param>
     /// <returns>scale factor percent</returns>
-    public static double GetScaleAdjustment(Window window) => window.Content.XamlRoot.RasterizationScale;
-
-    /// <inheritdoc cref="GetScaleAdjustment"/>
-    /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.Window"/></term></item>
-    /// </list>
-    /// </remarks>
-    public static double ScaleAdjustment => GetScaleAdjustment(CurrentContext.Window);
+    public static double GetScaleAdjustment(Window? window = null) => (window ?? CurrentContext.Window).Content.XamlRoot.RasterizationScale;
 }

@@ -21,15 +21,15 @@ public static class BackdropHelper
         /// </summary>
         None,
         /// <summary>
-        /// Acrylic
+        /// Use <see cref="TryApplyAcrylic"/>
         /// </summary>
         Acrylic,
         /// <summary>
-        /// Mica
+        /// Use <see cref="TryApplyMica"/>
         /// </summary>
         Mica,
         /// <summary>
-        /// Mica alt
+        /// Use <see cref="TryApplyMica"/>
         /// </summary>
         MicaAlt
     }
@@ -54,13 +54,10 @@ public static class BackdropHelper
     /// <summary>
     /// Apply mica when supported
     /// </summary>
-    /// <param name="useMicaAlt"></param>
     /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.Window"/></term></item>
-    /// </list>
+    /// Related to <see cref="BackdropType.Mica"/> and <see cref="BackdropType.MicaAlt"/>
     /// </remarks>
+    /// <param name="useMicaAlt"></param>
     /// <param name="window"></param>
     /// <returns>Whether mica is supported</returns>
     public static bool TryApplyMica(Window window, bool useMicaAlt = true)
@@ -68,7 +65,7 @@ public static class BackdropHelper
         if (!MicaController.IsSupported())
             return false;
 
-        Init(window, MicaController = new MicaController { Kind = useMicaAlt ? MicaKind.BaseAlt : MicaKind.Base });
+        Init(window, MicaController = new() { Kind = useMicaAlt ? MicaKind.BaseAlt : MicaKind.Base });
 
         return true;
     }
@@ -77,10 +74,7 @@ public static class BackdropHelper
     /// Apply acrylic when supported
     /// </summary>
     /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.Window"/></term></item>
-    /// </list>
+    /// Related to <see cref="BackdropType.Acrylic"/>
     /// </remarks>
     /// <param name="window"></param>
     /// <returns>Whether acrylic is supported</returns>
@@ -89,19 +83,18 @@ public static class BackdropHelper
         if (!DesktopAcrylicController.IsSupported())
             return false;
 
-        Init(window, AcrylicController = new DesktopAcrylicController());
+        Init(window, AcrylicController = new());
 
         return true;
     }
 
     private static void Init(Window window, ISystemBackdropControllerWithTargets controller)
     {
-        _dispatcherQueueHelper = new WindowsSystemDispatcherQueueHelper();
+        _dispatcherQueueHelper = new();
         _dispatcherQueueHelper.EnsureWindowsSystemDispatcherQueueController();
 
-
         // Hooking up the policy object
-        SystemBackdropConfiguration = new SystemBackdropConfiguration();
+        SystemBackdropConfiguration = new();
         window.Activated += WindowOnActivated;
         window.Closed += WindowOnClosed;
         window.Content.To<FrameworkElement>().ActualThemeChanged += OnActualThemeChanged;
@@ -123,7 +116,7 @@ public static class BackdropHelper
         void WindowOnClosed(object sender, WindowEventArgs args)
         {
             // Make sure any Mica/Acrylic controller is disposed so it doesn't try to
-            // use CurrentContext.Window closed window.
+            // use this closed window.
             if (MicaController is not null)
             {
                 MicaController.Dispose();
@@ -143,7 +136,6 @@ public static class BackdropHelper
         void WindowOnActivated(object sender, WindowActivatedEventArgs args)
             => SystemBackdropConfiguration!.IsInputActive = args.WindowActivationState is not WindowActivationState.Deactivated;
     }
-
 
     private static void SetConfigurationSourceTheme(Window window) =>
         SystemBackdropConfiguration!.Theme = window.Content switch

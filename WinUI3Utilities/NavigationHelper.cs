@@ -1,5 +1,6 @@
 using System;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Animation;
 
 namespace WinUI3Utilities;
 
@@ -8,36 +9,23 @@ namespace WinUI3Utilities;
 /// </summary>
 public static class NavigationHelper
 {
-    /// <summary>
-    /// Goto Page <typeparamref name="T"/>
-    /// </summary>
-    /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.NavigationView"/></term></item>
-    /// <item><term><see cref="CurrentContext.Frame"/></term></item>
-    /// </list>
-    /// </remarks>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="parameter">Parameter passed to <typeparamref name="T"/></param>
-    public static void GotoPage<T>(object? parameter = null) where T : Page => GotoPage(typeof(T), parameter);
+    /// <inheritdoc cref="GotoPage"/>
+    public static void GotoPage<T>(object? parameter = null, NavigationTransitionInfo? info = null, NavigationView? navigationView = null, Frame? frame = null) where T : Page
+        => GotoPage(typeof(T), parameter, info, navigationView, frame);
 
     /// <summary>
-    /// Goto Page <paramref name="page"/>
+    /// Goto Page
     /// </summary>
-    /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.NavigationView"/></term></item>
-    /// <item><term><see cref="CurrentContext.Frame"/></term></item>
-    /// </list>
-    /// </remarks>
     /// <param name="page"></param>
-    /// <param name="parameter">Parameter passed to <paramref name="page"/></param>
-    public static void GotoPage(Type page, object? parameter = null)
+    /// <param name="parameter"></param>
+    /// <param name="info"></param>
+    /// <param name="navigationView">Default: <see cref="CurrentContext.NavigationView"/></param>
+    /// <param name="frame">Default: <see cref="CurrentContext.Frame"/></param>
+    public static void GotoPage(Type page, object? parameter = null, NavigationTransitionInfo? info = null, NavigationView? navigationView = null, Frame? frame = null)
     {
-        _ = CurrentContext.Frame.Navigate(page, parameter);
-        CurrentContext.NavigationView.IsBackEnabled = CurrentContext.Frame.CanGoBack;
-        GC.Collect();
+        navigationView ??= CurrentContext.NavigationView;
+        frame ??= CurrentContext.Frame;
+        _ = frame.Navigate(page, parameter, info);
+        navigationView.IsBackEnabled = frame.CanGoBack;
     }
 }

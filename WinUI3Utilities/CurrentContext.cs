@@ -2,7 +2,7 @@ using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using WinRT.Interop;
+using WinUI3Utilities.Interfaces;
 
 namespace WinUI3Utilities;
 
@@ -11,98 +11,36 @@ namespace WinUI3Utilities;
 /// </summary>
 public static class CurrentContext
 {
-    private static Window _window = null!;
+    /// <summary>
+    /// Window info
+    /// </summary>
+    public static IWindowInfo WindowInfo { get; set; } = null!;
 
     /// <summary>
     /// App instance
     /// </summary>
     public static Application App => Application.Current;
 
-    /// <summary>
-    /// Main window instance
-    /// </summary>
-    public static Window Window
-    {
-        get => _window;
-        set
-        {
-            _window = value;
-            HWnd = WindowNative.GetWindowHandle(_window);
-            WindowId = Win32Interop.GetWindowIdFromWindow(HWnd);
-            AppWindow = AppWindow.GetFromWindowId(WindowId);
-        }
-    }
+    /// <inheritdoc cref="IWindowInfo.Window"/>
+    public static Window Window => WindowInfo.Window;
 
-    /// <summary>
-    /// The handle of <see cref="Window"/>
-    /// </summary>
-    /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="Window"/></term></item>
-    /// </list>
-    /// </remarks>
-    public static nint HWnd { get; private set; }
+    /// <inheritdoc cref="IWindowInfo.HWnd"/>
+    public static nint HWnd => WindowInfo.HWnd;
 
-    /// <summary>
-    /// The id of <see cref="Window"/>
-    /// </summary>
-    /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="Window"/></term></item>
-    /// </list>
-    /// </remarks>
-    public static WindowId WindowId { get; private set; }
+    /// <inheritdoc cref="IWindowInfo.WindowId"/>
+    public static WindowId WindowId => WindowInfo.WindowId;
 
-    /// <summary>
-    /// The app window of <see cref="Window"/>
-    /// </summary>
-    /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="Window"/></term></item>
-    /// </list>
-    /// </remarks>
-    public static AppWindow AppWindow { get; private set; } = null!;
+    /// <inheritdoc cref="IWindowInfo.AppWindow"/>
+    public static AppWindow AppWindow => WindowInfo.AppWindow;
 
-    /// <summary>
-    /// The title bar of <see cref="AppWindow"/>
-    /// </summary>
-    /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="Window"/></term></item>
-    /// </list>
-    /// </remarks>
-    public static AppWindowTitleBar AppTitleBar => AppWindow.TitleBar;
+    /// <inheritdoc cref="IWindowInfo.AppTitleBar"/>
+    public static AppWindowTitleBar AppTitleBar => WindowInfo.AppTitleBar;
 
-    /// <summary>
-    /// The presenter of <see cref="AppWindow"/>
-    /// </summary>
-    /// <remarks>
-    /// Tips:
-    /// <list type="bullet">
-    /// <item><term><see cref="AppWindowPresenter.Kind"/></term><description>default value is <see cref="AppWindowPresenterKind.Overlapped"/></description></item>
-    /// <item><term><see cref="System.Type"/></term><description>default value is <see cref="Microsoft.UI.Windowing.OverlappedPresenter"/></description></item>
-    /// </list>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="Window"/></term></item>
-    /// </list>
-    /// </remarks>
-    public static AppWindowPresenter AppPresenter => AppWindow.Presenter;
+    /// <inheritdoc cref="IWindowInfo.AppPresenter"/>
+    public static AppWindowPresenter AppPresenter => WindowInfo.AppPresenter;
 
-    /// <summary>
-    /// A <strong>FORCED CAST</strong> of <see cref="AppPresenter"/>, equals to (<see cref="Microsoft.UI.Windowing.OverlappedPresenter"/>)<see cref="AppPresenter"/>
-    /// </summary>
-    /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="Window"/></term></item>
-    /// </list>
-    /// </remarks>
-    public static OverlappedPresenter OverlappedPresenter => AppWindow.Presenter.To<OverlappedPresenter>();
+    /// <inheritdoc cref="IWindowInfo.OverlappedPresenter"/>
+    public static OverlappedPresenter OverlappedPresenter => WindowInfo.OverlappedPresenter;
 
     /// <summary>
     /// The title of <see cref="Window"/>

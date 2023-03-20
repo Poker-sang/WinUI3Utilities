@@ -1,11 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.UI;
 using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
 using Windows.Graphics;
-using WinRT.Interop;
+using WinUI3Utilities.Interfaces;
 
 namespace WinUI3Utilities;
 
@@ -141,19 +138,19 @@ public static class DragZoneHelper
     /// <summary>
     /// Set dragging-zones of title bar
     /// </summary>
-    /// <param name="window"></param>
     /// <param name="info"></param>
-    public static void SetDragZones(Window window, DragZoneInfo info)
+    /// <param name="windowInfo">Default: <see cref="CurrentContext.WindowInfo"/></param>
+    public static void SetDragZones(DragZoneInfo info, IWindowInfo? windowInfo = null)
     {
-        var appWindow = GetAppWindow(window);
-        var scaleAdjustment = WindowHelper.GetScaleAdjustment(window);
-        var windowWidth = (int)(appWindow.Size.Width / scaleAdjustment);
-        var nonDraggingZones = info.NonDraggingZones ?? Array.Empty<RectInt32>();
+        windowInfo ??= CurrentContext.WindowInfo;
+        var scaleAdjustment = WindowHelper.GetScaleAdjustment(windowInfo.Window);
+        var windowWidth = (int)(windowInfo.AppWindow.Size.Width / scaleAdjustment);
+        var nonDraggingZones = info.NonDraggingZones;
 
         if (info.ExcludeDebugToolbarArea)
             nonDraggingZones = nonDraggingZones.Concat(new RectInt32[] { new((windowWidth - DebugToolbarWidth) / 2, 0, DebugToolbarWidth, DebugToolbarHeight) });
 
-        appWindow.TitleBar.SetDragRectangles(
+        windowInfo.AppWindow.TitleBar.SetDragRectangles(
             GetDragZones(windowWidth, info.DragZoneHeight, info.DragZoneLeftIndent, nonDraggingZones)
                 .Select(rect => new RectInt32(
                     (int)(rect.X * scaleAdjustment),
@@ -163,25 +160,8 @@ public static class DragZoneHelper
                 .ToArray());
     }
 
-    /// <inheritdoc cref="SetDragZones(Window, DragZoneInfo)"/>
-    /// <remarks>
-    /// Assign Prerequisites
-    /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.Window"/></term></item>
-    /// </list>
-    /// </remarks>
-    public static void SetDragZones(DragZoneInfo info)
-        => SetDragZones(CurrentContext.Window, info);
-
     private const int DebugToolbarWidth = 217;
     private const int DebugToolbarHeight = 25;
-
-    private static AppWindow GetAppWindow(Window window)
-    {
-        var hWnd = WindowNative.GetWindowHandle(window);
-        var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
-        return AppWindow.GetFromWindowId(windowId);
-    }
 }
 
 file record Range(int Lower, int Upper)

@@ -1,3 +1,4 @@
+using System;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -22,8 +23,8 @@ public static class TitleBarHelper
     /// </list>
     /// </remarks>
     /// <param name="sender"></param>
-    /// <param name="e"></param>
-    public static void PaneClosing(NavigationView sender, NavigationViewPaneClosingEventArgs e) => UpdateAppTitleMargin(sender, CurrentContext.TitleTextBlock);
+    /// <param name="_"></param>
+    public static void PaneClosing(NavigationView sender, NavigationViewPaneClosingEventArgs _) => UpdateAppTitleMargin(sender, CurrentContext.TitleTextBlock);
 
     /// <summary>
     /// Simply call <see cref="UpdateAppTitleMargin"/>, should be invoked by <see cref="NavigationView.PaneOpening"/>
@@ -35,8 +36,8 @@ public static class TitleBarHelper
     /// </list>
     /// </remarks>
     /// <param name="sender"></param>
-    /// <param name="e"></param>
-    public static void PaneOpening(NavigationView sender, object e) => UpdateAppTitleMargin(sender, CurrentContext.TitleTextBlock);
+    /// <param name="_"></param>
+    public static void PaneOpening(NavigationView sender, object _) => UpdateAppTitleMargin(sender, CurrentContext.TitleTextBlock);
 
     /// <inheritdoc cref="DisplayModeChangedTitleBar(FrameworkElement, TextBlock, NavigationView)"/>
     /// <remarks>
@@ -47,8 +48,8 @@ public static class TitleBarHelper
     /// </list>
     /// </remarks>
     /// <param name="sender"></param>
-    /// <param name="e"></param>
-    public static void DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs e)
+    /// <param name="_"></param>
+    public static void DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs _)
         => DisplayModeChangedTitleBar(CurrentContext.TitleBar, CurrentContext.TitleTextBlock, sender);
 
     /// <summary>
@@ -98,8 +99,58 @@ public static class TitleBarHelper
     }
 
     /// <summary>
+    /// TitleBar type
+    /// </summary>
+    [Flags]
+    public enum TitleBarType
+    {
+        /// <summary>
+        /// Neither
+        /// </summary>
+        Neither,
+        
+        /// <summary>
+        /// Use <see cref="TryCustomizeTitleBar(Microsoft.UI.Xaml.Window, FrameworkElement)"/>
+        /// </summary>
+        Window,
+
+        /// <summary>
+        /// Use <see cref="TryCustomizeTitleBar(AppWindowTitleBar)"/>
+        /// </summary>
+        AppWindow,
+
+        /// <summary>
+        /// <strong>Use with Caution</strong><br/>
+        /// Use both of <see cref="TryCustomizeTitleBar(Microsoft.UI.Xaml.Window, FrameworkElement)"/> and <see cref="TryCustomizeTitleBar(AppWindowTitleBar)"/>
+        /// </summary>
+        Both = Window | AppWindow
+    }
+
+    /// <summary>
     /// Customize title bar when supported
     /// </summary>
+    /// <remarks>
+    /// Related to <see cref="TitleBarType.Window"/>
+    /// </remarks>
+    /// <returns>Whether customization of title bar is supported</returns>
+    public static bool TryCustomizeTitleBar(Window window, FrameworkElement titleBar)
+    {
+        if (!AppWindowTitleBar.IsCustomizationSupported())
+            return false;
+
+        CurrentContext.App.Resources["WindowCaptionBackground"] = new SolidColorBrush(Colors.Transparent);
+        CurrentContext.App.Resources["WindowCaptionBackgroundDisabled"] = new SolidColorBrush(Colors.Transparent);
+        window.ExtendsContentIntoTitleBar = true;
+        window.SetTitleBar(titleBar);
+        return true;
+    }
+
+    /// <summary>
+    /// Customize title bar when supported
+    /// </summary>
+    /// <remarks>
+    /// Related to <see cref="TitleBarType.AppWindow"/>
+    /// </remarks>
     /// <returns>Whether customization of title bar is supported</returns>
     public static bool TryCustomizeTitleBar(AppWindowTitleBar appWindowTitleBar)
     {

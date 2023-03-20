@@ -11,65 +11,43 @@ namespace WinUI3Utilities;
 /// </summary>
 public static class PickerHelper
 {
-    /// <inheritdoc cref="PickSingleFolderAsync(nint, PickerLocationId, PickerViewMode)"/>
-    /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.Window"/></term></item>
-    /// </list>
-    /// </remarks>
-    public static IAsyncOperation<StorageFolder?> PickSingleFolderAsync(PickerLocationId suggestedStartLocation = PickerLocationId.Desktop, PickerViewMode viewMode = PickerViewMode.Thumbnail)
-        => PickSingleFolderAsync(CurrentContext.HWnd, suggestedStartLocation, viewMode);
-
     /// <summary>
     /// Pick a single folder
     /// </summary>
-    /// <param name="hWnd"></param>
+    /// <param name="hWnd">Default: <see cref="CurrentContext.HWnd"/></param>
     /// <param name="suggestedStartLocation"></param>
     /// <param name="viewMode"></param>
     /// <returns></returns>
-    public static IAsyncOperation<StorageFolder?> PickSingleFolderAsync(nint hWnd, PickerLocationId suggestedStartLocation = PickerLocationId.Desktop, PickerViewMode viewMode = PickerViewMode.Thumbnail)
-        => new FolderPicker
+    public static IAsyncOperation<StorageFolder?> PickSingleFolderAsync(nint hWnd = 0, PickerLocationId suggestedStartLocation = PickerLocationId.Desktop, PickerViewMode viewMode = PickerViewMode.Thumbnail)
+    {
+        if (hWnd is 0)
+            hWnd = CurrentContext.HWnd;
+        return new FolderPicker
         {
             FileTypeFilter = { "*" }, /*不加会崩溃*/
             SuggestedStartLocation = suggestedStartLocation,
             ViewMode = viewMode
         }.InitializeWithWindow(hWnd).PickSingleFolderAsync();
-
-    /// <inheritdoc cref="PickSingleFileAsync(nint, PickerLocationId, PickerViewMode)"/>
-    /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.Window"/></term></item>
-    /// </list>
-    /// </remarks>
-    public static IAsyncOperation<StorageFile?> PickSingleFileAsync(PickerLocationId suggestedStartLocation = PickerLocationId.Desktop, PickerViewMode viewMode = PickerViewMode.Thumbnail)
-        => PickSingleFileAsync(CurrentContext.HWnd, suggestedStartLocation, viewMode);
+    }
 
     /// <summary>
     /// Pick a single file
     /// </summary>
-    /// <param name="hWnd"></param>
+    /// <param name="hWnd">Default: <see cref="CurrentContext.HWnd"/></param>
     /// <param name="suggestedStartLocation"></param>
     /// <param name="viewMode"></param>
     /// <returns></returns>
-    public static IAsyncOperation<StorageFile?> PickSingleFileAsync(nint hWnd, PickerLocationId suggestedStartLocation = PickerLocationId.Desktop, PickerViewMode viewMode = PickerViewMode.Thumbnail)
-        => new FileOpenPicker
+    public static IAsyncOperation<StorageFile?> PickSingleFileAsync(nint hWnd = 0, PickerLocationId suggestedStartLocation = PickerLocationId.Desktop, PickerViewMode viewMode = PickerViewMode.Thumbnail)
+    {
+        if (hWnd is 0)
+            hWnd = CurrentContext.HWnd;
+        return new FileOpenPicker
         {
             FileTypeFilter = { "*" },
             SuggestedStartLocation = suggestedStartLocation,
             ViewMode = viewMode
         }.InitializeWithWindow(hWnd).PickSingleFileAsync();
-
-    /// <inheritdoc cref="PickMultipleFilesAsync(nint, PickerLocationId, PickerViewMode)"/>
-    /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.Window"/></term></item>
-    /// </list>
-    /// </remarks>
-    public static IAsyncOperation<IReadOnlyList<StorageFile>> PickMultipleFilesAsync(PickerLocationId suggestedStartLocation = PickerLocationId.Desktop, PickerViewMode viewMode = PickerViewMode.Thumbnail)
-        => PickMultipleFilesAsync(CurrentContext.HWnd, suggestedStartLocation, viewMode);
+    }
 
     /// <summary>
     /// Pick multiple files
@@ -78,24 +56,17 @@ public static class PickerHelper
     /// <param name="suggestedStartLocation"></param>
     /// <param name="viewMode"></param>
     /// <returns></returns>
-    public static IAsyncOperation<IReadOnlyList<StorageFile>> PickMultipleFilesAsync(nint hWnd, PickerLocationId suggestedStartLocation = PickerLocationId.Desktop, PickerViewMode viewMode = PickerViewMode.Thumbnail)
-        => new FileOpenPicker
+    public static IAsyncOperation<IReadOnlyList<StorageFile>> PickMultipleFilesAsync(nint hWnd = 0, PickerLocationId suggestedStartLocation = PickerLocationId.Desktop, PickerViewMode viewMode = PickerViewMode.Thumbnail)
+    {
+        if (hWnd is 0)
+            hWnd = CurrentContext.HWnd;
+        return new FileOpenPicker
         {
             FileTypeFilter = { "*" },
             SuggestedStartLocation = suggestedStartLocation,
             ViewMode = viewMode
         }.InitializeWithWindow().PickMultipleFilesAsync();
-
-    /// <inheritdoc cref="PickSaveFileAsync(nint, string, string, string, PickerLocationId)"/>
-    /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.Window"/></term></item>
-    /// </list>
-    /// </remarks>
-    [Obsolete($"Use {nameof(PickSingleFolderAsync)} instead")]
-    public static IAsyncOperation<StorageFile?> PickSaveFileAsync(string suggestedFileName, string fileTypeName, string fileTypeId, PickerLocationId suggestedStartLocation = PickerLocationId.Desktop)
-        => PickSaveFileAsync(CurrentContext.HWnd, suggestedFileName, fileTypeName, fileTypeId, suggestedStartLocation);
+    }
 
     /// <summary>
     /// Pick a place to save file
@@ -107,14 +78,13 @@ public static class PickerHelper
     /// <param name="suggestedStartLocation"></param>
     /// <returns></returns>
     [Obsolete($"Use {nameof(PickSingleFolderAsync)} instead")]
-    public static IAsyncOperation<StorageFile?> PickSaveFileAsync(nint hWnd, string suggestedFileName, string fileTypeName, string fileTypeId, PickerLocationId suggestedStartLocation = PickerLocationId.Desktop)
-        => new FileSavePicker
+    public static IAsyncOperation<StorageFile?> PickSaveFileAsync(string suggestedFileName, string fileTypeName, string fileTypeId, nint hWnd = 0, PickerLocationId suggestedStartLocation = PickerLocationId.Desktop)
+    {
+        return new FileSavePicker
         {
             SuggestedStartLocation = suggestedStartLocation,
-            FileTypeChoices =
-            {
-                [fileTypeId] = new List<string> { fileTypeId }
-            },
+            FileTypeChoices = { [fileTypeId] = new List<string> { fileTypeId } },
             SuggestedFileName = suggestedFileName
         }.InitializeWithWindow().PickSaveFileAsync();
+    }
 }
