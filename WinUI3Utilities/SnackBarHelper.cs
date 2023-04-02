@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
 namespace WinUI3Utilities;
@@ -18,6 +19,13 @@ public static class SnackBarHelper
     /// Value type members require property to enable thread sharing
     /// </remarks>
     private static DateTime HideSnakeBarTime { get; set; }
+
+    /// <summary>
+    /// Assign <see cref="RootSnackBar"/> when <paramref name="sender"/> is loaded
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    public static void TeachingTipLoaded(object sender, RoutedEventArgs e) => RootSnackBar = sender.To<TeachingTip>();
 
     /// <summary>
     /// Show <see cref="RootSnackBar"/>

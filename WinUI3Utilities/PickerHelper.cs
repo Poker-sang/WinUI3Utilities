@@ -65,7 +65,7 @@ public static class PickerHelper
             FileTypeFilter = { "*" },
             SuggestedStartLocation = suggestedStartLocation,
             ViewMode = viewMode
-        }.InitializeWithWindow().PickMultipleFilesAsync();
+        }.InitializeWithWindow(hWnd).PickMultipleFilesAsync();
     }
 
     /// <summary>
@@ -85,6 +85,6 @@ public static class PickerHelper
             SuggestedStartLocation = suggestedStartLocation,
             FileTypeChoices = { [fileTypeId] = new List<string> { fileTypeId } },
             SuggestedFileName = suggestedFileName
-        }.InitializeWithWindow().PickSaveFileAsync();
+        }.InitializeWithWindow(hWnd).PickSaveFileAsync();
     }
 }

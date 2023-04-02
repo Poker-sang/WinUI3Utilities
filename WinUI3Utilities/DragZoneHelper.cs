@@ -20,10 +20,7 @@ public static class DragZoneHelper
         /// Create instance with <see cref="NonDraggingZones"/> set
         /// </summary>
         /// <param name="nonDragZones"></param>
-        public DragZoneInfo(params RectInt32[] nonDragZones)
-        {
-            NonDraggingZones = nonDragZones;
-        }
+        public DragZoneInfo(params RectInt32[] nonDragZones) => NonDraggingZones = nonDragZones;
 
         /// <summary>
         /// Default: 48

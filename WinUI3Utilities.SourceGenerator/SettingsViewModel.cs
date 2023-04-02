@@ -56,7 +56,6 @@ partial class {name}
     }}"));
         }
 
-
         var allPropertySentences = propertySentences.Aggregate("", (current, ps) => current + $"{ps}\n\n");
         allPropertySentences = allPropertySentences.Substring(0, allPropertySentences.Length - 2);
         return namespaces.GenerateFileHeader()

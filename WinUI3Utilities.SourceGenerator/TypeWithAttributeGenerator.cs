@@ -38,8 +38,6 @@ public class TypeWithAttributeGenerator : IIncrementalGenerator
                 (syntaxContext, _) => syntaxContext
             ).Combine(context.CompilationProvider);
 
-
-
             context.RegisterSourceOutput(generatorAttributes, (spc, tuple) =>
             {
                 var (ga, compilation) = tuple;
