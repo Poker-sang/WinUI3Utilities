@@ -31,19 +31,24 @@ partial class {name}
 
         foreach (var property in type.GetMembers().Where(property =>
                          property is { Kind: SymbolKind.Property }
-                             and not { Name: "EqualityContract" }
-                         && !property.GetAttributes().Any(propertyAttribute =>
-                             propertyAttribute.AttributeClass!.Name is "SettingsViewModelExclusionAttribute"))
+                             and not { Name: "EqualityContract" })
                      .Cast<IPropertySymbol>())
         {
+            if (IgnoreAttribute(property, attribute.AttributeClass))
+                continue;
+
             namespaces.UseNamespace(usedTypes, typeSymbol, property.Type);
             foreach (var propertyAttribute in property.GetAttributes())
             {
                 namespaces.UseNamespace(usedTypes, typeSymbol, propertyAttribute.AttributeClass!);
-                foreach (var attrConstructorArgument in propertyAttribute.ConstructorArguments.Where(arg =>
-                             arg.Value is INamedTypeSymbol))
+
+                foreach (var arg in propertyAttribute.ConstructorArguments)
                 {
-                    namespaces.UseNamespace(usedTypes, typeSymbol, (ITypeSymbol)attrConstructorArgument.Value!);
+                    if (arg.Kind is TypedConstantKind.Array)
+                        foreach (var value in arg.Values)
+                            namespaces.UseNamespace(usedTypes, typeSymbol, (ITypeSymbol)value.Value!);
+                    else
+                        namespaces.UseNamespace(usedTypes, typeSymbol, (ITypeSymbol)arg.Value!);
                 }
             }
 
@@ -57,7 +62,7 @@ partial class {name}
         }
 
         var allPropertySentences = propertySentences.Aggregate("", (current, ps) => current + $"{ps}\n\n");
-        allPropertySentences = allPropertySentences.Substring(0, allPropertySentences.Length - 2);
+        allPropertySentences = allPropertySentences[..^2];
         return namespaces.GenerateFileHeader()
             .AppendLine(classBegin)
             .AppendLine(allPropertySentences)

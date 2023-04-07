@@ -10,7 +10,7 @@
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
         <Authors>Poker</Authors>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
         <Description>Useful template methods for WinUI3 projects</Description>
@@ -18,7 +18,7 @@
         <Title>$(AssemblyName)</Title>
         <RepositoryUrl>git@github.com:Poker-sang/WinUI3Utilities.git</RepositoryUrl>
         <PackageProjectUrl>https://github.com/Poker-sang/WinUI3Utilities</PackageProjectUrl>
-        <AssemblyVersion>1.1.0</AssemblyVersion>
+        <AssemblyVersion>1.1.1</AssemblyVersion>
         <FileVersion>$(AssemblyVersion)</FileVersion>
         <VersionPrefix>$(AssemblyVersion)</VersionPrefix>
         <Version>$(AssemblyVersion)</Version>
@@ -36,10 +36,6 @@
     <ItemGroup>
         <ProjectReference Include="..\WinUI3Utilities.SourceGenerator\WinUI3Utilities.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <None Include="..\$(AssemblyName).SourceGenerator\$(OutputPath)\..\netstandard2.0\$(AssemblyName).SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-        <None Include="..\LICENSE" Link="NuGet Info\LICENSE">
-            <Pack>True</Pack>
-            <PackagePath>\</PackagePath>
-        </None>
         <None Include="..\README.md" Link="NuGet Info\README.md">
             <Pack>True</Pack>
             <PackagePath>\</PackagePath>

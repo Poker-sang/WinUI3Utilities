@@ -81,7 +81,7 @@ public static class AppHelper
     /// <br/>
     /// 
     /// <see cref="CurrentContext.App"/>.Resources["NavigationViewContentMargin"] = <see langword="new"/> <see cref="Thickness"/>(0, 48, 0, 0);<br/>
-    /// <see cref="IWindowInfo.AppWindow"/>.Title = <see cref="CurrentContext.Title"/>;<br/>
+    /// <paramref name="windowInfo"/>.AppWindow.Title = <paramref name="title"/>;<br/>
     /// <br/>
     /// <see langword="if"/> (<paramref name="info"/>.Size.HasValue)
     ///     <paramref name="windowInfo"/>.AppWindow.Resize(<paramref name="info"/>.Size.Value);<br/>
@@ -98,16 +98,18 @@ public static class AppHelper
     /// </remarks>
     /// <param name="info"></param>
     /// <param name="windowInfo">Default: <see cref="CurrentContext.WindowInfo"/></param>
+    /// <param name="title">Default: <see cref="CurrentContext.Title"/></param>
     /// <param name="titleBar">Default: <see cref="CurrentContext.TitleBar"/></param>
-    public static void Initialize(InitializeInfo info, IWindowInfo? windowInfo = null, FrameworkElement? titleBar = null)
+    public static void Initialize(InitializeInfo info, IWindowInfo? windowInfo = null, string? title = null, FrameworkElement? titleBar = null)
     {
         titleBar ??= CurrentContext.TitleBar;
         windowInfo ??= CurrentContext.WindowInfo;
+        title ??= CurrentContext.Title;
+
         RegisterUnhandledExceptionHandler(windowInfo.Window, info.UnhandledExceptionHandler);
 
         CurrentContext.App.Resources["NavigationViewContentMargin"] = new Thickness(0, 48, 0, 0);
-
-        windowInfo.AppWindow.Title = CurrentContext.Title;
+        windowInfo.AppWindow.Title = title;
 
         if (info.Size != default)
             windowInfo.AppWindow.Resize(info.Size);

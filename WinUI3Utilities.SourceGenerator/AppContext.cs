@@ -36,8 +36,8 @@ internal static partial class TypeWithAttributeDelegates
                         var dotPosition = castMethodFullName.LastIndexOf('.');
                         if (dotPosition is -1)
                             throw new InvalidDataException("\"CastMethod\" must contain the full name.");
-                        staticClassName = "static " + castMethodFullName.Substring(0, dotPosition);
-                        methodName = castMethodFullName.Substring(dotPosition + 1);
+                        staticClassName = "static " + castMethodFullName[..dotPosition];
+                        methodName = castMethodFullName[(dotPosition + 1)..];
                         break;
                 }
 
@@ -93,13 +93,16 @@ partial class {name}
     }}
 }}";
         /*-----Body End-----*/
-        foreach (var member in type.GetMembers().Where(member =>
+        foreach (var property in type.GetMembers().Where(member =>
                          member is { Kind: SymbolKind.Property } and not { Name: "EqualityContract" })
                      .Cast<IPropertySymbol>())
         {
-            _ = loadConfigurationContent.AppendLine(LoadRecord(member.Name, member.Type.Name, type.Name, methodName));
-            _ = saveConfigurationContent.AppendLine(SaveRecord(member.Name, member.Type, type.Name, methodName));
-            namespaces.UseNamespace(usedTypes, typeSymbol, member.Type);
+            if (IgnoreAttribute(property, attribute.AttributeClass))
+                continue;
+
+            _ = loadConfigurationContent.AppendLine(LoadRecord(property.Name, property.Type.Name, type.Name, methodName));
+            _ = saveConfigurationContent.AppendLine(SaveRecord(property.Name, property.Type, type.Name, methodName));
+            namespaces.UseNamespace(usedTypes, typeSymbol, property.Type);
         }
 
         // 去除" \r\n"

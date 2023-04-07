@@ -5,14 +5,14 @@ namespace WinUI3Utilities.Attributes;
 /// <summary>
 /// Generate property according to the properties of the settings class <typeparamref name="T"/> for the specified viewmodel class
 /// (the attributes on the property will also be copied)<br/>
-/// <example>
+/// <strong>Use <see cref="AttributeIgnoreAttribute"/> to indicate which properties are ignored</strong><br/>
 /// Example:
 /// <code>
 /// <see langword="public record"/> <typeparamref name="T"/><br/>
 /// {
 ///     [Attribute1]
 ///     <see langword="public"/> Type1 Property1 { <see langword="get"/>; <see langword="set"/>; }
-///     [<see cref="SettingsViewModelExclusionAttribute"/>]
+///     [<see cref="AttributeIgnoreAttribute"/>(<see langword="typeof"/>(<see cref="SettingsViewModelAttribute{T}"/>))]
 ///     <see langword="public"/> Type2 Property2 { <see langword="get"/>; <see langword="set"/>; }
 ///     ...
 /// }
@@ -30,9 +30,7 @@ namespace WinUI3Utilities.Attributes;
 ///     ...
 /// }
 /// </code>
-/// </example>
 /// </summary>
-/// <remarks>Use <see cref="SettingsViewModelExclusionAttribute"/> to specify which properties are excluded</remarks>
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
 public class SettingsViewModelAttribute<T> : Attribute
 {

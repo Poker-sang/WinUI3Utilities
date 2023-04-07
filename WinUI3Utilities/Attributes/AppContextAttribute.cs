@@ -4,9 +4,8 @@ using Windows.Storage;
 namespace WinUI3Utilities.Attributes;
 
 /// <summary>
-/// Generate field _configurationContainer and methods Load/SaveConfiguration for the specified class
-/// </summary>
-/// <remarks>
+/// Generate field _configurationContainer and methods Load/SaveConfiguration for the specified class<br/>
+/// <strong>Use <see cref="AttributeIgnoreAttribute"/> to indicate which properties are ignored</strong><br/>
 /// Generate:
 /// <code>
 /// <see langword="partial class"/> SpecifiedClass
@@ -50,7 +49,7 @@ namespace WinUI3Utilities.Attributes;
 ///     }
 /// }
 /// </code>
-/// </remarks>
+/// </summary>
 /// <typeparam name="T"></typeparam>
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
 public class AppContextAttribute<T> : Attribute

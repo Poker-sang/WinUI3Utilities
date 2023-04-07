@@ -30,7 +30,7 @@ internal static class Utilities
     /// <returns></returns>
     internal static ConstructorDeclarationSyntax GetDeclaration(IPropertySymbol property, ConstructorDeclarationSyntax ctor)
     {
-        var newName = property.Name.Substring(0, 1).ToLower() + property.Name.Substring(1);
+        var newName = property.Name[..1].ToLower() + property.Name[1..];
         return ctor.AddParameterListParameters(
                 Parameter(Identifier(newName)).WithType(property.Type.GetTypeSyntax(false)))
             .AddBodyStatements(ExpressionStatement(
@@ -245,6 +245,23 @@ internal static class Utilities
         for (var i = 0; i < n; i++)
             temp += "    ";
         return temp;
+    }
+
+    internal static bool IgnoreAttribute(ISymbol symbol, INamedTypeSymbol attribute)
+    {
+        attribute = attribute is { IsGenericType: true, IsUnboundGenericType: false } ? attribute.ConstructUnboundGenericType() : attribute;
+        if (symbol.GetAttributes()
+                .FirstOrDefault(propertyAttribute => propertyAttribute.AttributeClass!.ToDisplayString() is AttributeNamespace + "AttributeIgnoreAttribute")
+            is { ConstructorArguments: [{ Kind: TypedConstantKind.Array }] args })
+            if (args[0].Values.Any(t =>
+                {
+                    if (t.Value is not INamedTypeSymbol type)
+                        return false;
+                    type = type is { IsGenericType: true, IsUnboundGenericType: false } ? type.ConstructUnboundGenericType() : type;
+                    return SymbolEqualityComparer.Default.Equals(type, attribute);
+                }))
+                return true;
+        return false;
     }
 
     /// <summary>

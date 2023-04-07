@@ -17,12 +17,15 @@ internal static partial class TypeWithAttributeDelegates
         var namespaces = new HashSet<string>();
         var usedTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
         var ctor = ConstructorDeclaration(name).WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)));
-        foreach (var member in typeSymbol.GetMembers().Where(member =>
+        foreach (var property in typeSymbol.GetMembers().Where(member =>
                          member is { Kind: SymbolKind.Property } and not { Name: "EqualityContract" })
                      .Cast<IPropertySymbol>())
         {
-            ctor = GetDeclaration(member, ctor);
-            namespaces.UseNamespace(usedTypes, typeSymbol, member.Type);
+            if (IgnoreAttribute(property, attributeList[0].AttributeClass!))
+                continue;
+
+            ctor = GetDeclaration(property, ctor);
+            namespaces.UseNamespace(usedTypes, typeSymbol, property.Type);
         }
 
         var generatedType = GetDeclaration(name, typeSymbol, ctor);
