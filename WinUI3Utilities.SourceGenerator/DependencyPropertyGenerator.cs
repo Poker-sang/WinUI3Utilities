@@ -30,7 +30,7 @@ public class DependencyPropertyGenerator : TypeWithAttributeGenerator
                 continue;
 
             var isSetterPublic = true;
-            var defaultValue = "DependencyProperty.UnsetValue";
+            var defaultValue = "global::Microsoft.UI.Xaml.DependencyProperty.UnsetValue";
             var isNullable = false;
 
             foreach (var namedArgument in attribute.NamedArguments)
@@ -57,10 +57,12 @@ public class DependencyPropertyGenerator : TypeWithAttributeGenerator
                 metadataCreation = GetMetadataCreation(metadataCreation, propertyChanged);
 
             var registration = GetRegistration(propertyName, type, typeSymbol, metadataCreation);
-            var staticFieldDeclaration = GetStaticFieldDeclaration(fieldName, registration);
-            var getter = GetGetter(fieldName, isNullable, type);
-            var setter = GetSetter(fieldName, isSetterPublic);
-            var propertyDeclaration = GetPropertyDeclaration(propertyName, isNullable, type, getter, setter);
+            var staticFieldDeclaration = GetStaticFieldDeclaration(fieldName, registration)
+                .AddAttributeLists(GetAttributeForField(nameof(DependencyPropertyGenerator)));
+            var getter = GetGetter(fieldName, isNullable, type, typeSymbol);
+            var setter = GetSetter(fieldName, isSetterPublic, typeSymbol);
+            var propertyDeclaration = GetPropertyDeclaration(propertyName, isNullable, type, getter, setter)
+                .AddAttributeLists(GetAttributeForMethod(nameof(DependencyPropertyGenerator)));
 
             members.Add(staticFieldDeclaration);
             members.Add(propertyDeclaration);
@@ -70,7 +72,7 @@ public class DependencyPropertyGenerator : TypeWithAttributeGenerator
         {
             var generatedClass = GetClassDeclaration(typeSymbol, members);
             var generatedNamespace = GetFileScopedNamespaceDeclaration(typeSymbol, generatedClass);
-            var compilationUnit = GetCompilationUnit(generatedNamespace, namespaces);
+            var compilationUnit = GetCompilationUnit(generatedNamespace, namespaces).NormalizeWhitespace();
             return SyntaxTree(compilationUnit, encoding: Encoding.UTF8).GetText().ToString();
         }
 

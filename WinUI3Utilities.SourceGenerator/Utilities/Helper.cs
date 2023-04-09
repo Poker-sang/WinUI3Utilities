@@ -13,6 +13,8 @@ internal static class Helper
 {
     internal const string AttributeNamespace = $"{nameof(WinUI3Utilities)}.Attributes.";
     internal const string DisableSourceGeneratorAttribute = AttributeNamespace + "DisableSourceGeneratorAttribute";
+    internal const string AssemblyName = $"{nameof(WinUI3Utilities)}.{nameof(SourceGenerator)}.";
+    internal const string AssemblyVersion = "1.1.1";
 
     internal static INamedTypeSymbol ObjectSymbol { get; set; } = null!;
 
@@ -72,7 +74,7 @@ internal static class Helper
     /// </code>
     /// </summary>
     /// <returns>ObjectCreationExpression</returns>
-    internal static ObjectCreationExpressionSyntax GetObjectCreationExpression(ExpressionSyntax defaultValueExpression) => ObjectCreationExpression(IdentifierName("PropertyMetadata"))
+    internal static ObjectCreationExpressionSyntax GetObjectCreationExpression(ExpressionSyntax defaultValueExpression) => ObjectCreationExpression(IdentifierName("global::Microsoft.UI.Xaml.PropertyMetadata"))
             .AddArgumentListArguments(Argument(defaultValueExpression));
 
     /// <summary>
@@ -92,8 +94,12 @@ internal static class Helper
     /// </summary>
     /// <returns>Registration</returns>
     internal static InvocationExpressionSyntax GetRegistration(string propertyName, ITypeSymbol type, ITypeSymbol specificClass, ExpressionSyntax metadataCreation) => InvocationExpression(MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression, IdentifierName("DependencyProperty"), IdentifierName("Register")))
-            .AddArgumentListArguments(Argument(NameOfExpression(propertyName)), Argument(TypeOfExpression(type.GetTypeSyntax(false))), Argument(TypeOfExpression(specificClass.GetTypeSyntax(false))), Argument(metadataCreation));
+                SyntaxKind.SimpleMemberAccessExpression, IdentifierName("global::Microsoft.UI.Xaml.DependencyProperty"), IdentifierName("Register")))
+            .AddArgumentListArguments(
+                Argument(NameOfExpression(specificClass.GetStaticMemberAccessExpression(propertyName))),
+                Argument(TypeOfExpression(type.GetTypeSyntax(false))),
+                Argument(TypeOfExpression(specificClass.GetTypeSyntax(false))),
+                Argument(metadataCreation));
 
     /// <summary>
     /// Generate the following code
@@ -120,7 +126,7 @@ internal static class Helper
     /// </code>
     /// </summary>
     /// <returns>StaticFieldDeclaration</returns>
-    internal static FieldDeclarationSyntax GetStaticFieldDeclaration(string fieldName, ExpressionSyntax registration) => FieldDeclaration(VariableDeclaration(IdentifierName("DependencyProperty")))
+    internal static FieldDeclarationSyntax GetStaticFieldDeclaration(string fieldName, ExpressionSyntax registration) => FieldDeclaration(VariableDeclaration(IdentifierName("global::Microsoft.UI.Xaml.DependencyProperty")))
             .AddModifiers(Token(SyntaxKind.PublicKeyword), Token(SyntaxKind.StaticKeyword), Token(SyntaxKind.ReadOnlyKeyword))
             .AddDeclarationVariables(VariableDeclarator(fieldName).WithInitializer(EqualsValueClause(registration)));
 
@@ -131,10 +137,10 @@ internal static class Helper
     /// </code>
     /// </summary>
     /// <returns>Getter</returns>
-    internal static AccessorDeclarationSyntax GetGetter(string fieldName, bool isNullable, ITypeSymbol type)
+    internal static AccessorDeclarationSyntax GetGetter(string fieldName, bool isNullable, ITypeSymbol type, ITypeSymbol containingType)
     {
-        ExpressionSyntax getProperty = InvocationExpression(IdentifierName("GetValue"))
-            .AddArgumentListArguments(Argument(IdentifierName(fieldName)));
+        ExpressionSyntax getProperty = InvocationExpression(GetThisMemberAccessExpression("GetValue"))
+            .AddArgumentListArguments(Argument(containingType.GetStaticMemberAccessExpression(fieldName)));
         if (!SymbolEqualityComparer.Default.Equals(type, ObjectSymbol))
             getProperty = CastExpression(type.GetTypeSyntax(isNullable), getProperty);
 
@@ -150,10 +156,10 @@ internal static class Helper
     /// </code>
     /// </summary>
     /// <returns>Setter</returns>
-    internal static AccessorDeclarationSyntax GetSetter(string fieldName, bool isSetterPublic)
+    internal static AccessorDeclarationSyntax GetSetter(string fieldName, bool isSetterPublic, ITypeSymbol containingType)
     {
-        ExpressionSyntax setProperty = InvocationExpression(IdentifierName("SetValue"))
-            .AddArgumentListArguments(Argument(IdentifierName(fieldName)), Argument(IdentifierName("value")));
+        ExpressionSyntax setProperty = InvocationExpression(GetThisMemberAccessExpression("SetValue"))
+            .AddArgumentListArguments(Argument(containingType.GetStaticMemberAccessExpression(fieldName)), Argument(IdentifierName("value")));
         var setter = AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
             .WithExpressionBody(ArrowExpressionClause(setProperty))
             .WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
@@ -169,8 +175,41 @@ internal static class Helper
     /// <returns>PropertyDeclaration</returns>
     internal static PropertyDeclarationSyntax GetPropertyDeclaration(string propertyName, bool isNullable, ITypeSymbol type, AccessorDeclarationSyntax getter, AccessorDeclarationSyntax setter)
         => PropertyDeclaration(type.GetTypeSyntax(isNullable), propertyName)
-            .AddModifiers(Token(SyntaxKind.PublicKeyword))
+        .AddModifiers(Token(SyntaxKind.PublicKeyword))
             .AddAccessorListAccessors(getter, setter);
+
+    internal static AttributeListSyntax[] GetAttributeForField(string generatorName) =>
+        new[]
+        {
+            AttributeList().AddAttributes(Attribute(IdentifierName("global::System.CodeDom.Compiler.GeneratedCode"))
+                .AddArgumentListArguments(
+                    AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(AssemblyName + generatorName))),
+                    AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(AssemblyVersion)))
+                ))
+        };
+
+    internal static AttributeListSyntax[] GetAttributeForEvent(string generatorName) =>
+        new[]
+        {
+            AttributeList().AddAttributes(
+                Attribute(IdentifierName("global::System.CodeDom.Compiler.GeneratedCode")).AddArgumentListArguments(
+                    AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(AssemblyName + generatorName))),
+                    AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(AssemblyVersion))))),
+            AttributeList().AddAttributes(
+                Attribute(IdentifierName("global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage")))
+        };
+
+    internal static AttributeListSyntax[] GetAttributeForMethod(string generatorName) =>
+        new[]
+        {
+            AttributeList().AddAttributes(Attribute(IdentifierName("global::System.CodeDom.Compiler.GeneratedCode"))
+                .AddArgumentListArguments(
+                    AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(AssemblyName + generatorName))),
+                    AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(AssemblyVersion)))
+                )),
+            AttributeList().AddAttributes(Attribute(IdentifierName("global::System.Diagnostics.DebuggerNonUserCode"))),
+            AttributeList().AddAttributes(Attribute(IdentifierName("global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage")))
+        };
 
     /// <summary>
     /// Generate the following code
@@ -226,8 +265,24 @@ internal static class Helper
     /// <returns>CompilationUnit</returns>
     private static TypeSyntax GetTypeSyntax(this ITypeSymbol typeSymbol, bool isNullable)
     {
-        var typeName = ParseTypeName(typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
+        var typeName = ParseTypeName(typeSymbol.ToDisplayString());
         return isNullable ? NullableType(typeName) : typeName;
+    }
+
+    private static MemberAccessExpressionSyntax GetThisMemberAccessExpression(string name)
+    {
+        return MemberAccessExpression(
+            SyntaxKind.SimpleMemberAccessExpression,
+            ThisExpression(),
+            IdentifierName(name));
+    }
+
+    private static MemberAccessExpressionSyntax GetStaticMemberAccessExpression(this ITypeSymbol typeSymbol, string name)
+    {
+        return MemberAccessExpression(
+            SyntaxKind.SimpleMemberAccessExpression,
+            IdentifierName(typeSymbol.ToDisplayString()),
+            IdentifierName(name));
     }
 
     #endregion
@@ -240,7 +295,7 @@ internal static class Helper
     internal static string Spacing(int n)
     {
         var temp = "";
-        for (var i = 0; i < n; i++)
+        for (var i = 0; i < n; ++i)
             temp += "    ";
         return temp;
     }
