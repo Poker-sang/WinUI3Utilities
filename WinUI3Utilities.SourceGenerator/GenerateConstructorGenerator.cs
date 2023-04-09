@@ -4,14 +4,18 @@ using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using WinUI3Utilities.SourceGenerator.Utilities;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using static WinUI3Utilities.SourceGenerator.Utilities;
+using static WinUI3Utilities.SourceGenerator.Utilities.Helper;
 
 namespace WinUI3Utilities.SourceGenerator;
 
-internal static partial class TypeWithAttributeDelegates
+[Generator]
+public class GenerateConstructorGenerator : TypeWithAttributeGenerator
 {
-    public static string GenerateConstructor(INamedTypeSymbol typeSymbol, ImmutableArray<AttributeData> attributeList)
+    internal override string AttributeName => "GenerateConstructorAttribute";
+
+    internal override string TypeWithAttribute(INamedTypeSymbol typeSymbol, ImmutableArray<AttributeData> attributeList)
     {
         var name = typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
         var namespaces = new HashSet<string>();

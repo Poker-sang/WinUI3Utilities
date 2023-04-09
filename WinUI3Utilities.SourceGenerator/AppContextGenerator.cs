@@ -5,13 +5,17 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
-using static WinUI3Utilities.SourceGenerator.Utilities;
+using WinUI3Utilities.SourceGenerator.Utilities;
+using static WinUI3Utilities.SourceGenerator.Utilities.Helper;
 
 namespace WinUI3Utilities.SourceGenerator;
 
-internal static partial class TypeWithAttributeDelegates
+[Generator]
+public class AppContextGenerator : TypeWithAttributeGenerator
 {
-    public static string? AppContext(INamedTypeSymbol typeSymbol, ImmutableArray<AttributeData> attributeList)
+    internal override string AttributeName => "AppContextAttribute`1";
+
+    internal override string? TypeWithAttribute(INamedTypeSymbol typeSymbol, ImmutableArray<AttributeData> attributeList)
     {
         var attribute = attributeList[0];
 

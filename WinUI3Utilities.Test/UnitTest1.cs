@@ -14,13 +14,5 @@ public partial class UnitTest1 : ObservableObject
         Debug.WriteLine(TestProperty2);
     }
 
-    public AppConfig AppConfig { get; } = new(true);
-}
-
-[GenerateConstructor]
-public partial class AppConfig
-{
-    [AttributeIgnore(typeof(SettingsViewModelAttribute<>), typeof(GenerateConstructorAttribute))]
-    public bool TestProperty { get; set; } = true;
-    public bool TestProperty2 { get; set; } = true;
+    public AppConfig AppConfig { get; } = new(default);
 }

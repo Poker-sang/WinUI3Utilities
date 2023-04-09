@@ -6,9 +6,9 @@ namespace WinUI3Utilities.Attributes;
 /// <summary>
 /// Generate:
 /// <code>
-/// <see langword="public static readonly"/> <see cref="DependencyProperty"/> Property = <see cref="DependencyProperty"/>.Register("Field", <see langword="typeof"/>(Type), <see langword="typeof"/>(TClass), <see langword="new"/> <see cref="PropertyMetadata"/>(DefaultValue, OnPropertyChanged));
+/// <see langword="public static readonly"/> <see cref="DependencyProperty"/> Property = <see cref="DependencyProperty"/>.Register(<see langword="nameof"/>(Field), <see langword="typeof"/>(<typeparamref name="T"/>), <see langword="typeof"/>(TClass), <see langword="new"/> <see cref="PropertyMetadata"/>(DefaultValue, OnPropertyChanged));
 /// <br/>
-/// <see langword="public"/> <see cref="T:Attributes.DependencyPropertyAttribute`1"/> Field { <see langword="get"/> => (<see cref="T:Attributes.DependencyPropertyAttribute`1"/>)GetValue(Property); <see langword="set"/> => SetValue(Property, <see langword="value"/>); }
+/// <see langword="public"/> <typeparamref name="T"/> Field { <see langword="get"/> => (<typeparamref name="T"/>)GetValue(Property); <see langword="set"/> => SetValue(Property, <see langword="value"/>); }
 /// </code>
 /// </summary>
 /// <typeparam name="T">property type (nullable-references are not allowed)</typeparam>

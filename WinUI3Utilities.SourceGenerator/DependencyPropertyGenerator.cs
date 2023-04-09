@@ -3,14 +3,18 @@ using System.Collections.Immutable;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using WinUI3Utilities.SourceGenerator.Utilities;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using static WinUI3Utilities.SourceGenerator.Utilities;
+using static WinUI3Utilities.SourceGenerator.Utilities.Helper;
 
 namespace WinUI3Utilities.SourceGenerator;
 
-internal static partial class TypeWithAttributeDelegates
+[Generator]
+public class DependencyPropertyGenerator : TypeWithAttributeGenerator
 {
-    public static string? DependencyProperty(INamedTypeSymbol typeSymbol, ImmutableArray<AttributeData> attributeList)
+    internal override string AttributeName => "DependencyPropertyAttribute`1";
+
+    internal override string? TypeWithAttribute(INamedTypeSymbol typeSymbol, ImmutableArray<AttributeData> attributeList)
     {
         var members = new List<MemberDeclarationSyntax>();
         var namespaces = new HashSet<string> { "Microsoft.UI.Xaml" };

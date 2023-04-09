@@ -7,9 +7,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace WinUI3Utilities.SourceGenerator;
+namespace WinUI3Utilities.SourceGenerator.Utilities;
 
-internal static class Utilities
+internal static class Helper
 {
     internal const string AttributeNamespace = $"{nameof(WinUI3Utilities)}.Attributes.";
     internal const string DisableSourceGeneratorAttribute = AttributeNamespace + "DisableSourceGeneratorAttribute";
@@ -136,9 +136,7 @@ internal static class Utilities
         ExpressionSyntax getProperty = InvocationExpression(IdentifierName("GetValue"))
             .AddArgumentListArguments(Argument(IdentifierName(fieldName)));
         if (!SymbolEqualityComparer.Default.Equals(type, ObjectSymbol))
-        {
             getProperty = CastExpression(type.GetTypeSyntax(isNullable), getProperty);
-        }
 
         return AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
             .WithExpressionBody(ArrowExpressionClause(getProperty))
@@ -286,7 +284,7 @@ internal static class Utilities
 
         if (symbol is INamedTypeSymbol { IsGenericType: true } genericSymbol)
             foreach (var a in genericSymbol.TypeArguments)
-                UseNamespace(namespaces, usedTypes, contextType, a);
+                namespaces.UseNamespace(usedTypes, contextType, a);
     }
 
     /// <summary>

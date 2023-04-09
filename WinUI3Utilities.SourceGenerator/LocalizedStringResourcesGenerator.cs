@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using Microsoft.CodeAnalysis;
-using static WinUI3Utilities.SourceGenerator.Utilities;
+using static WinUI3Utilities.SourceGenerator.Utilities.Helper;
 
 namespace WinUI3Utilities.SourceGenerator;
 
@@ -14,6 +14,7 @@ namespace WinUI3Utilities.SourceGenerator;
 public class LocalizedStringResourcesGenerator : IIncrementalGenerator
 {
     private const string AttributeName = AttributeNamespace + "LocalizedStringResourcesAttribute";
+
     private const string SourceItemGroupMetadata = "build_metadata.AdditionalFiles.SourceItemGroup";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
