@@ -21,7 +21,7 @@ public class DependencyPropertyCodeFixProvider : DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor _convertible = new(
         DiagnosticId + "001",
         "转化为Attribute",
-        "依赖属性字段 '{0}' 可以转化为Attribute",
+        "依赖属性字段 '{0}' 和属性 '{1}' 可以转化为Attribute",
         "Refactor", DiagnosticSeverity.Warning, true,
         "建议转化为Attribute.");
 
@@ -70,15 +70,15 @@ public class DependencyPropertyCodeFixProvider : DiagnosticAnalyzer
                     },
                     ArgumentList.Arguments:
                     [
-                        { Expression: { } propertyNameExpression },
-                        { Expression: TypeOfExpressionSyntax { Type: { } propertyType } },
-                        { Expression: TypeOfExpressionSyntax { Type: { } classType } },
+                    { Expression: { } propertyNameExpression },
+                    { Expression: TypeOfExpressionSyntax { Type: { } propertyType } },
+                    { Expression: TypeOfExpressionSyntax { Type: { } classType } },
+                    {
+                        Expression: ObjectCreationExpressionSyntax
                         {
-                            Expression: ObjectCreationExpressionSyntax
-                            {
-                                Type: IdentifierNameSyntax { Identifier.ValueText: "PropertyMetadata" }
-                            }
+                            Type: IdentifierNameSyntax { Identifier.ValueText: "PropertyMetadata" }
                         }
+                    }
                     ]
                 }
             })
@@ -93,23 +93,25 @@ public class DependencyPropertyCodeFixProvider : DiagnosticAnalyzer
         if (!fieldSymbol.ContainingType!.ToDisplayString().EndsWith(classType.ToFullString()))
             return;
 
-        var propertySymbol = (IPropertySymbol)null!;
-
         var propertyName = propertyNameExpression switch
         {
-            LiteralExpressionSyntax { Token.ValueText: var name1 } => name1,
+            LiteralExpressionSyntax { Token.ValueText: var tempName } => tempName,
             InvocationExpressionSyntax
             {
                 Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" },
-                ArgumentList.Arguments: [{ Expression: IdentifierNameSyntax { Identifier.ValueText: var name1 } }]
-            } => name1,
+                ArgumentList.Arguments: [{ Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } }]
+            } => tempName,
             _ => ""
         };
 
         if (propertyName is "")
             return;
 
-        if (!FindProperty(propertyName))
+        if (fieldSymbol.ContainingType.GetMembers()
+                .Where(t => t.Kind is SymbolKind.Property)
+                .Cast<IPropertySymbol>()
+                .FirstOrDefault(symbol => symbol.Name == propertyName)
+            is not { } propertySymbol)
         {
             var diagnostic = Diagnostic.Create(_missingProperty, fieldSymbol.Locations[0], fieldSymbol.Name);
             context.ReportDiagnostic(diagnostic);
@@ -126,27 +128,10 @@ public class DependencyPropertyCodeFixProvider : DiagnosticAnalyzer
             context.ReportDiagnostic(diagnostic);
         }
 
-        bool FindProperty(string name)
-        {
-            foreach (var symbol in fieldSymbol.ContainingType.GetMembers()
-                         .Where(t => t.Kind is SymbolKind.Property)
-                         .Cast<IPropertySymbol>())
-            {
-                if (symbol.Name == name)
-                {
-                    propertySymbol = symbol;
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        if (propertySymbol.DeclaringSyntaxReferences[0].GetSyntax() is not PropertyDeclarationSyntax
-            {
-                AccessorList.Accessors: [{ } getter, { } setter]
-            })
+        if (propertySymbol.DeclaringSyntaxReferences[0].GetSyntax() is not
+            PropertyDeclarationSyntax { AccessorList.Accessors: [{ } getter, { } setter] })
             return;
+
         var (fieldSymbolNameGetter, type) = getter switch
         {
             // get { return GetValue(xxx); }
@@ -154,37 +139,37 @@ public class DependencyPropertyCodeFixProvider : DiagnosticAnalyzer
                 Body.Statements:
                 [
                     ReturnStatementSyntax
+                {
+                    Expression: CastExpressionSyntax
                     {
-                        Expression: CastExpressionSyntax
+                        Type: var tempType,
+                        Expression: InvocationExpressionSyntax
                         {
-                            Type: var type1,
-                            Expression: InvocationExpressionSyntax
-                            {
-                                Expression: IdentifierNameSyntax { Identifier.ValueText: "GetValue" },
-                                ArgumentList.Arguments:
+                            Expression: IdentifierNameSyntax { Identifier.ValueText: "GetValue" },
+                            ArgumentList.Arguments:
                                 [
-                                    { Expression: IdentifierNameSyntax { Identifier.ValueText: var name1 } }
+                                    { Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } }
                                 ]
-                            }
                         }
                     }
+                }
                 ]
-            } => (name1, type1),
+            } => (tempName, tempType),
             // get => (x)GetValue(xxx); 
             {
                 ExpressionBody.Expression: CastExpressionSyntax
                 {
-                    Type: var type1,
+                    Type: var tempType,
                     Expression: InvocationExpressionSyntax
                     {
                         Expression: IdentifierNameSyntax { Identifier.ValueText: "GetValue" },
                         ArgumentList.Arguments:
                         [
-                            { Expression: IdentifierNameSyntax { Identifier.ValueText: var name1 } }
+                            { Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } }
                         ]
                     }
                 }
-            } => (name1, type1),
+            } => (tempName, tempType),
             _ => ("", null)
         };
 
@@ -202,19 +187,19 @@ public class DependencyPropertyCodeFixProvider : DiagnosticAnalyzer
                 Body.Statements:
                 [
                     ReturnStatementSyntax
+                {
+                    Expression: InvocationExpressionSyntax
                     {
-                        Expression: InvocationExpressionSyntax
-                        {
-                            Expression: IdentifierNameSyntax { Identifier.ValueText: "SetValue" },
-                            ArgumentList.Arguments:
+                        Expression: IdentifierNameSyntax { Identifier.ValueText: "SetValue" },
+                        ArgumentList.Arguments:
                             [
-                                { Expression: IdentifierNameSyntax { Identifier.ValueText: var name1 } },
-                                { Expression: IdentifierNameSyntax { Identifier.ValueText: "value" } }
+                            { Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } },
+                            { Expression: IdentifierNameSyntax { Identifier.ValueText: "value" } }
                             ]
-                        }
                     }
+                }
                 ]
-            } => name1,
+            } => tempName,
             // set => SetValue(xxx, value);
             {
                 ExpressionBody.Expression: InvocationExpressionSyntax
@@ -222,11 +207,11 @@ public class DependencyPropertyCodeFixProvider : DiagnosticAnalyzer
                     Expression: IdentifierNameSyntax { Identifier.ValueText: "SetValue" },
                     ArgumentList.Arguments:
                     [
-                        { Expression: IdentifierNameSyntax { Identifier.ValueText: var name1 } },
-                        { Expression: IdentifierNameSyntax { Identifier.ValueText: "value" } }
+                    { Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } },
+                    { Expression: IdentifierNameSyntax { Identifier.ValueText: "value" } }
                     ]
                 }
-            } => name1,
+            } => tempName,
             _ => ""
         };
 
@@ -236,7 +221,7 @@ public class DependencyPropertyCodeFixProvider : DiagnosticAnalyzer
         if (fieldSymbolNameSetter != fieldSymbol.Name)
             return;
 
-        var diagnosticEx = Diagnostic.Create(_convertible, fieldSymbol.Locations[0], fieldSymbol.Name);
+        var diagnosticEx = Diagnostic.Create(_convertible, fieldSymbol.Locations[0], fieldSymbol.Name, propertyName);
         context.ReportDiagnostic(diagnosticEx);
     }
 }

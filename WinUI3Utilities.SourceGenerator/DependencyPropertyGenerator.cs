@@ -17,8 +17,6 @@ public class DependencyPropertyGenerator : TypeWithAttributeGenerator
     internal override string? TypeWithAttribute(INamedTypeSymbol typeSymbol, ImmutableArray<AttributeData> attributeList)
     {
         var members = new List<MemberDeclarationSyntax>();
-        var namespaces = new HashSet<string> { "Microsoft.UI.Xaml" };
-        var usedTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
 
         foreach (var attribute in attributeList)
         {
@@ -29,7 +27,7 @@ public class DependencyPropertyGenerator : TypeWithAttributeGenerator
             if (attribute.ConstructorArguments.Length < 2 || attribute.ConstructorArguments[0].Value is not string propertyName || attribute.ConstructorArguments[1].Value is not string propertyChanged)
                 continue;
 
-            var isSetterPublic = true;
+            var isSetterPrivate = false;
             var defaultValue = "global::Microsoft.UI.Xaml.DependencyProperty.UnsetValue";
             var isNullable = false;
 
@@ -37,8 +35,8 @@ public class DependencyPropertyGenerator : TypeWithAttributeGenerator
                 if (namedArgument.Value.Value is { } value)
                     switch (namedArgument.Key)
                     {
-                        case "IsSetterPublic":
-                            isSetterPublic = (bool)value;
+                        case "IsSetterPrivate":
+                            isSetterPrivate = (bool)value;
                             break;
                         case "DefaultValue":
                             defaultValue = (string)value;
@@ -50,7 +48,6 @@ public class DependencyPropertyGenerator : TypeWithAttributeGenerator
 
             var fieldName = propertyName + "Property";
 
-            namespaces.UseNamespace(usedTypes, typeSymbol, type);
             var defaultValueExpression = ParseExpression(defaultValue);
             var metadataCreation = GetObjectCreationExpression(defaultValueExpression);
             if (propertyChanged is not "")
@@ -60,7 +57,7 @@ public class DependencyPropertyGenerator : TypeWithAttributeGenerator
             var staticFieldDeclaration = GetStaticFieldDeclaration(fieldName, registration)
                 .AddAttributeLists(GetAttributeForField(nameof(DependencyPropertyGenerator)));
             var getter = GetGetter(fieldName, isNullable, type, typeSymbol);
-            var setter = GetSetter(fieldName, isSetterPublic, typeSymbol);
+            var setter = GetSetter(fieldName, isSetterPrivate, typeSymbol);
             var propertyDeclaration = GetPropertyDeclaration(propertyName, isNullable, type, getter, setter)
                 .AddAttributeLists(GetAttributeForMethod(nameof(DependencyPropertyGenerator)));
 
@@ -72,7 +69,7 @@ public class DependencyPropertyGenerator : TypeWithAttributeGenerator
         {
             var generatedClass = GetClassDeclaration(typeSymbol, members);
             var generatedNamespace = GetFileScopedNamespaceDeclaration(typeSymbol, generatedClass);
-            var compilationUnit = GetCompilationUnit(generatedNamespace, namespaces).NormalizeWhitespace();
+            var compilationUnit = GetCompilationUnit(generatedNamespace);
             return SyntaxTree(compilationUnit, encoding: Encoding.UTF8).GetText().ToString();
         }
 

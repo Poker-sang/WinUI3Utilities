@@ -18,7 +18,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Folder", "Solution
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinUI3Utilities.Test", "WinUI3Utilities.Test\WinUI3Utilities.Test.csproj", "{1C813122-FAFA-4969-AC4D-AD630FCC1CC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinUI3Utilities.Analyzer", "WinUI3Utilities.Analyzer\WinUI3Utilities.Analyzer.csproj", "{D8663AC6-BF6B-44DC-B194-F31E2047F679}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinUI3Utilities.Analyzer", "WinUI3Utilities.Analyzer\WinUI3Utilities.Analyzer.csproj", "{D8663AC6-BF6B-44DC-B194-F31E2047F679}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinUI3Utilities.CodeFix", "WinUI3Utilities.CodeFix\WinUI3Utilities.CodeFix.csproj", "{F351B22E-04FC-4015-8ECE-0F6814EABD7B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +44,10 @@ Global
 		{D8663AC6-BF6B-44DC-B194-F31E2047F679}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8663AC6-BF6B-44DC-B194-F31E2047F679}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8663AC6-BF6B-44DC-B194-F31E2047F679}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F351B22E-04FC-4015-8ECE-0F6814EABD7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F351B22E-04FC-4015-8ECE-0F6814EABD7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F351B22E-04FC-4015-8ECE-0F6814EABD7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F351B22E-04FC-4015-8ECE-0F6814EABD7B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

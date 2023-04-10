@@ -11,9 +11,9 @@ namespace WinUI3Utilities.Attributes;
 /// <see langword="public"/> <typeparamref name="T"/> Field { <see langword="get"/> => (<typeparamref name="T"/>)GetValue(Property); <see langword="set"/> => SetValue(Property, <see langword="value"/>); }
 /// </code>
 /// </summary>
-/// <typeparam name="T">property type (nullable-references are not allowed)</typeparam>
+/// <typeparam name="T">property type (nullable value type are not allowed)</typeparam>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
-public sealed class DependencyPropertyAttribute<T> : Attribute
+public sealed class DependencyPropertyAttribute<T> : Attribute where T : notnull
 {
     /// <inheritdoc cref="DependencyPropertyAttribute{T}"/>
     /// <param name="name">Property name</param>
@@ -35,16 +35,16 @@ public sealed class DependencyPropertyAttribute<T> : Attribute
     public string PropertyChanged { get; }
 
     /// <summary>
-    /// Whether property setter is public
+    /// Whether property setter is private
     /// </summary>
-    /// <remarks>default: <see langword="true"/></remarks>
-    public bool IsSetterPublic { get; init; } = true;
+    /// <remarks>default: <see langword="false"/></remarks>
+    public bool IsSetterPrivate { get; init; } = false;
 
     /// <summary>
-    /// Whether property type is nullable (nullable-references are not allowed)
+    /// Whether property type is nullable (nullable value type are not allowed)
     /// </summary>
-    /// <remarks>default: <see langword="true"/></remarks>
-    public bool IsNullable { get; init; } = true;
+    /// <remarks>default: <see langword="false"/></remarks>
+    public bool IsNullable { get; init; }
 
     /// <summary>
     /// Default value of property

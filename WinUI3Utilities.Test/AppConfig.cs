@@ -8,5 +8,6 @@ public partial class AppConfig
 {
     [AttributeIgnore(typeof(SettingsViewModelAttribute<>), typeof(GenerateConstructorAttribute))]
     public bool TestProperty { get; set; } = true;
+
     public Rect TestProperty2 { get; set; } 
 }

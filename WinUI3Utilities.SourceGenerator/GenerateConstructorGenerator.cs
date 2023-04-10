@@ -34,7 +34,7 @@ public class GenerateConstructorGenerator : TypeWithAttributeGenerator
 
         var generatedType = GetDeclaration(name, typeSymbol, ctor);
         var generatedNamespace = GetFileScopedNamespaceDeclaration(typeSymbol, generatedType);
-        var compilationUnit = GetCompilationUnit(generatedNamespace, namespaces);
+        var compilationUnit = GetCompilationUnitWithUsings(generatedNamespace, namespaces);
         return SyntaxTree(compilationUnit, encoding: Encoding.UTF8).GetText().ToString();
     }
 }

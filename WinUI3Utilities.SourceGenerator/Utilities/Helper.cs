@@ -16,8 +16,6 @@ internal static class Helper
     internal const string AssemblyName = $"{nameof(WinUI3Utilities)}.{nameof(SourceGenerator)}.";
     internal const string AssemblyVersion = "1.1.1";
 
-    internal static INamedTypeSymbol ObjectSymbol { get; set; } = null!;
-
     #region Abstract Syntax Tree Generate
 
     /// <summary>
@@ -141,7 +139,7 @@ internal static class Helper
     {
         ExpressionSyntax getProperty = InvocationExpression(GetThisMemberAccessExpression("GetValue"))
             .AddArgumentListArguments(Argument(containingType.GetStaticMemberAccessExpression(fieldName)));
-        if (!SymbolEqualityComparer.Default.Equals(type, ObjectSymbol))
+        if (type.SpecialType != SpecialType.System_Object)
             getProperty = CastExpression(type.GetTypeSyntax(isNullable), getProperty);
 
         return AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
@@ -152,18 +150,18 @@ internal static class Helper
     /// <summary>
     /// Generate the following code
     /// <code>
-    /// &lt;<paramref name="isSetterPublic" />&gt; set => SetValue(<paramref name="fieldName" />, value);
+    /// &lt;<paramref name="isSetterPrivate" />&gt; set => SetValue(<paramref name="fieldName" />, value);
     /// </code>
     /// </summary>
     /// <returns>Setter</returns>
-    internal static AccessorDeclarationSyntax GetSetter(string fieldName, bool isSetterPublic, ITypeSymbol containingType)
+    internal static AccessorDeclarationSyntax GetSetter(string fieldName, bool isSetterPrivate, ITypeSymbol containingType)
     {
         ExpressionSyntax setProperty = InvocationExpression(GetThisMemberAccessExpression("SetValue"))
             .AddArgumentListArguments(Argument(containingType.GetStaticMemberAccessExpression(fieldName)), Argument(IdentifierName("value")));
         var setter = AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
             .WithExpressionBody(ArrowExpressionClause(setProperty))
             .WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
-        return !isSetterPublic ? setter.AddModifiers(Token(SyntaxKind.PrivateKeyword)) : setter;
+        return isSetterPrivate ? setter.AddModifiers(Token(SyntaxKind.PrivateKeyword)) : setter;
     }
 
     /// <summary>
@@ -250,10 +248,24 @@ internal static class Helper
     /// </code>
     /// </summary>
     /// <returns>CompilationUnit</returns>
-    internal static CompilationUnitSyntax GetCompilationUnit(MemberDeclarationSyntax generatedNamespace, IEnumerable<string> namespaces)
+    internal static CompilationUnitSyntax GetCompilationUnitWithUsings(MemberDeclarationSyntax generatedNamespace, IEnumerable<string> namespaces)
         => CompilationUnit()
             .AddMembers(generatedNamespace)
             .AddUsings(namespaces.Select(ns => UsingDirective(ParseName(ns))).ToArray())
+            .NormalizeWhitespace();
+
+    /// <summary>
+    /// Generate the following code
+    /// <code>
+    /// using Microsoft.UI.Xaml;
+    /// ...
+    /// <br/><paramref name="generatedNamespace" />
+    /// </code>
+    /// </summary>
+    /// <returns>CompilationUnit</returns>
+    internal static CompilationUnitSyntax GetCompilationUnit(MemberDeclarationSyntax generatedNamespace)
+        => CompilationUnit()
+            .AddMembers(generatedNamespace)
             .NormalizeWhitespace();
 
     /// <summary>
