@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace WinUI3Utilities.Analyzer;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class DependencyPropertyCodeFixProvider : DiagnosticAnalyzer
+public class DependencyPropertyAnalyzer : DiagnosticAnalyzer
 {
     private const string DiagnosticId = "Utilities";
 
@@ -70,15 +70,15 @@ public class DependencyPropertyCodeFixProvider : DiagnosticAnalyzer
                     },
                     ArgumentList.Arguments:
                     [
-                    { Expression: { } propertyNameExpression },
-                    { Expression: TypeOfExpressionSyntax { Type: { } propertyType } },
-                    { Expression: TypeOfExpressionSyntax { Type: { } classType } },
-                    {
-                        Expression: ObjectCreationExpressionSyntax
+                        { Expression: { } propertyNameExpression },
+                        { Expression: TypeOfExpressionSyntax { Type: { } propertyType } },
+                        { Expression: TypeOfExpressionSyntax { Type: { } classType } },
                         {
-                            Type: IdentifierNameSyntax { Identifier.ValueText: "PropertyMetadata" }
+                            Expression: ObjectCreationExpressionSyntax
+                            {
+                                Type: IdentifierNameSyntax { Identifier.ValueText: "PropertyMetadata" }
+                            }
                         }
-                    }
                     ]
                 }
             })
@@ -139,20 +139,20 @@ public class DependencyPropertyCodeFixProvider : DiagnosticAnalyzer
                 Body.Statements:
                 [
                     ReturnStatementSyntax
-                {
-                    Expression: CastExpressionSyntax
                     {
-                        Type: var tempType,
-                        Expression: InvocationExpressionSyntax
+                        Expression: CastExpressionSyntax
                         {
-                            Expression: IdentifierNameSyntax { Identifier.ValueText: "GetValue" },
-                            ArgumentList.Arguments:
+                            Type: var tempType,
+                            Expression: InvocationExpressionSyntax
+                            {
+                                Expression: IdentifierNameSyntax { Identifier.ValueText: "GetValue" },
+                                ArgumentList.Arguments:
                                 [
                                     { Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } }
                                 ]
+                            }
                         }
                     }
-                }
                 ]
             } => (tempName, tempType),
             // get => (x)GetValue(xxx); 
@@ -182,22 +182,22 @@ public class DependencyPropertyCodeFixProvider : DiagnosticAnalyzer
 
         var fieldSymbolNameSetter = setter switch
         {
-            // set { return SetValue(xxx, value); }
+            // set { SetValue(xxx, value); }
             {
                 Body.Statements:
                 [
-                    ReturnStatementSyntax
-                {
-                    Expression: InvocationExpressionSyntax
+                    ExpressionStatementSyntax
                     {
-                        Expression: IdentifierNameSyntax { Identifier.ValueText: "SetValue" },
-                        ArgumentList.Arguments:
+                        Expression: InvocationExpressionSyntax
+                        {
+                            Expression: IdentifierNameSyntax { Identifier.ValueText: "SetValue" },
+                            ArgumentList.Arguments:
                             [
-                            { Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } },
-                            { Expression: IdentifierNameSyntax { Identifier.ValueText: "value" } }
+                                { Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } },
+                                { Expression: IdentifierNameSyntax { Identifier.ValueText: "value" } }
                             ]
+                        }
                     }
-                }
                 ]
             } => tempName,
             // set => SetValue(xxx, value);
@@ -207,8 +207,8 @@ public class DependencyPropertyCodeFixProvider : DiagnosticAnalyzer
                     Expression: IdentifierNameSyntax { Identifier.ValueText: "SetValue" },
                     ArgumentList.Arguments:
                     [
-                    { Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } },
-                    { Expression: IdentifierNameSyntax { Identifier.ValueText: "value" } }
+                        { Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } },
+                        { Expression: IdentifierNameSyntax { Identifier.ValueText: "value" } }
                     ]
                 }
             } => tempName,

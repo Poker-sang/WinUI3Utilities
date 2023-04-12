@@ -19,9 +19,8 @@ public class AppContextGenerator : TypeWithAttributeGenerator
     {
         var attribute = attributeList[0];
 
-        if (attribute.AttributeClass is not ({ IsGenericType: true } and { TypeArguments.IsDefaultOrEmpty: false }))
+        if (attribute.AttributeClass is not { TypeArguments: [var type, ..] })
             return null;
-        var type = attribute.AttributeClass.TypeArguments[0];
 
         var staticClassName = "static WinUI3Utilities.Misc";
         var methodName = "ToNotNull";

@@ -15,10 +15,6 @@ public abstract class TypeWithAttributeGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-#if TEST
-        System.Diagnostics.Debugger.Launch();
-#endif
-
         var generatorAttributes = context.SyntaxProvider.ForAttributeWithMetadataName(
             AttributeFullName,
             (_, _) => true,

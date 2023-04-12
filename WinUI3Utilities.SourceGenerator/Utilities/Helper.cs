@@ -212,17 +212,22 @@ internal static class Helper
     /// <summary>
     /// Generate the following code
     /// <code>
-    /// partial class <paramref name="specificClass" /><br/>
+    /// partial class <paramref name="specificType" /><br/>
     /// {
     ///     <paramref name="members" /><br/>
     /// }
     /// </code>
     /// </summary>
     /// <returns>ClassDeclaration</returns>
-    internal static ClassDeclarationSyntax GetClassDeclaration(ISymbol specificClass, IEnumerable<MemberDeclarationSyntax> members)
-        => ClassDeclaration(specificClass.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat))
+    internal static ClassDeclarationSyntax GetClassDeclaration(ISymbol specificType, IList<MemberDeclarationSyntax> members)
+    {
+        for (var i = 0; i < members.Count - 1; i++)
+            members[i] = members[i].WithTrailingTrivia(SyntaxTrivia(SyntaxKind.EndOfLineTrivia, "\n"));
+
+        return ClassDeclaration(specificType.Name)
             .AddModifiers(Token(SyntaxKind.PartialKeyword))
             .AddMembers(members.ToArray());
+    }
 
     /// <summary>
     /// Generate the following code

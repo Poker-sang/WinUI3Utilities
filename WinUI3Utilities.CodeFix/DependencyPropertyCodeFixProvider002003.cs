@@ -19,7 +19,7 @@ public class DependencyPropertyCodeFixProvider002003 : DependencyPropertyCodeFix
     public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
-        var ancestor = root.FindToken(context.Span.Start).Parent.AncestorsAndSelf().ToImmutableArray();
+        var ancestor = root!.FindToken(context.Span.Start).Parent!.AncestorsAndSelf().ToImmutableArray();
 
         foreach (var diagnostic in context.Diagnostics)
         {
@@ -40,10 +40,10 @@ public class DependencyPropertyCodeFixProvider002003 : DependencyPropertyCodeFix
         var declaration = ancestor.OfType<VariableDeclarationSyntax>().First();
 
         var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
-        var fieldSymbol = semanticModel.GetDeclaredSymbol(declaration, cancellationToken);
+        var fieldSymbol = semanticModel!.GetDeclaredSymbol(declaration, cancellationToken)!;
 
         var originalSolution = document.Project.Solution;
-        var newSolution = await Renamer.RenameSymbolAsync(originalSolution, fieldSymbol, newName, originalSolution.Workspace.Options, cancellationToken).ConfigureAwait(false);
+        var newSolution = await Renamer.RenameSymbolAsync(originalSolution, fieldSymbol, new(), newName, cancellationToken).ConfigureAwait(false);
 
         return newSolution;
     }

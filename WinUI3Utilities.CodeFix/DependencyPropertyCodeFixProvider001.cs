@@ -31,10 +31,11 @@ public class DependencyPropertyCodeFixProvider001 : DependencyPropertyCodeFixPro
             return;
 
         var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
-        var ancestor = root.FindToken(context.Span.Start).Parent.AncestorsAndSelf().ToImmutableArray();
+        var ancestor = root!.FindToken(context.Span.Start).Parent!.AncestorsAndSelf().ToImmutableArray();
 
         context.RegisterCodeFix(
-            CodeAction.Create("删除字段和属性，改为DependencyPropertyAttribute", c => AddNewProperty(context.Document, ancestor, propertyName, c),
+            CodeAction.Create("删除字段和属性，改为DependencyPropertyAttribute",
+                c => AddNewProperty(context.Document, ancestor, propertyName, c),
                 diagnostic.Id),
             diagnostic);
     }
@@ -59,14 +60,14 @@ public class DependencyPropertyCodeFixProvider001 : DependencyPropertyCodeFixPro
                     ArgumentList.Arguments:
                     [
                         _,
-                    { Expression: TypeOfExpressionSyntax { Type: { } propertyType } },
+                        { Expression: TypeOfExpressionSyntax { Type: { } propertyType } },
                         _,
-                    {
-                        Expression: ObjectCreationExpressionSyntax
                         {
-                            ArgumentList.Arguments: [{ } defaultValue, ..] arguments
+                            Expression: ObjectCreationExpressionSyntax
+                            {
+                                ArgumentList.Arguments: [{ } defaultValue, ..] arguments
+                            }
                         }
-                    }
                     ]
                 }
             })
@@ -87,8 +88,7 @@ public class DependencyPropertyCodeFixProvider001 : DependencyPropertyCodeFixPro
         var propertyDeclaration = (PropertyDeclarationSyntax)typeDeclaration.Members
             .First(t => t is PropertyDeclarationSyntax { Identifier.ValueText: { } name } && name == propertyName);
 
-        var isSetterPrivate = propertyDeclaration
-            .AccessorList.Accessors
+        var isSetterPrivate = propertyDeclaration.AccessorList!.Accessors
             .Any(t => t.Keyword.ValueText == "set" && t.Modifiers.Any(m => m.ValueText is "private"));
 
         if (isSetterPrivate)
@@ -104,10 +104,10 @@ public class DependencyPropertyCodeFixProvider001 : DependencyPropertyCodeFixPro
             .AddArgumentListArguments(args.ToArray());
 
         var newTypeDeclaration = typeDeclaration
-             .RemoveNodes(
-                 new SyntaxNode[] { fieldDeclaration, propertyDeclaration },
-                 SyntaxRemoveOptions.KeepNoTrivia)
-             .AddAttributeLists(AttributeList().AddAttributes(attribute));
+            .RemoveNodes(
+                new SyntaxNode[] { fieldDeclaration, propertyDeclaration },
+                SyntaxRemoveOptions.KeepNoTrivia)!
+            .AddAttributeLists(AttributeList().AddAttributes(attribute));
 
         if (typeDeclaration.Modifiers.All(t => t.ValueText is not "partial"))
             newTypeDeclaration = newTypeDeclaration.AddModifiers(Token(SyntaxKind.PartialKeyword));

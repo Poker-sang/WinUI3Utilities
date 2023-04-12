@@ -3,7 +3,6 @@ using System.Collections.Immutable;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using WinUI3Utilities.SourceGenerator.Utilities;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using static WinUI3Utilities.SourceGenerator.Utilities.Helper;
 
@@ -20,11 +19,10 @@ public class DependencyPropertyGenerator : TypeWithAttributeGenerator
 
         foreach (var attribute in attributeList)
         {
-            if (attribute.AttributeClass is not ({ IsGenericType: true } and { TypeArguments.IsDefaultOrEmpty: false }))
+            if (attribute.AttributeClass is not { TypeArguments: [var type, ..] })
                 return null;
-            var type = attribute.AttributeClass.TypeArguments[0];
-
-            if (attribute.ConstructorArguments.Length < 2 || attribute.ConstructorArguments[0].Value is not string propertyName || attribute.ConstructorArguments[1].Value is not string propertyChanged)
+            
+            if (attribute.ConstructorArguments is not [{ Value: string propertyName }, { Value: string propertyChanged }, ..])
                 continue;
 
             var isSetterPrivate = false;

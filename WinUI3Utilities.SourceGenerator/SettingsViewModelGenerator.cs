@@ -17,10 +17,10 @@ internal class SettingsViewModelGenerator : TypeWithAttributeGenerator
     {
         var attribute = attributeList[0];
 
-        if (attribute.AttributeClass is not ({ IsGenericType: true } and { TypeArguments.IsDefaultOrEmpty: false }))
+        if (attribute.AttributeClass is not { TypeArguments: [var type, ..] })
             return null;
-        var type = attribute.AttributeClass.TypeArguments[0];
-        if (attribute.ConstructorArguments[0].Value is not string settingName)
+
+        if (attribute.ConstructorArguments is not [{ Value: string settingName }, ..])
             return null;
 
         var name = typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);

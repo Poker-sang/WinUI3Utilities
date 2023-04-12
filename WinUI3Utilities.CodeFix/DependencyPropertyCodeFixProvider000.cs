@@ -23,7 +23,7 @@ public class DependencyPropertyCodeFixProvider000 : DependencyPropertyCodeFixPro
         var diagnostic = context.Diagnostics[0];
 
         var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
-        var ancestor = root.FindToken(context.Span.Start).Parent.AncestorsAndSelf().ToImmutableArray();
+        var ancestor = root!.FindToken(context.Span.Start).Parent!.AncestorsAndSelf().ToImmutableArray();
 
         var fieldName = diagnostic.Descriptor.MessageFormat.ToString().Split('\'')[1];
         if (!fieldName.EndsWith("Property"))
@@ -50,7 +50,7 @@ public class DependencyPropertyCodeFixProvider000 : DependencyPropertyCodeFixPro
             })
             throw new();
 
-        var typeSymbol = (ITypeSymbol)semanticModel.GetSymbolInfo(typeSyntax, cancellationToken).Symbol;
+        var typeSymbol = (ITypeSymbol)semanticModel.GetSymbolInfo(typeSyntax, cancellationToken).Symbol!;
         var getter = GetGetter(fieldName, typeSymbol);
         var setter = GetSetter(fieldName);
 
