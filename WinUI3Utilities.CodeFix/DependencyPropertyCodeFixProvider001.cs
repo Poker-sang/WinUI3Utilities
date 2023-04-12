@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Composition;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -63,7 +62,7 @@ public class DependencyPropertyCodeFixProvider001 : DependencyPropertyCodeFixPro
                         { Expression: TypeOfExpressionSyntax { Type: { } propertyType } },
                         _,
                         {
-                            Expression: ObjectCreationExpressionSyntax
+                            Expression: BaseObjectCreationExpressionSyntax
                             {
                                 ArgumentList.Arguments: [{ } defaultValue, ..] arguments
                             }

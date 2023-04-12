@@ -1,19 +1,21 @@
 using System.Collections.Immutable;
-using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.CodeAnalysis;
 using System.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace WinUI3Utilities.Analyzer;
 
-[DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class DependencyPropertyAttributeAnalyzer : DiagnosticAnalyzer
+
+
+// [DiagnosticAnalyzer(LanguageNames.CSharp)]
+public class AppContextAttributeAnalyzer : DiagnosticAnalyzer
 {
     private const string DiagnosticId = "Utilities";
 
     private static readonly DiagnosticDescriptor _needFullName = new(
         DiagnosticId + "004",
         "填写方法全限定名",
-        "'{0}' 应该是方法的全限定名{1}",
+        "'{0}' 应该是扩展方法的全限定名{1}",
         "Fix", DiagnosticSeverity.Warning, true,
         "应该填写方法全限定名.");
 
@@ -32,31 +34,37 @@ public class DependencyPropertyAttributeAnalyzer : DiagnosticAnalyzer
 
         foreach (var attribute in typeSymbol.GetAttributes())
         {
-            if (attribute.AttributeClass?.OriginalDefinition.ToDisplayString() is not "WinUI3Utilities.Attributes.DependencyPropertyAttribute<T>")
+            if (attribute.AttributeClass?.OriginalDefinition.ToDisplayString() is not "WinUI3Utilities.Attributes.AppContextAttribute<T>")
                 continue;
 
-            if (attribute.ConstructorArguments is not [_, { Value: string propertyChanged and not "" }, ..])
+            if (attribute.NamedArguments.FirstOrDefault(t => t is { Key: "CastMethod", Value.Value: string and not "" }) is { Key: null } arg)
                 continue;
 
-            if (propertyChanged.StartsWith("global::"))
-                propertyChanged = propertyChanged[8..];
+            var castMethod = (string)arg.Value.Value!;
 
-            var name = propertyChanged.Split('.')[^1];
+            if (castMethod.StartsWith("global::"))
+                castMethod = castMethod[8..];
+
+            var name = castMethod.Split('.')[^1];
 
             var possibleFullName = "";
 
             if (context.Compilation.ContainsSymbolsWithName(name, SymbolFilter.Member))
             {
                 var symbols = context.Compilation.GetSymbolsWithName(name, SymbolFilter.Member);
-                if (symbols.Any(symbol =>
+                if (symbols.Any(s =>
                     {
-                        if (symbol.Kind is SymbolKind.Method)
+                        if (s is IMethodSymbol method)
                         {
-                            var symbolName = symbol.ToDisplayString().Split('(')[0];
-                            if (symbolName == propertyChanged)
+                            var symbolName = method.ToDisplayString().Split('(')[0];
+                            if (symbolName == castMethod
+                                && method is { TypeParameters: [{ } type], Parameters: [{ } param] }
+                                && SymbolEqualityComparer.Default.Equals(param.Type, type))
+                            {
                                 return true;
+                            }
                             else
-                                possibleFullName = $"，可能是 '{symbolName}'" ;
+                                possibleFullName = $"，可能是 '{symbolName}'";
                         }
 
                         return false;
@@ -64,7 +72,7 @@ public class DependencyPropertyAttributeAnalyzer : DiagnosticAnalyzer
                     continue;
             }
 
-            var diagnostic = Diagnostic.Create(_needFullName, attribute.AttributeConstructor!.Locations[0], propertyChanged, possibleFullName);
+            var diagnostic = Diagnostic.Create(_needFullName, attribute.AttributeConstructor!.Locations[0], castMethod, possibleFullName);
             context.ReportDiagnostic(diagnostic);
         }
     }

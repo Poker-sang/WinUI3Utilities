@@ -9,4 +9,3 @@ Utilities000 | Completion | Warning | DependencyPropertyAnalyzer
 Utilities001 | Refactor | Warning | DependencyPropertyAnalyzer
 Utilities002 | Naming | Warning | DependencyPropertyAnalyzer
 Utilities003 | Naming | Warning | DependencyPropertyAnalyzer
-Utilities004 | Fix | Warning | DependencyPropertyAttributeAnalyzer

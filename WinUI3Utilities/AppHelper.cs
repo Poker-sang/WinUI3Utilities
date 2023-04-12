@@ -1,9 +1,9 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Windows.Graphics;
-using Microsoft.UI;
 using WinUI3Utilities.Interfaces;
 
 namespace WinUI3Utilities;

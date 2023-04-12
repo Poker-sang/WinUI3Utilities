@@ -108,7 +108,7 @@ public static class TitleBarHelper
         /// Neither
         /// </summary>
         Neither,
-        
+
         /// <summary>
         /// Use <see cref="TryCustomizeTitleBar(Microsoft.UI.Xaml.Window, FrameworkElement)"/>
         /// </summary>

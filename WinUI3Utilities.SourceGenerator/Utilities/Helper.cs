@@ -317,6 +317,20 @@ internal static class Helper
         return temp;
     }
 
+    internal static IEnumerable<IPropertySymbol> GetProperties(this ITypeSymbol typeSymbol, INamedTypeSymbol attribute)
+    {
+        foreach (var member in typeSymbol.GetMembers())
+        {
+            if (member is not IPropertySymbol { Name: not "EqualityContract" } property)
+                continue;
+
+            if (IgnoreAttribute(property, attribute))
+                continue;
+
+            yield return property;
+        }
+    }
+
     internal static bool IgnoreAttribute(ISymbol symbol, INamedTypeSymbol attribute)
     {
         attribute = attribute is { IsGenericType: true, IsUnboundGenericType: false } ? attribute.ConstructUnboundGenericType() : attribute;

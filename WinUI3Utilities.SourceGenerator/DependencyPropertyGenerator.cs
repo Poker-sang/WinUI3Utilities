@@ -21,7 +21,7 @@ public class DependencyPropertyGenerator : TypeWithAttributeGenerator
         {
             if (attribute.AttributeClass is not { TypeArguments: [var type, ..] })
                 return null;
-            
+
             if (attribute.ConstructorArguments is not [{ Value: string propertyName }, { Value: string propertyChanged }, ..])
                 continue;
 

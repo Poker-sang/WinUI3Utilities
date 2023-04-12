@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -21,13 +20,8 @@ public class GenerateConstructorGenerator : TypeWithAttributeGenerator
         var namespaces = new HashSet<string>();
         var usedTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
         var ctor = ConstructorDeclaration(name).WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)));
-        foreach (var property in typeSymbol.GetMembers().Where(member =>
-                         member is { Kind: SymbolKind.Property } and not { Name: "EqualityContract" })
-                     .Cast<IPropertySymbol>())
+        foreach (var property in typeSymbol.GetProperties(attributeList[0].AttributeClass!))
         {
-            if (IgnoreAttribute(property, attributeList[0].AttributeClass!))
-                continue;
-
             ctor = GetDeclaration(property, ctor);
             namespaces.UseNamespace(usedTypes, typeSymbol, property.Type);
         }

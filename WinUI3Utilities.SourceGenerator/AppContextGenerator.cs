@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
-using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using WinUI3Utilities.SourceGenerator.Utilities;
@@ -38,7 +37,7 @@ public class AppContextGenerator : TypeWithAttributeGenerator
                         var castMethodFullName = (string)value;
                         var dotPosition = castMethodFullName.LastIndexOf('.');
                         if (dotPosition is -1)
-                            throw new InvalidDataException("\"CastMethod\" must contain the full name.");
+                            throw new InvalidDataException($"{namedArgument.Key} must contain the full name.");
                         staticClassName = "static " + castMethodFullName[..dotPosition];
                         methodName = castMethodFullName[(dotPosition + 1)..];
                         break;
@@ -46,8 +45,9 @@ public class AppContextGenerator : TypeWithAttributeGenerator
 
         configKey ??= "Configuration";
 
-        var name = typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-        var namespaces = new HashSet<string> { "Windows.Storage" };
+        var specificType = typeSymbol.ToDisplayString();
+        var typeName = type.ToDisplayString();
+        var namespaces = new HashSet<string>();
         // methodName方法所用namespace
         _ = namespaces.Add(staticClassName);
         var usedTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
@@ -55,25 +55,26 @@ public class AppContextGenerator : TypeWithAttributeGenerator
         var classBegin = @$"
 namespace {typeSymbol.ContainingNamespace.ToDisplayString()};
 
-partial class {name}
+partial class {typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}
 {{
-    private static ApplicationDataContainer _configurationContainer = null!;
+    private static Windows.Storage.ApplicationDataContainer _configurationContainer = null!;
 
     private const string ConfigurationContainerKey = ""{configKey}"";
 
     public static void InitializeConfigurationContainer()
     {{
-        if (!ApplicationData.Current.RoamingSettings.Containers.ContainsKey(ConfigurationContainerKey))
-            _ = ApplicationData.Current.RoamingSettings.CreateContainer(ConfigurationContainerKey, ApplicationDataCreateDisposition.Always);
+        var roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings;
+        if (!roamingSettings.Containers.ContainsKey({specificType}.ConfigurationContainerKey))
+            _ = roamingSettings.CreateContainer({specificType}.ConfigurationContainerKey, Windows.Storage.ApplicationDataCreateDisposition.Always);
 
-        _configurationContainer = ApplicationData.Current.RoamingSettings.Containers[ConfigurationContainerKey];
+        _configurationContainer = roamingSettings.Containers[{specificType}.ConfigurationContainerKey];
     }}
 
-    public static {type.Name}? LoadConfiguration()
+    public static {typeName}? LoadConfiguration()
     {{
         try
         {{
-            return new {type.Name}(";
+            return new {typeName}(";
         /*-----Splitter-----*/
         var loadConfigurationContent = new StringBuilder();
         /*-----Splitter-----*/
@@ -85,7 +86,7 @@ partial class {name}
         }}
     }}
 
-    public static void SaveConfiguration({type.Name}? configuration)
+    public static void SaveConfiguration({typeName}? configuration)
     {{
         if (configuration is {{ }} appConfiguration)
         {{";
@@ -96,15 +97,10 @@ partial class {name}
     }}
 }}";
         /*-----Body End-----*/
-        foreach (var property in type.GetMembers().Where(member =>
-                         member is { Kind: SymbolKind.Property } and not { Name: "EqualityContract" })
-                     .Cast<IPropertySymbol>())
+        foreach (var property in type.GetProperties(attributeList[0].AttributeClass!))
         {
-            if (IgnoreAttribute(property, attribute.AttributeClass))
-                continue;
-
-            _ = loadConfigurationContent.AppendLine(LoadRecord(property.Name, property.Type.Name, type.Name, methodName));
-            _ = saveConfigurationContent.AppendLine(SaveRecord(property.Name, property.Type, type.Name, methodName));
+            _ = loadConfigurationContent.AppendLine(LoadRecord(specificType, property.Name, property.Type.Name, typeName, methodName));
+            _ = saveConfigurationContent.AppendLine(SaveRecord(specificType, property.Name, property.Type, typeName, methodName));
             namespaces.UseNamespace(usedTypes, typeSymbol, property.Type);
         }
 
@@ -121,9 +117,24 @@ partial class {name}
             .ToString();
     }
 
-    private static string LoadRecord(string name, string type, string typeName, string? methodName) => methodName is null
-            ? $"{Spacing(4)}({type})_configurationContainer.Values[nameof({typeName}.{name})],"
-            : $"{Spacing(4)}_configurationContainer.Values[nameof({typeName}.{name})].{methodName}<{type}>(),";
+    private static string LoadRecord(string specificType, string propertyName, string type, string typeName, string? methodName) => methodName is null
+            ? $"{Spacing(4)}({type}){specificType}._configurationContainer.Values[nameof({typeName}.{propertyName})],"
+            : $"{Spacing(4)}{specificType}._configurationContainer.Values[nameof({typeName}.{propertyName})].{methodName}<{type}>(),";
+
+    private static string SaveRecord(string specificType, string name, ITypeSymbol type, string typeName, string? methodName)
+    {
+        var body = $"{specificType}._configurationContainer.Values[nameof({typeName}.{name})] = appConfiguration.{name}";
+        return !_primitiveTypes.Contains(type.Name)
+            ? type switch
+            {
+                { Name: nameof(String) } => $"{Spacing(3)}{body} ?? string.Empty;",
+                { TypeKind: TypeKind.Enum } => methodName is null
+                    ? $"{Spacing(3)}(int)({body});"
+                    : $"{Spacing(3)}{body}.{methodName}<int>();",
+                _ => throw new InvalidCastException("Only primitive and Enum types are supported.")
+            }
+            : $"{Spacing(3)}{body};";
+    }
 
     private static readonly HashSet<string> _primitiveTypes = new()
     {
@@ -144,19 +155,4 @@ partial class {name}
         nameof(Guid),
         nameof(DateTimeOffset)
     };
-
-    private static string SaveRecord(string name, ITypeSymbol type, string typeName, string? methodName)
-    {
-        var body = $"_configurationContainer.Values[nameof({typeName}.{name})] = appConfiguration.{name}";
-        return !_primitiveTypes.Contains(type.Name)
-            ? type switch
-            {
-                { Name: nameof(String) } => $"{Spacing(3)}{body} ?? string.Empty;",
-                { TypeKind: TypeKind.Enum } => methodName is null
-                    ? $"{Spacing(3)}(int)({body});"
-                    : $"{Spacing(3)}{body}.{methodName}<int>();",
-                _ => throw new InvalidCastException("Only primitive and Enum types are supported.")
-            }
-            : $"{Spacing(3)}{body};";
-    }
 }

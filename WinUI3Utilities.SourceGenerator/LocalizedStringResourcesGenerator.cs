@@ -13,14 +13,14 @@ namespace WinUI3Utilities.SourceGenerator;
 [Generator]
 public class LocalizedStringResourcesGenerator : IIncrementalGenerator
 {
-    private const string AttributeName = AttributeNamespace + "LocalizedStringResourcesAttribute";
+    private const string AttributeFullName = AttributeNamespace + "LocalizedStringResourcesAttribute";
 
     private const string SourceItemGroupMetadata = "build_metadata.AdditionalFiles.SourceItemGroup";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var attributes = context.SyntaxProvider.ForAttributeWithMetadataName(
-                AttributeName,
+                AttributeFullName,
                 (_, _) => true,
                 (syntaxContext, _) => syntaxContext)
             .Select((t, _) => t.Attributes[0])
@@ -36,11 +36,11 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
         {
             var ((left, right), compilation) = triple;
 
-            if (compilation.Assembly.GetAttributes().Any(attrData => attrData.AttributeClass?.ToString() == DisableSourceGeneratorAttribute))
+            if (compilation.Assembly.GetAttributes().Any(attrData => attrData.AttributeClass?.ToDisplayString() == DisableSourceGeneratorAttribute))
                 return;
 
             if (Execute(left, right) is { } s)
-                spc.AddSource("WinUI3Utilities.Generator.LocalizedStringResources.g.cs", s);
+                spc.AddSource(AttributeFullName + ".g.cs", s);
         });
     }
 

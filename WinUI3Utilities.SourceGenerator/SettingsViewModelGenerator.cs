@@ -35,15 +35,12 @@ partial class {name}
 {{";
         const string classEnd = "}";
 
-        var allPropertySentences = type.GetMembers()
-            .Where(property => property is { Kind: SymbolKind.Property } and not { Name: "EqualityContract" })
-            .Cast<IPropertySymbol>()
-            .Where(property => !IgnoreAttribute(property, attribute.AttributeClass))
+        var allPropertySentences = type.GetProperties(attributeList[0].AttributeClass!)
             .Select(property => Spacing(1) + Regex.Replace(property.DeclaringSyntaxReferences[0].GetSyntax().ToString(),
                 @"\s*{[\s\S]+}[\s\S]*", $@"
     {{
         get => {settingName}.{property.Name};
-        set => SetProperty({settingName}.{property.Name}, value, {settingName}, (@setting, @value) => @setting.{property.Name} = @value);
+        set => this.SetProperty({settingName}.{property.Name}, value, {settingName}, (@setting, @value) => @setting.{property.Name} = @value);
     }}"))
             .Aggregate("", (current, ps) => current + $"{ps}\n\n")[..^2];
 
