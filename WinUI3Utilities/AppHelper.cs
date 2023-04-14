@@ -4,7 +4,8 @@ using System.Threading.Tasks;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Windows.Graphics;
-using WinUI3Utilities.Interfaces;
+using Microsoft.UI.Composition.SystemBackdrops;
+using Microsoft.UI.Xaml.Media;
 
 namespace WinUI3Utilities;
 
@@ -44,9 +45,9 @@ public static class AppHelper
         /// Backdrop type
         /// </summary>
         /// <remarks>
-        /// Default: <see cref="BackdropHelper.BackdropType.MicaAlt"/>
+        /// Default: <see cref="BackdropType.MicaAlt"/>
         /// </remarks>
-        public BackdropHelper.BackdropType BackdropType { get; set; } = BackdropHelper.BackdropType.MicaAlt;
+        public BackdropType BackdropType { get; set; } = BackdropType.MicaAlt;
 
         /// <summary>
         /// Unhandled exception handler
@@ -81,58 +82,61 @@ public static class AppHelper
     /// <br/>
     /// 
     /// <see cref="CurrentContext.App"/>.Resources["NavigationViewContentMargin"] = <see langword="new"/> <see cref="Thickness"/>(0, 48, 0, 0);<br/>
-    /// <paramref name="windowInfo"/>.AppWindow.Title = <paramref name="title"/>;<br/>
+    /// <paramref name="window"/>.AppWindow.Title = <paramref name="title"/>;<br/>
     /// <br/>
     /// <see langword="if"/> (<paramref name="info"/>.Size.HasValue)
-    ///     <paramref name="windowInfo"/>.AppWindow.Resize(<paramref name="info"/>.Size.Value);<br/>
+    ///     <paramref name="window"/>.AppWindow.Resize(<paramref name="info"/>.Size.Value);<br/>
     /// <see langword="if"/> (<paramref name="info"/>.IconPath <see langword="is not"/> "")
-    ///     <paramref name="windowInfo"/>.AppWindow.SetIcon(<paramref name="info"/>.IconPath);<br/>
+    ///     <paramref name="window"/>.AppWindow.SetIcon(<paramref name="info"/>.IconPath);<br/>
     /// <see langword="else if"/> (<paramref name="info"/>.IconId != <see langword="default"/>)
-    ///     <paramref name="windowInfo"/>.AppWindow.SetIcon(<paramref name="info"/>.IconId);<br/>
-    /// <br/>
-    /// <paramref name="windowInfo"/>.AppWindow.Show();<br/>
+    ///     <paramref name="window"/>.AppWindow.SetIcon(<paramref name="info"/>.IconId);<br/>
     /// <br/>
     /// <see cref="TitleBarHelper"/>... // try apply customize title bar (depends on <see cref="InitializeInfo.TitleBarType"/>)<br/>
-    /// <see cref="BackdropHelper"/>... // try apply backdrop (depends on <see cref="InitializeInfo.BackdropType"/>)
+    /// // try apply backdrop (depends on <see cref="InitializeInfo.BackdropType"/>)<br/>
+    /// <paramref name="window"/>.Window.SystemBackdrop = <paramref name="info"/>.BackdropType <see langword="switch"/> { ... }
+    /// <br/>
+    /// <br/>
+    /// <paramref name="window"/>.AppWindow.Show();<br/>
     /// </code>
     /// </remarks>
     /// <param name="info"></param>
-    /// <param name="windowInfo">Default: <see cref="CurrentContext.WindowInfo"/></param>
+    /// <param name="window">Default: <see cref="CurrentContext.Window"/></param>
     /// <param name="title">Default: <see cref="CurrentContext.Title"/></param>
     /// <param name="titleBar">Default: <see cref="CurrentContext.TitleBar"/></param>
-    public static void Initialize(InitializeInfo info, IWindowInfo? windowInfo = null, string? title = null, FrameworkElement? titleBar = null)
+    public static void Initialize(InitializeInfo info, Window? window = null, string? title = null, FrameworkElement? titleBar = null)
     {
         titleBar ??= CurrentContext.TitleBar;
-        windowInfo ??= CurrentContext.WindowInfo;
+        window ??= CurrentContext.Window;
         title ??= CurrentContext.Title;
 
-        RegisterUnhandledExceptionHandler(windowInfo.Window, info.UnhandledExceptionHandler);
+        RegisterUnhandledExceptionHandler(window, info.UnhandledExceptionHandler);
 
         CurrentContext.App.Resources["NavigationViewContentMargin"] = new Thickness(0, 48, 0, 0);
-        windowInfo.AppWindow.Title = title;
+        window.AppWindow.Title = title;
 
         if (info.Size != default)
-            windowInfo.AppWindow.Resize(info.Size);
+            window.AppWindow.Resize(info.Size);
         if (info.IconPath is not "")
-            windowInfo.AppWindow.SetIcon(info.IconPath);
+            window.AppWindow.SetIcon(info.IconPath);
         else if (info.IconId != default)
-            windowInfo.AppWindow.SetIcon(info.IconId);
-
-        windowInfo.AppWindow.Show();
+            window.AppWindow.SetIcon(info.IconId);
 
         if (info.TitleBarType.HasFlag(TitleBarHelper.TitleBarType.Window))
-            _ = TitleBarHelper.TryCustomizeTitleBar(windowInfo.Window, titleBar);
+            _ = TitleBarHelper.TryCustomizeTitleBar(window, titleBar);
         if (info.TitleBarType.HasFlag(TitleBarHelper.TitleBarType.AppWindow))
-            _ = TitleBarHelper.TryCustomizeTitleBar(windowInfo.AppTitleBar);
+            _ = TitleBarHelper.TryCustomizeTitleBar(window.AppWindow.TitleBar);
 
-        _ = info.BackdropType switch
+        window.SystemBackdrop = info.BackdropType switch
         {
-            BackdropHelper.BackdropType.None => false,
-            BackdropHelper.BackdropType.Acrylic => BackdropHelper.TryApplyAcrylic(windowInfo.Window),
-            BackdropHelper.BackdropType.Mica => BackdropHelper.TryApplyMica(windowInfo.Window, false),
-            BackdropHelper.BackdropType.MicaAlt => BackdropHelper.TryApplyMica(windowInfo.Window),
-            _ => ThrowHelper.ArgumentOutOfRange<BackdropHelper.BackdropType, bool>(info.BackdropType)
+            BackdropType.None => null,
+            BackdropType.Acrylic => new DesktopAcrylicBackdrop(),
+            BackdropType.Mica => new MicaBackdrop(),
+            BackdropType.MicaAlt => new MicaBackdrop { Kind = MicaKind.BaseAlt },
+            BackdropType.Maintain => window.SystemBackdrop,
+            _ => ThrowHelper.ArgumentOutOfRange<BackdropType, SystemBackdrop>(info.BackdropType)
         };
+
+        window.AppWindow.Show();
     }
 
     #region DebugHelper

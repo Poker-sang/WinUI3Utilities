@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.UI.Windowing;
 using Windows.Graphics;
-using WinUI3Utilities.Interfaces;
+using Microsoft.UI.Xaml;
 
 namespace WinUI3Utilities;
 
@@ -136,18 +136,18 @@ public static class DragZoneHelper
     /// Set dragging-zones of title bar
     /// </summary>
     /// <param name="info"></param>
-    /// <param name="windowInfo">Default: <see cref="CurrentContext.WindowInfo"/></param>
-    public static void SetDragZones(DragZoneInfo info, IWindowInfo? windowInfo = null)
+    /// <param name="window">Default: <see cref="CurrentContext.Window"/></param>
+    public static void SetDragZones(DragZoneInfo info, Window? window = null)
     {
-        windowInfo ??= CurrentContext.WindowInfo;
-        var scaleAdjustment = WindowHelper.GetScaleAdjustment(windowInfo.Window);
-        var windowWidth = (int)(windowInfo.AppWindow.Size.Width / scaleAdjustment);
+        window ??= CurrentContext.Window;
+        var scaleAdjustment = WindowHelper.GetScaleAdjustment(window);
+        var windowWidth = (int)(window.AppWindow.Size.Width / scaleAdjustment);
         var nonDraggingZones = info.NonDraggingZones;
 
         if (info.ExcludeDebugToolbarArea)
             nonDraggingZones = nonDraggingZones.Concat(new RectInt32[] { new((windowWidth - DebugToolbarWidth) / 2, 0, DebugToolbarWidth, DebugToolbarHeight) });
 
-        windowInfo.AppWindow.TitleBar.SetDragRectangles(
+        window.AppWindow.TitleBar.SetDragRectangles(
             GetDragZones(windowWidth, info.DragZoneHeight, info.DragZoneLeftIndent, nonDraggingZones)
                 .Select(rect => new RectInt32(
                     (int)(rect.X * scaleAdjustment),

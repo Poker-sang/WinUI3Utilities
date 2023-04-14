@@ -19,7 +19,7 @@ public static class WindowHelper
     public static T InitializeWithWindow<T>(this T obj, nint hWnd = 0)
     {
         if (hWnd is 0)
-            hWnd = CurrentContext.HWnd;
+            hWnd = (nint)CurrentContext.HWnd;
         // When running on win32, FileOpenPicker needs to know the top-level hWnd via IInitializeWithWindow::Initialize.
         WinRT.Interop.InitializeWithWindow.Initialize(obj, hWnd);
         return obj;

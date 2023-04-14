@@ -21,7 +21,7 @@ public static class PickerHelper
     public static IAsyncOperation<StorageFolder?> PickSingleFolderAsync(nint hWnd = 0, PickerLocationId suggestedStartLocation = PickerLocationId.Desktop, PickerViewMode viewMode = PickerViewMode.Thumbnail)
     {
         if (hWnd is 0)
-            hWnd = CurrentContext.HWnd;
+            hWnd = (nint)CurrentContext.HWnd;
         return new FolderPicker
         {
             FileTypeFilter = { "*" }, /*不加会崩溃*/
@@ -40,7 +40,7 @@ public static class PickerHelper
     public static IAsyncOperation<StorageFile?> PickSingleFileAsync(nint hWnd = 0, PickerLocationId suggestedStartLocation = PickerLocationId.Desktop, PickerViewMode viewMode = PickerViewMode.Thumbnail)
     {
         if (hWnd is 0)
-            hWnd = CurrentContext.HWnd;
+            hWnd = (nint)CurrentContext.HWnd;
         return new FileOpenPicker
         {
             FileTypeFilter = { "*" },
@@ -59,7 +59,7 @@ public static class PickerHelper
     public static IAsyncOperation<IReadOnlyList<StorageFile>> PickMultipleFilesAsync(nint hWnd = 0, PickerLocationId suggestedStartLocation = PickerLocationId.Desktop, PickerViewMode viewMode = PickerViewMode.Thumbnail)
     {
         if (hWnd is 0)
-            hWnd = CurrentContext.HWnd;
+            hWnd = (nint)CurrentContext.HWnd;
         return new FileOpenPicker
         {
             FileTypeFilter = { "*" },

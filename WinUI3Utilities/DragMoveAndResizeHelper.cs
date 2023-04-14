@@ -6,7 +6,6 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using Windows.Graphics;
-using WinUI3Utilities.Interfaces;
 using WinUI3Utilities.Internal.PlatformInvoke.User32;
 
 namespace WinUI3Utilities;
@@ -87,11 +86,11 @@ public static class DragMoveAndResizeHelper
     /// </summary>
     /// <param name="element"></param>
     /// <param name="info"></param>
-    /// <param name="windowInfo">Default: <see cref="CurrentContext.WindowInfo"/></param>
-    public static void SetDragMove(UIElement element, DragMoveAndResizeInfo info, IWindowInfo? windowInfo = null)
+    /// <param name="window">Default: <see cref="CurrentContext.Window"/></param>
+    public static void SetDragMove(UIElement element, DragMoveAndResizeInfo info, Window? window = null)
     {
         _pointerPressed = (o, e) => RootPointerPressed(o, e, info);
-        _pointerMoved = (o, e) => RootPointerMoved(o, e, info, windowInfo ?? CurrentContext.WindowInfo);
+        _pointerMoved = (o, e) => RootPointerMoved(o, e, info, window ?? CurrentContext.Window);
         element.PointerPressed += _pointerPressed;
         element.PointerMoved += _pointerMoved;
         element.PointerReleased += RootPointerReleased;
@@ -192,7 +191,7 @@ public static class DragMoveAndResizeHelper
         _ = User32.GetCursorPos(out _lastPoint);
     }
 
-    private static void RootPointerMoved(object sender, PointerRoutedEventArgs e, DragMoveAndResizeInfo info, IWindowInfo windowInfo)
+    private static void RootPointerMoved(object sender, PointerRoutedEventArgs e, DragMoveAndResizeInfo info, Window window)
     {
         var frameworkElement = sender.To<FrameworkElement>();
         var pointer = e.GetCurrentPoint(frameworkElement);
@@ -205,7 +204,9 @@ public static class DragMoveAndResizeHelper
 
         var pointerShape = InputSystemCursorShape.Arrow;
 
-        if (windowInfo.OverlappedPresenter.State is not OverlappedPresenterState.Maximized && info.Mode.HasFlag(Mode.Resize))
+        var presenter = window.AppWindow.Presenter.To<OverlappedPresenter>();
+
+        if (presenter.State is not OverlappedPresenterState.Maximized && info.Mode.HasFlag(Mode.Resize))
         {
             var left = position._x < info.MinimumOffset;
             var top = position._y < info.MinimumOffset;
@@ -243,23 +244,23 @@ public static class DragMoveAndResizeHelper
         if (offset < info.MinimumOffset)
             return;
 
-        if (windowInfo.OverlappedPresenter.State is OverlappedPresenterState.Maximized)
+        if (presenter.State is OverlappedPresenterState.Maximized)
         {
             if (_type is PointerOperationType.Move)
             {
-                var originalSize = windowInfo.AppWindow.Size;
-                windowInfo.OverlappedPresenter.Restore();
-                var size = windowInfo.AppWindow.Size;
+                var originalSize = window.AppWindow.Size;
+                presenter.Restore();
+                var size = window.AppWindow.Size;
                 var rate = 1 - (double)size.Width / originalSize.Width;
-                windowInfo.AppWindow.Move(new((int)(point.X * rate), (int)(point.Y * rate)));
+                window.AppWindow.Move(new((int)(point.X * rate), (int)(point.Y * rate)));
             }
         }
         else
         {
-            var xPos = windowInfo.AppWindow.Position.X;
-            var yPos = windowInfo.AppWindow.Position.Y;
-            var xSize = windowInfo.AppWindow.Size.Width;
-            var ySize = windowInfo.AppWindow.Size.Height;
+            var xPos = window.AppWindow.Position.X;
+            var yPos = window.AppWindow.Position.Y;
+            var xSize = window.AppWindow.Size.Width;
+            var ySize = window.AppWindow.Size.Height;
 
             if (_type.HasFlag(PointerOperationType.Top))
             {
@@ -292,7 +293,7 @@ public static class DragMoveAndResizeHelper
                     xPos += xOffset;
             }
 
-            windowInfo.AppWindow.MoveAndResize(new(xPos, yPos, xSize, ySize));
+            window.AppWindow.MoveAndResize(new(xPos, yPos, xSize, ySize));
         }
 
         _lastPoint.X = point.X;
