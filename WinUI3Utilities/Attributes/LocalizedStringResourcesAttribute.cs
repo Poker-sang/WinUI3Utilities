@@ -4,11 +4,10 @@ using Microsoft.Windows.ApplicationModel.Resources;
 namespace WinUI3Utilities.Attributes;
 
 /// <summary>
-/// Generate all the .resw files under the namespace of the specified type
+/// Generate all the .resw files under the specified namespace
 /// </summary>
 /// <remarks>
 /// <seealso href="https://platform.uno/blog/using-msbuild-items-and-properties-in-c-9-source-generators/"/><br/>
-/// <strong>This Attribute Should Only Appear ONCE Per Project</strong><br/>
 /// To use this Attribute, at first, you should add this region to your .csproj file:
 /// <code>
 /// &lt;<see langword="Target"/> Name="InjectAdditionalFiles" BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun"&gt;

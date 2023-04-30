@@ -10,6 +10,8 @@ namespace WinUI3Utilities;
 /// </summary>
 public static class CurrentContext
 {
+    private static Window? _window;
+
     /// <summary>
     /// App instance
     /// </summary>
@@ -18,7 +20,11 @@ public static class CurrentContext
     /// <summary>
     /// Main window instance
     /// </summary>
-    public static Window Window { get; set; } = null!;
+    public static Window Window
+    {
+        get => _window ?? ThrowHelper.NullReference<Window>($"{nameof(CurrentContext)}.{nameof(Window)} is not assigned yet.");
+        set => _window = value;
+    }
 
     /// <summary>
     /// The app window of <see cref="Window"/>

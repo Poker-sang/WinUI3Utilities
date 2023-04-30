@@ -4,6 +4,7 @@ using Windows.Storage;
 namespace WinUI3Utilities.Attributes;
 
 /// <summary>
+/// <strong>Only for packaged applications</strong><br/>
 /// Generate field _configurationContainer and methods Load/SaveConfiguration for the specified class<br/>
 /// <strong>Use <see cref="AttributeIgnoreAttribute"/> to indicate which properties are ignored</strong><br/>
 /// Generate:
@@ -16,10 +17,11 @@ namespace WinUI3Utilities.Attributes;
 /// 
 ///     <see langword="public static void"/> InitializeConfigurationContainer()
 ///     {
-///         <see langword="if"/> (!ApplicationData.Current.RoamingSettings.Containers.ContainsKey(ConfigurationContainerKey))
-///             _ = ApplicationData.Current.RoamingSettings.CreateContainer(ConfigurationContainerKey, ApplicationDataCreateDisposition.Always);
+///         <see langword="var"/> roamingSettings = <see cref="ApplicationData"/>.Current.RoamingSettings.Current.RoamingSettings;
+///         <see langword="if"/> (!roamingSettings.Containers.ContainsKey(ConfigurationContainerKey))
+///             _ = roamingSettings.CreateContainer(ConfigurationContainerKey, <see cref="ApplicationDataCreateDisposition.Always"/>);
 /// 
-///         _configurationContainer = ApplicationData.Current.RoamingSettings.Containers[ConfigurationContainerKey];
+///         _configurationContainer = roamingSettings.Containers[ConfigurationContainerKey];
 ///     }
 /// 
 ///     <see langword="public static"/> <typeparamref name="T"/>? LoadConfiguration()
@@ -27,14 +29,14 @@ namespace WinUI3Utilities.Attributes;
 ///         <see langword="try"/><br/>
 ///         {
 ///             <see langword="return new"/> <typeparamref name="T"/>(
-///                 _configurationContainer.Values[nameof(<typeparamref name="T"/>.Property1)].<see cref="CastMethod"/>&lt;Type1&gt;()
-///                 _configurationContainer.Values[nameof(<typeparamref name="T"/>.Property2)].<see cref="CastMethod"/>&lt;Type2&gt;()
+///                 _configurationContainer.Values[<see langword="nameof"/>(<typeparamref name="T"/>.Property1)].<see cref="CastMethod"/>&lt;Type1&gt;()
+///                 _configurationContainer.Values[<see langword="nameof"/>(<typeparamref name="T"/>.Property2)].<see cref="CastMethod"/>&lt;Type2&gt;()
 ///                 ...
 ///             );
 ///         }
 ///         <see langword="catch"/><br/>
 ///         {
-///             <see langword="return null"/>;
+///             <see langword="return default"/>;
 ///         }
 ///     }
 /// 

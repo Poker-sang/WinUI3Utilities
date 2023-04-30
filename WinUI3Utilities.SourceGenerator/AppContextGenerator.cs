@@ -82,7 +82,7 @@ partial class {typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualified
         }}
         catch
         {{
-            return null;
+            return default;
         }}
     }}
 

@@ -90,6 +90,15 @@ public static class ThrowHelper
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static void NotSupported(string? message = null) => throw new NotSupportedException(message);
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="message"></param>
+    /// <exception cref="NullReferenceException"/>
+    [DoesNotReturn]
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void NullReference(string? message = null) => throw new NullReferenceException(message);
+
     #region With generic return
 
     /// <summary>
@@ -172,6 +181,15 @@ public static class ThrowHelper
     [DoesNotReturn]
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static TReturn NotSupported<TReturn>(string? message = null) => throw new NotSupportedException(message);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="message"></param>
+    /// <exception cref="NullReferenceException"/>
+    [DoesNotReturn]
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static TReturn NullReference<TReturn>(string? message = null) => throw new NullReferenceException(message);
 
     #endregion
 }
