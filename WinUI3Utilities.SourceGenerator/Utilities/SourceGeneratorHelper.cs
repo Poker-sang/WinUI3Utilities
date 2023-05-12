@@ -9,7 +9,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace WinUI3Utilities.SourceGenerator.Utilities;
 
-internal static class Helper
+internal static class SourceGeneratorHelper
 {
     internal const string AttributeNamespace = $"{nameof(WinUI3Utilities)}.Attributes.";
     internal const string DisableSourceGeneratorAttribute = AttributeNamespace + "DisableSourceGeneratorAttribute";
@@ -94,7 +94,7 @@ internal static class Helper
     internal static InvocationExpressionSyntax GetRegistration(string propertyName, ITypeSymbol type, ITypeSymbol specificClass, ExpressionSyntax metadataCreation) => InvocationExpression(MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression, IdentifierName("global::Microsoft.UI.Xaml.DependencyProperty"), IdentifierName("Register")))
             .AddArgumentListArguments(
-                Argument(NameOfExpression(specificClass.GetStaticMemberAccessExpression(propertyName))),
+                Argument(NameOfExpression(propertyName)),
                 Argument(TypeOfExpression(type.GetTypeSyntax(false))),
                 Argument(TypeOfExpression(specificClass.GetTypeSyntax(false))),
                 Argument(metadataCreation));
@@ -135,10 +135,10 @@ internal static class Helper
     /// </code>
     /// </summary>
     /// <returns>Getter</returns>
-    internal static AccessorDeclarationSyntax GetGetter(string fieldName, bool isNullable, ITypeSymbol type, ITypeSymbol containingType)
+    internal static AccessorDeclarationSyntax GetGetter(string fieldName, bool isNullable, ITypeSymbol type)
     {
         ExpressionSyntax getProperty = InvocationExpression(GetThisMemberAccessExpression("GetValue"))
-            .AddArgumentListArguments(Argument(containingType.GetStaticMemberAccessExpression(fieldName)));
+            .AddArgumentListArguments(Argument(IdentifierName(fieldName)));
         if (type.SpecialType != SpecialType.System_Object)
             getProperty = CastExpression(type.GetTypeSyntax(isNullable), getProperty);
 
@@ -154,10 +154,10 @@ internal static class Helper
     /// </code>
     /// </summary>
     /// <returns>Setter</returns>
-    internal static AccessorDeclarationSyntax GetSetter(string fieldName, bool isSetterPrivate, ITypeSymbol containingType)
+    internal static AccessorDeclarationSyntax GetSetter(string fieldName, bool isSetterPrivate)
     {
         ExpressionSyntax setProperty = InvocationExpression(GetThisMemberAccessExpression("SetValue"))
-            .AddArgumentListArguments(Argument(containingType.GetStaticMemberAccessExpression(fieldName)), Argument(IdentifierName("value")));
+            .AddArgumentListArguments(Argument(IdentifierName(fieldName)), Argument(IdentifierName("value")));
         var setter = AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
             .WithExpressionBody(ArrowExpressionClause(setProperty))
             .WithSemicolonToken(Token(SyntaxKind.SemicolonToken));

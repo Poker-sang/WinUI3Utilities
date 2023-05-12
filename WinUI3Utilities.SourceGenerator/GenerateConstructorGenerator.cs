@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using WinUI3Utilities.SourceGenerator.Utilities;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using static WinUI3Utilities.SourceGenerator.Utilities.Helper;
+using static WinUI3Utilities.SourceGenerator.Utilities.SourceGeneratorHelper;
 
 namespace WinUI3Utilities.SourceGenerator;
 

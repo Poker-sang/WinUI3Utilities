@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using static WinUI3Utilities.SourceGenerator.Utilities.Helper;
+using static WinUI3Utilities.SourceGenerator.Utilities.SourceGeneratorHelper;
 
 namespace WinUI3Utilities.SourceGenerator;
 

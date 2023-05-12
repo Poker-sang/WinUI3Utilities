@@ -28,7 +28,11 @@ namespace Sample;
 
 public partial class App : Application
 {
-    public App() => InitializeComponent();
+    public App()
+    {
+        InitializeComponent();
+        CurrentContext.Title = nameof(Sample);
+    }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
@@ -113,7 +117,7 @@ When saving configuration, you can use the following code:
 AppContext.SaveConfiguration(AppContext.AppConfig)
 ```
 
-### Globalization
+### Localization
 
 Generate all the .resw files under the specified namespace.
 
@@ -123,7 +127,10 @@ Sample.csproj
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
-    ...
+    ... 
+    <PropertyGroup>
+        <EnableDefaultPriItems>false</EnableDefaultPriItems>
+    </PropertyGroup>
     <Target Name="InjectAdditionalFiles" BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun">
         <ItemGroup>
             <AdditionalFiles Include="@(PRIResource)" SourceItemGroup="PRIResource" />
