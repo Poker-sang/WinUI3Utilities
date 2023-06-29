@@ -8,6 +8,12 @@ namespace WinUI3Utilities.Internal.PlatformInvoke;
 /// </summary>
 internal enum WindowMessage : uint
 {
+    WA_ACTIVE = 0x01,
+
+    WA_CLICKACTIVE = 0x02,
+
+    WA_INACTIVE = 0x00,
+
     /// <summary>
     /// Sent after a window has been moved.
     /// See <a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/wm-move">WM_MOVE message</a>.

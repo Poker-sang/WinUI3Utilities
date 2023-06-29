@@ -9,18 +9,22 @@ public enum BackdropType
     /// None
     /// </summary>
     None,
+
     /// <summary>
     /// Desktop Acrylic
     /// </summary>
     Acrylic,
+
     /// <summary>
     /// Mica Base
     /// </summary>
     Mica,
+
     /// <summary>
     /// Mica Base Alt
     /// </summary>
     MicaAlt,
+
     /// <summary>
     /// Maintaining the status quo
     /// </summary>

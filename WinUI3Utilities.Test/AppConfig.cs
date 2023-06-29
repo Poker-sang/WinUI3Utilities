@@ -13,7 +13,7 @@ public partial class AppConfig
 
     [AttributeIgnore(typeof(SettingsViewModelAttribute<>), typeof(GenerateConstructorAttribute), typeof(AppContextAttribute<>))]
     public bool TestProperty { get; set; } = true;
-    
+
     public bool TestProperty2 { get; set; } = true;
 
     public Visibility TestProperty3 { get; set; }

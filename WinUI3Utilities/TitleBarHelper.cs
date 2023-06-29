@@ -1,10 +1,9 @@
-using System;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
 using Windows.Foundation.Metadata;
+using WinUI3Utilities.Internal.PlatformInvoke;
 
 namespace WinUI3Utilities;
 
@@ -99,69 +98,86 @@ public static class TitleBarHelper
     }
 
     /// <summary>
-    /// TitleBar type
-    /// </summary>
-    [Flags]
-    public enum TitleBarType
-    {
-        /// <summary>
-        /// Neither
-        /// </summary>
-        Neither,
-
-        /// <summary>
-        /// Use <see cref="TryCustomizeTitleBar(Microsoft.UI.Xaml.Window, FrameworkElement)"/>
-        /// </summary>
-        Window,
-
-        /// <summary>
-        /// Use <see cref="TryCustomizeTitleBar(AppWindowTitleBar)"/>
-        /// </summary>
-        AppWindow,
-
-        /// <summary>
-        /// <strong>Use with Caution</strong><br/>
-        /// Use both of <see cref="TryCustomizeTitleBar(Microsoft.UI.Xaml.Window, FrameworkElement)"/> and <see cref="TryCustomizeTitleBar(AppWindowTitleBar)"/>
-        /// </summary>
-        Both = Window | AppWindow
-    }
-
-    /// <summary>
     /// Customize title bar when supported
     /// </summary>
     /// <remarks>
-    /// Related to <see cref="TitleBarType.Window"/>
+    /// Related to <see cref="TitleBarType.Window"/>, set <see cref="Window.ExtendsContentIntoTitleBar"/> and <see cref="Window.SetTitleBar"/>
     /// </remarks>
     /// <returns>Whether customization of title bar is supported</returns>
-    public static bool TryCustomizeTitleBar(Window window, FrameworkElement titleBar)
+    public static void TryCustomizeTitleBar(Window window, FrameworkElement titleBar)
     {
-        if (!AppWindowTitleBar.IsCustomizationSupported())
-            return false;
-
-        CurrentContext.App.Resources["WindowCaptionBackground"] = new SolidColorBrush(Colors.Transparent);
-        CurrentContext.App.Resources["WindowCaptionBackgroundDisabled"] = new SolidColorBrush(Colors.Transparent);
         window.ExtendsContentIntoTitleBar = true;
         window.SetTitleBar(titleBar);
-        return true;
     }
 
     /// <summary>
     /// Customize title bar when supported
     /// </summary>
     /// <remarks>
-    /// Related to <see cref="TitleBarType.AppWindow"/>
+    /// Related to <see cref="TitleBarType.AppWindow"/>, set <see cref="AppWindowTitleBar.ExtendsContentIntoTitleBar"/>
     /// </remarks>
     /// <returns>Whether customization of title bar is supported</returns>
-    public static bool TryCustomizeTitleBar(AppWindowTitleBar appWindowTitleBar)
+    public static void TryCustomizeTitleBar(AppWindowTitleBar appWindowTitleBar)
     {
-        if (!AppWindowTitleBar.IsCustomizationSupported())
-            return false;
-
         appWindowTitleBar.ExtendsContentIntoTitleBar = true;
-        appWindowTitleBar.ButtonBackgroundColor = Colors.Transparent;
-        appWindowTitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
-        appWindowTitleBar.ButtonHoverBackgroundColor = CurrentContext.App.Resources["SystemControlBackgroundBaseLowBrush"].To<SolidColorBrush>().Color;
-        appWindowTitleBar.ButtonForegroundColor = CurrentContext.App.Resources["SystemControlForegroundBaseHighBrush"].To<SolidColorBrush>().Color;
-        return true;
+    }
+
+    /// <summary>
+    /// Work when in <see cref="TitleBarType.AppWindow"/>
+    /// </summary>
+    /// <param name="window"></param>
+    /// <param name="useDark">use dark theme</param>
+    public static void SetAppWindowTitleBarButtonColor(Window window, bool useDark)
+    {
+        window.AppWindow.TitleBar.ButtonForegroundColor = useDark ? Colors.White : Colors.Black;
+        window.AppWindow.TitleBar.ButtonHoverBackgroundColor = useDark
+            ? new()
+            {
+                A = 0x33,
+                R = 0xFF,
+                G = 0xFF,
+                B = 0xFF
+            }
+            : new()
+            {
+                A = 0x33,
+                R = 0,
+                G = 0,
+                B = 0
+            };
+    }
+
+    /// <summary>
+    /// Work when in <see cref="TitleBarType.Window"/>
+    /// </summary>
+    /// <param name="window"></param>
+    /// <param name="useDark">use dark theme</param>
+    /// <param name="setAppResources">Set <see cref="Application.Current"/>.Resources["WindowCaptionForeground"]</param>
+    public static void SetWindowTitleBarButtonColor(Window window, bool useDark, bool setAppResources)
+    {
+        if (setAppResources)
+            Application.Current.Resources["WindowCaptionForeground"] = useDark ? Colors.White : Colors.Black;
+
+        TriggerTitleBarRepaint(window);
+    }
+
+    /// <summary>
+    /// To trigger repaint tracking task id 38044406
+    /// </summary>
+    /// <param name="window"></param>
+    private static void TriggerTitleBarRepaint(Window window)
+    {
+        var hWnd = (nint)window.AppWindow.Id.Value;
+        var activeWindow = User32.GetActiveWindow();
+        if (hWnd == activeWindow)
+        {
+            _ = User32.SendMessage(hWnd, WindowMessage.WM_ACTIVATE, (nint)WindowMessage.WA_INACTIVE, 0);
+            _ = User32.SendMessage(hWnd, WindowMessage.WM_ACTIVATE, (nint)WindowMessage.WA_ACTIVE, 0);
+        }
+        else
+        {
+            _ = User32.SendMessage(hWnd, WindowMessage.WM_ACTIVATE, (nint)WindowMessage.WA_ACTIVE, 0);
+            _ = User32.SendMessage(hWnd, WindowMessage.WM_ACTIVATE, (nint)WindowMessage.WA_INACTIVE, 0);
+        }
     }
 }

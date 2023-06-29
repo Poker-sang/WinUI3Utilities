@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using Microsoft.UI.Xaml;
-using WinUI3Utilities.Internal.PlatformInvoke;
 using WinUI3Utilities.Attributes;
+using WinUI3Utilities.Internal.PlatformInvoke;
 
 namespace WinUI3Utilities;
 
@@ -17,18 +17,25 @@ public static class WindowSizeHelper
     public class WindowSizeParameter
     {
         #region System.ExecutionEngineException would throw if delete the following field
+
         internal User32.WinProc NewWndProc = null!;
+
         internal nint OldWndProc;
+
         #endregion
+
         /// <summary>
         /// </summary>
         public int MinWidth;
+
         /// <summary>
         /// </summary>
         public int MinHeight;
+
         /// <summary>
         /// </summary>
         public int MaxWidth;
+
         /// <summary>
         /// </summary>
         public int MaxHeight;

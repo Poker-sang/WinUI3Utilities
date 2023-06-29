@@ -70,15 +70,15 @@ public class DependencyPropertyAnalyzer : DiagnosticAnalyzer
                     },
                     ArgumentList.Arguments:
                     [
-                        { Expression: { } propertyNameExpression },
-                        { Expression: TypeOfExpressionSyntax { Type: { } propertyType } },
-                        { Expression: TypeOfExpressionSyntax { Type: { } classType } },
+                    { Expression: { } propertyNameExpression },
+                    { Expression: TypeOfExpressionSyntax { Type: { } propertyType } },
+                    { Expression: TypeOfExpressionSyntax { Type: { } classType } },
+                    {
+                        Expression: ObjectCreationExpressionSyntax
                         {
-                            Expression: ObjectCreationExpressionSyntax
-                            {
-                                Type: IdentifierNameSyntax { Identifier.ValueText: "PropertyMetadata" }
-                            }
+                            Type: IdentifierNameSyntax { Identifier.ValueText: "PropertyMetadata" }
                         }
+                    }
                     ]
                 }
             })
@@ -139,20 +139,20 @@ public class DependencyPropertyAnalyzer : DiagnosticAnalyzer
                 Body.Statements:
                 [
                     ReturnStatementSyntax
+                {
+                    Expression: CastExpressionSyntax
                     {
-                        Expression: CastExpressionSyntax
+                        Type: var tempType,
+                        Expression: InvocationExpressionSyntax
                         {
-                            Type: var tempType,
-                            Expression: InvocationExpressionSyntax
-                            {
-                                Expression: IdentifierNameSyntax { Identifier.ValueText: "GetValue" },
-                                ArgumentList.Arguments:
+                            Expression: IdentifierNameSyntax { Identifier.ValueText: "GetValue" },
+                            ArgumentList.Arguments:
                                 [
                                     { Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } }
                                 ]
-                            }
                         }
                     }
+                }
                 ]
             } => (tempName, tempType),
             // get => (x)GetValue(xxx); 
@@ -187,17 +187,17 @@ public class DependencyPropertyAnalyzer : DiagnosticAnalyzer
                 Body.Statements:
                 [
                     ExpressionStatementSyntax
+                {
+                    Expression: InvocationExpressionSyntax
                     {
-                        Expression: InvocationExpressionSyntax
-                        {
-                            Expression: IdentifierNameSyntax { Identifier.ValueText: "SetValue" },
-                            ArgumentList.Arguments:
+                        Expression: IdentifierNameSyntax { Identifier.ValueText: "SetValue" },
+                        ArgumentList.Arguments:
                             [
-                                { Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } },
-                                { Expression: IdentifierNameSyntax { Identifier.ValueText: "value" } }
+                            { Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } },
+                            { Expression: IdentifierNameSyntax { Identifier.ValueText: "value" } }
                             ]
-                        }
                     }
+                }
                 ]
             } => tempName,
             // set => SetValue(xxx, value);
@@ -207,8 +207,8 @@ public class DependencyPropertyAnalyzer : DiagnosticAnalyzer
                     Expression: IdentifierNameSyntax { Identifier.ValueText: "SetValue" },
                     ArgumentList.Arguments:
                     [
-                        { Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } },
-                        { Expression: IdentifierNameSyntax { Identifier.ValueText: "value" } }
+                    { Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } },
+                    { Expression: IdentifierNameSyntax { Identifier.ValueText: "value" } }
                     ]
                 }
             } => tempName,

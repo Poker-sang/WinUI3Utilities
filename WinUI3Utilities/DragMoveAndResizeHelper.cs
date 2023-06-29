@@ -16,56 +16,7 @@ namespace WinUI3Utilities;
 public static class DragMoveAndResizeHelper
 {
     /// <summary>
-    /// Info type for <see cref="DragMoveAndResizeHelper"/>
-    /// </summary>
-    /// <remarks>
-    /// The default value of <see cref="AppWindow"/> is <see cref="CurrentContext.AppWindow"/>
-    /// </remarks>
-    public record DragMoveAndResizeInfo(Mode Mode)
-    {
-        /// <summary>
-        /// Default: 10
-        /// </summary>
-        public int MinOffset { get; set; } = 10;
-
-        /// <summary>
-        /// Default: 10
-        /// </summary>
-        public int DraggableBorderThickness { get; set; } = 10;
-
-        /// <summary>
-        /// Default: (1280, 720)
-        /// </summary>
-        public (int X, int Y) MinSize { get; set; } = (1280, 720);
-
-        /// <summary>
-        /// Default: <see cref="WindowHelper.GetScreenSize"/>
-        /// </summary>
-        public (int X, int Y) MaxSize { get; set; } = WindowHelper.GetScreenSize();
-    }
-
-    /// <summary>
-    /// Mode for <inheritdoc cref="DragMoveAndResizeInfo"/>
-    /// </summary>
-    [Flags]
-    public enum Mode
-    {
-        /// <summary>
-        /// Enable moving window by dragging <see cref="UIElement"/>
-        /// </summary>
-        DragMove = 1,
-        /// <summary>
-        /// Enable resizing window by dragging the border of <see cref="UIElement"/>
-        /// </summary>
-        Resize,
-        /// <summary>
-        /// Enable both
-        /// </summary>
-        Both = DragMove | Resize
-    }
-
-    /// <summary>
-    /// Once set, 3 events that are subscribed to by <see cref="RootPanel"/> (call <see cref="SetDragMove"/>, and use <see cref="Mode.Both"/>)<br/>
+    /// Once set, 3 events that are subscribed to by <see cref="RootPanel"/> (call <see cref="SetDragMove"/>, and use <see cref="DragMoveAndResizeMode.Both"/>)<br/>
     /// When set to a new <see cref="UIElement"/> or <see langword="null"/>, the old <see cref="RootPanel"/>'s events will be unsubscribed (call <see cref="UnsetDragMove"/>)
     /// </summary>
     public static UIElement? RootPanel
@@ -77,7 +28,7 @@ public static class DragMoveAndResizeHelper
                 UnsetDragMove(_rootPanel);
             _rootPanel = value;
             if (_rootPanel is not null)
-                SetDragMove(_rootPanel, new(Mode.Both));
+                SetDragMove(_rootPanel, new(DragMoveAndResizeMode.Both));
         }
     }
 
@@ -126,7 +77,7 @@ public static class DragMoveAndResizeHelper
         None = 0,
 
         /// <summary>
-        /// Only available when <see cref="Mode.Resize"/> is set
+        /// Only available when <see cref="DragMoveAndResizeMode.Resize"/> is set
         /// </summary>
         Top = 1 << 0,
 
@@ -152,7 +103,7 @@ public static class DragMoveAndResizeHelper
         RightBottom = Right | Bottom,
 
         /// <summary>
-        /// Only available when <see cref="Mode.DragMove"/> is set
+        /// Only available when <see cref="DragMoveAndResizeMode.DragMove"/> is set
         /// </summary>
         Move = Top | Left | Right | Bottom
     }
@@ -170,7 +121,7 @@ public static class DragMoveAndResizeHelper
         var height = frameworkElement.ActualHeight;
         var position = point.Position;
 
-        if (info.Mode is Mode.DragMove)
+        if (info.Mode is DragMoveAndResizeMode.DragMove)
             _type = PointerOperationType.Move;
         else
         {
@@ -183,7 +134,7 @@ public static class DragMoveAndResizeHelper
                 _type |= PointerOperationType.Right;
             if (height - position.Y < info.DraggableBorderThickness)
                 _type |= PointerOperationType.Bottom;
-            if (_type is PointerOperationType.None && info.Mode is not Mode.Resize)
+            if (_type is PointerOperationType.None && info.Mode is not DragMoveAndResizeMode.Resize)
                 _type = PointerOperationType.Move;
         }
 
@@ -206,7 +157,7 @@ public static class DragMoveAndResizeHelper
 
         var presenter = window.AppWindow.Presenter.To<OverlappedPresenter>();
 
-        if (presenter.State is not OverlappedPresenterState.Maximized && info.Mode.HasFlag(Mode.Resize))
+        if (presenter.State is not OverlappedPresenterState.Maximized && info.Mode.HasFlag(DragMoveAndResizeMode.Resize))
         {
             var left = position._x < info.MinOffset;
             var top = position._y < info.MinOffset;

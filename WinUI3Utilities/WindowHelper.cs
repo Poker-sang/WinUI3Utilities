@@ -1,13 +1,8 @@
-using Microsoft.UI;
-using Microsoft.UI.Xaml;
-using Windows.Graphics;
 using Microsoft.UI.Composition.SystemBackdrops;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using Windows.Graphics;
 using WinUI3Utilities.Internal.PlatformInvoke;
-using System;
-using Windows.Foundation;
-using Microsoft.UI.Windowing;
-using System.Runtime.InteropServices;
 
 namespace WinUI3Utilities;
 
@@ -21,12 +16,11 @@ public static class WindowHelper
     /// </summary>
     /// <typeparam name="T">Target type</typeparam>
     /// <param name="obj"></param>
-    /// <param name="hWnd">Default: <see cref="CurrentContext.HWnd"/></param>
+    /// <param name="window">Default: <see cref="CurrentContext.Window"/></param>
     /// <returns><paramref name="obj"/></returns>
-    public static T InitializeWithWindow<T>(this T obj, nint hWnd = 0)
+    public static T InitializeWithWindow<T>(this T obj, Window? window = null)
     {
-        if (hWnd is 0)
-            hWnd = (nint)CurrentContext.HWnd;
+        var hWnd = (nint)(window ?? CurrentContext.Window).AppWindow.Id.Value;
         // When running on win32, FileOpenPicker needs to know the top-level hWnd via IInitializeWithWindow::Initialize.
         WinRT.Interop.InitializeWithWindow.Initialize(obj, hWnd);
         return obj;
@@ -89,56 +83,6 @@ public static class WindowHelper
     public static double GetScaleAdjustment(nint window) => User32.GetDpiForWindow(window) / 96d;
 
     /// <summary>
-    /// Info type for <see cref="Initialize"/>
-    /// </summary>
-    public record InitializeInfo
-    {
-        /// <summary>
-        /// Window size
-        /// </summary>
-        /// <remarks>
-        /// Default: <see langword="default"/>
-        /// </remarks>
-        public SizeInt32 Size { get; set; }
-
-        /// <summary>
-        /// TitleBar type
-        /// </summary>
-        /// <remarks>
-        /// Default: <see cref="TitleBarHelper.TitleBarType.Window"/>
-        /// </remarks>
-        public TitleBarHelper.TitleBarType TitleBarType { get; set; } = TitleBarHelper.TitleBarType.Window;
-
-        /// <summary>
-        /// Backdrop type
-        /// </summary>
-        /// <remarks>
-        /// Default: <see cref="BackdropType.MicaAlt"/>
-        /// </remarks>
-        public BackdropType BackdropType { get; set; } = BackdropType.MicaAlt;
-
-        /// <summary>
-        /// Icon's absolute path
-        /// </summary>
-        /// <remarks>
-        /// Has the same effect as <see cref="IconId"/>, and only works when using default titlebar (<see cref="TitleBarHelper.TitleBarType.Neither"/>)
-        /// <br/>
-        /// Default: ""
-        /// </remarks>
-        public string IconPath { get; set; } = "";
-
-        /// <summary>
-        /// Icon id 
-        /// </summary>
-        /// <remarks>
-        /// Has the same effect as <see cref="IconPath"/>, and only works when using default titlebar (<see cref="TitleBarHelper.TitleBarType.Neither"/>)
-        /// <br/>
-        /// Default: <see langword="default"/>
-        /// </remarks>
-        public IconId IconId { get; set; } = default;
-    }
-
-    /// <summary>
     /// </summary>
     /// <remarks>
     /// <code>
@@ -160,14 +104,11 @@ public static class WindowHelper
     /// </code>
     /// </remarks>
     /// <param name="info"></param>
-    /// <param name="window">Default: <see cref="CurrentContext.Window"/></param>
-    /// <param name="title">Default: <see cref="CurrentContext.Title"/></param>
-    /// <param name="titleBar">Default: <see cref="CurrentContext.TitleBar"/></param>
-    public static void Initialize(this Window window, InitializeInfo info, string? title = null, FrameworkElement? titleBar = null)
+    /// <param name="window"></param>
+    /// <param name="title"></param>
+    /// <param name="titleBar"></param>
+    public static void Initialize(this Window window, InitializeInfo info, string title = "", FrameworkElement? titleBar = null)
     {
-        titleBar ??= CurrentContext.TitleBar;
-        title ??= CurrentContext.Title;
-
         window.AppWindow.Title = title;
 
         if (info.Size != default)
@@ -177,10 +118,10 @@ public static class WindowHelper
         else if (info.IconId != default)
             window.AppWindow.SetIcon(info.IconId);
 
-        if (info.TitleBarType.HasFlag(TitleBarHelper.TitleBarType.Window))
-            _ = TitleBarHelper.TryCustomizeTitleBar(window, titleBar);
-        if (info.TitleBarType.HasFlag(TitleBarHelper.TitleBarType.AppWindow))
-            _ = TitleBarHelper.TryCustomizeTitleBar(window.AppWindow.TitleBar);
+        if (info.TitleBarType.HasFlag(TitleBarType.Window) && titleBar is not null)
+            TitleBarHelper.TryCustomizeTitleBar(window, titleBar);
+        if (info.TitleBarType.HasFlag(TitleBarType.AppWindow))
+            TitleBarHelper.TryCustomizeTitleBar(window.AppWindow.TitleBar);
 
         window.SystemBackdrop = info.BackdropType switch
         {

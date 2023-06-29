@@ -27,13 +27,13 @@ public static class TeachingTipHelper
     /// <param name="e"></param>
     public static void TeachingTipLoaded(object sender, RoutedEventArgs e) => RootTeachingTip = sender.To<TeachingTip>();
 
-    /// <inheritdoc cref="Show(string, Severity, string, bool)"/>
+    /// <inheritdoc cref="Show(string, TeachingTipSeverity, string, bool)"/>
     public static void Show(string title, IconSource icon, string hint = "", bool isLightDismissEnabled = false)
     {
         RootTeachingTip.Show(title, icon, hint, isLightDismissEnabled);
     }
 
-    /// <inheritdoc cref="Show(TeachingTip, string, Severity, string, bool)"/>
+    /// <inheritdoc cref="Show(TeachingTip, string, TeachingTipSeverity, string, bool)"/>
     public static void Show(this TeachingTip teachingTip, string title, IconSource? icon, string subtitle = "", bool isLightDismissEnabled = false)
     {
         teachingTip.IsLightDismissEnabled = isLightDismissEnabled;
@@ -46,8 +46,8 @@ public static class TeachingTipHelper
     /// <summary>
     /// Show <see cref="RootTeachingTip"/>
     /// </summary>
-    /// <inheritdoc cref="Show(TeachingTip, string, Severity, string, bool)"/>
-    public static void Show(string title, Severity icon = Severity.Ok, string subtitle = "", bool isLightDismissEnabled = false)
+    /// <inheritdoc cref="Show(TeachingTip, string, TeachingTipSeverity, string, bool)"/>
+    public static void Show(string title, TeachingTipSeverity icon = TeachingTipSeverity.Ok, string subtitle = "", bool isLightDismissEnabled = false)
     {
         RootTeachingTip.Show(title, icon, subtitle, isLightDismissEnabled);
     }
@@ -55,8 +55,8 @@ public static class TeachingTipHelper
     /// <summary>
     /// Show <paramref name="teachingTip"/>
     /// </summary>
-    /// <inheritdoc cref="ShowAndHide(TeachingTip, string, Severity, string, int, bool)"/>
-    public static void Show(this TeachingTip teachingTip, string title, Severity icon = Severity.Ok, string subtitle = "", bool isLightDismissEnabled = false)
+    /// <inheritdoc cref="ShowAndHide(TeachingTip, string, TeachingTipSeverity, string, int, bool)"/>
+    public static void Show(this TeachingTip teachingTip, string title, TeachingTipSeverity icon = TeachingTipSeverity.Ok, string subtitle = "", bool isLightDismissEnabled = false)
     {
         RootTeachingTip.Show(title, icon.GetIconSource(), subtitle, isLightDismissEnabled);
     }
@@ -67,7 +67,7 @@ public static class TeachingTipHelper
         RootTeachingTip.ShowAndHide(title, icon, subtitle, mSec, isLightDismissEnabled);
     }
 
-    /// <inheritdoc cref="ShowAndHide(TeachingTip, string, Severity, string, int, bool)"/>
+    /// <inheritdoc cref="ShowAndHide(TeachingTip, string, TeachingTipSeverity, string, int, bool)"/>
     public static async void ShowAndHide(this TeachingTip teachingTip, string title, IconSource? icon, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true)
     {
         HideSnakeBarTime = DateTime.Now + TimeSpan.FromMilliseconds(mSec - 100);
@@ -83,8 +83,8 @@ public static class TeachingTipHelper
     /// <summary>
     /// Show <see cref="RootTeachingTip"/> and hide after <paramref name="mSec"/> microseconds
     /// </summary>
-    /// <inheritdoc cref="ShowAndHide(TeachingTip, string, Severity, string, int, bool)"/>
-    public static void ShowAndHide(string title, Severity icon = Severity.Ok, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true)
+    /// <inheritdoc cref="ShowAndHide(TeachingTip, string, TeachingTipSeverity, string, int, bool)"/>
+    public static void ShowAndHide(string title, TeachingTipSeverity icon = TeachingTipSeverity.Ok, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true)
     {
         RootTeachingTip.ShowAndHide(title, icon, subtitle, mSec, isLightDismissEnabled);
     }
@@ -98,56 +98,25 @@ public static class TeachingTipHelper
     /// <param name="subtitle"><see cref="TeachingTip.Subtitle"/></param>
     /// <param name="mSec">Automatically hide after <paramref name="mSec"/> milliseconds</param>
     /// <param name="isLightDismissEnabled"><see cref="TeachingTip.IsLightDismissEnabled"/></param>
-    public static void ShowAndHide(this TeachingTip teachingTip, string title, Severity icon = Severity.Ok, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true)
+    public static void ShowAndHide(this TeachingTip teachingTip, string title, TeachingTipSeverity icon = TeachingTipSeverity.Ok, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true)
     {
         teachingTip.ShowAndHide(title, icon.GetIconSource(), subtitle, mSec, isLightDismissEnabled);
     }
 
-    /// <summary>
-    /// Snack bar severity on <see cref="TeachingTip.IconSource"/> (Segoe Fluent Icons font)
-    /// </summary>
-    public enum Severity
+    private static IconSource? GetIconSource(this TeachingTipSeverity severity)
     {
-        /// <summary>
-        /// Accept (E10B)
-        /// </summary>
-        Ok,
-        /// <summary>
-        /// Info (E946)
-        /// </summary>
-        Information,
-        /// <summary>
-        /// Important (E171)
-        /// </summary>
-        Important,
-        /// <summary>
-        /// Warning (E7BA)
-        /// </summary>
-        Warning,
-        /// <summary>
-        /// ErrorBadge (EA39)
-        /// </summary>
-        Error,
-        /// <summary>
-        /// <see langword="null"/>
-        /// </summary>
-        None
-    }
-
-    private static IconSource? GetIconSource(this Severity severity)
-    {
-        return severity is Severity.None
+        return severity is TeachingTipSeverity.None
             ? null
             : new FontIconSource
             {
                 Glyph = severity switch
                 {
-                    Severity.Ok => "\xE10B", // Accept
-                    Severity.Information => "\xE946", // Info
-                    Severity.Important => "\xE171", // Important
-                    Severity.Warning => "\xE7BA", // Warning
-                    Severity.Error => "\xEA39", // ErrorBadge
-                    _ => ThrowHelper.ArgumentOutOfRange<Severity, string>(severity)
+                    TeachingTipSeverity.Ok => "\xE10B", // Accept
+                    TeachingTipSeverity.Information => "\xE946", // Info
+                    TeachingTipSeverity.Important => "\xE171", // Important
+                    TeachingTipSeverity.Warning => "\xE7BA", // Warning
+                    TeachingTipSeverity.Error => "\xEA39", // ErrorBadge
+                    _ => ThrowHelper.ArgumentOutOfRange<TeachingTipSeverity, string>(severity)
                 }
             };
     }

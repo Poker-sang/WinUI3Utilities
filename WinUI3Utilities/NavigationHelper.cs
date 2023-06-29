@@ -5,7 +5,7 @@ using Microsoft.UI.Xaml.Media.Animation;
 namespace WinUI3Utilities;
 
 /// <summary>
-/// A set of method for <see cref="NavigationView"/>
+/// A set of method for <see cref="Frame"/> and <see cref="NavigationView"/>
 /// </summary>
 public static class NavigationHelper
 {
@@ -27,5 +27,19 @@ public static class NavigationHelper
         frame ??= CurrentContext.Frame;
         _ = frame.Navigate(page, parameter, info);
         navigationView.IsBackEnabled = frame.CanGoBack;
+    }
+
+    /// <summary>
+    /// Navigate to <typeparamref name="T"/>
+    /// </summary>
+    /// <param name="frame"></param>
+    /// <param name="parameter"></param>
+    /// <param name="info"></param>
+    /// <param name="navigationView">Set <seealso cref="NavigationView.IsBackEnabled"/></param>
+    public static void Navigate<T>(this Frame frame, object? parameter = null, NavigationTransitionInfo? info = null, NavigationView? navigationView = null) where T : Page
+    {
+        _ = frame.Navigate(typeof(T), parameter, info);
+        if (navigationView is not null)
+            navigationView.IsBackEnabled = frame.CanGoBack;
     }
 }

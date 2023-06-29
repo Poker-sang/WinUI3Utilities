@@ -59,14 +59,14 @@ public class DependencyPropertyCodeFixProvider001 : DependencyPropertyCodeFixPro
                     ArgumentList.Arguments:
                     [
                         _,
-                        { Expression: TypeOfExpressionSyntax { Type: { } propertyType } },
+                    { Expression: TypeOfExpressionSyntax { Type: { } propertyType } },
                         _,
+                    {
+                        Expression: BaseObjectCreationExpressionSyntax
                         {
-                            Expression: BaseObjectCreationExpressionSyntax
-                            {
-                                ArgumentList.Arguments: [{ } defaultValue, ..] arguments
-                            }
+                            ArgumentList.Arguments: [{ } defaultValue, ..] arguments
                         }
+                    }
                     ]
                 }
             })
