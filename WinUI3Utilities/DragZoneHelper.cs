@@ -45,7 +45,7 @@ public static class DragZoneHelper
 
     /// <summary>
     /// Calculate dragging-zones of title bar<br/>
-    /// <strong>You MUST transform the rectangles with <see cref="WindowHelper.GetScaleAdjustment"/> before calling <see cref="AppWindowTitleBar.SetDragRectangles"/></strong>
+    /// <strong>You MUST transform the rectangles with <see cref="WindowHelper.GetScaleAdjustment(Window)"/> before calling <see cref="AppWindowTitleBar.SetDragRectangles"/></strong>
     /// </summary>
     /// <param name="viewportWidth"></param>
     /// <param name="dragZoneHeight"></param>

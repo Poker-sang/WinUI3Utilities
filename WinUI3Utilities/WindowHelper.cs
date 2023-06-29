@@ -1,6 +1,13 @@
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Windows.Graphics;
-using WinUI3Utilities.Internal.PlatformInvoke.User32;
+using Microsoft.UI.Composition.SystemBackdrops;
+using Microsoft.UI.Xaml.Media;
+using WinUI3Utilities.Internal.PlatformInvoke;
+using System;
+using Windows.Foundation;
+using Microsoft.UI.Windowing;
+using System.Runtime.InteropServices;
 
 namespace WinUI3Utilities;
 
@@ -54,9 +61,135 @@ public static class WindowHelper
         };
 
     /// <summary>
+    /// Get DPI
+    /// </summary>
+    /// <param name="window"></param>
+    /// <returns>DPI</returns>
+    public static double GetDpi(this Window window) => User32.GetDpiForWindow((nint)window.AppWindow.Id.Value);
+
+    /// <summary>
+    /// Get DPI
+    /// </summary>
+    /// <param name="window"></param>
+    /// <returns>DPI</returns>
+    public static double GetDpi(nint window) => User32.GetDpiForWindow(window);
+
+    /// <summary>
     /// Get Scale Adjustment
     /// </summary>
-    /// <param name="window">Default: <see cref="CurrentContext.Window"/></param>
+    /// <param name="window"></param>
     /// <returns>scale factor percent</returns>
-    public static double GetScaleAdjustment(Window? window = null) => (window ?? CurrentContext.Window).Content.XamlRoot.RasterizationScale;
+    public static double GetScaleAdjustment(this Window window) => GetDpi(window) / 96d;
+
+    /// <summary>
+    /// Get Scale Adjustment
+    /// </summary>
+    /// <param name="window"></param>
+    /// <returns>scale factor percent</returns>
+    public static double GetScaleAdjustment(nint window) => User32.GetDpiForWindow(window) / 96d;
+
+    /// <summary>
+    /// Info type for <see cref="Initialize"/>
+    /// </summary>
+    public record InitializeInfo
+    {
+        /// <summary>
+        /// Window size
+        /// </summary>
+        /// <remarks>
+        /// Default: <see langword="default"/>
+        /// </remarks>
+        public SizeInt32 Size { get; set; }
+
+        /// <summary>
+        /// TitleBar type
+        /// </summary>
+        /// <remarks>
+        /// Default: <see cref="TitleBarHelper.TitleBarType.Window"/>
+        /// </remarks>
+        public TitleBarHelper.TitleBarType TitleBarType { get; set; } = TitleBarHelper.TitleBarType.Window;
+
+        /// <summary>
+        /// Backdrop type
+        /// </summary>
+        /// <remarks>
+        /// Default: <see cref="BackdropType.MicaAlt"/>
+        /// </remarks>
+        public BackdropType BackdropType { get; set; } = BackdropType.MicaAlt;
+
+        /// <summary>
+        /// Icon's absolute path
+        /// </summary>
+        /// <remarks>
+        /// Has the same effect as <see cref="IconId"/>, and only works when using default titlebar (<see cref="TitleBarHelper.TitleBarType.Neither"/>)
+        /// <br/>
+        /// Default: ""
+        /// </remarks>
+        public string IconPath { get; set; } = "";
+
+        /// <summary>
+        /// Icon id 
+        /// </summary>
+        /// <remarks>
+        /// Has the same effect as <see cref="IconPath"/>, and only works when using default titlebar (<see cref="TitleBarHelper.TitleBarType.Neither"/>)
+        /// <br/>
+        /// Default: <see langword="default"/>
+        /// </remarks>
+        public IconId IconId { get; set; } = default;
+    }
+
+    /// <summary>
+    /// </summary>
+    /// <remarks>
+    /// <code>
+    /// <paramref name="window"/>.AppWindow.Title = <paramref name="title"/>;<br/>
+    /// <br/>
+    /// <see langword="if"/> (<paramref name="info"/>.Size.HasValue)
+    ///     <paramref name="window"/>.AppWindow.Resize(<paramref name="info"/>.Size.Value);<br/>
+    /// <see langword="if"/> (<paramref name="info"/>.IconPath <see langword="is not"/> "")
+    ///     <paramref name="window"/>.AppWindow.SetIcon(<paramref name="info"/>.IconPath);<br/>
+    /// <see langword="else if"/> (<paramref name="info"/>.IconId != <see langword="default"/>)
+    ///     <paramref name="window"/>.AppWindow.SetIcon(<paramref name="info"/>.IconId);<br/>
+    /// <br/>
+    /// // try apply customize title bar (depends on <see cref="InitializeInfo.TitleBarType"/>)<br/>
+    /// <see cref="TitleBarHelper"/>... 
+    /// // try apply backdrop (depends on <see cref="InitializeInfo.BackdropType"/>)<br/>
+    /// <paramref name="window"/>.Window.SystemBackdrop = <paramref name="info"/>.BackdropType <see langword="switch"/> { ... }
+    /// // try set minimum size and maximum size of the window
+    /// _ = SetWindowSubclass(...);
+    /// </code>
+    /// </remarks>
+    /// <param name="info"></param>
+    /// <param name="window">Default: <see cref="CurrentContext.Window"/></param>
+    /// <param name="title">Default: <see cref="CurrentContext.Title"/></param>
+    /// <param name="titleBar">Default: <see cref="CurrentContext.TitleBar"/></param>
+    public static void Initialize(this Window window, InitializeInfo info, string? title = null, FrameworkElement? titleBar = null)
+    {
+        titleBar ??= CurrentContext.TitleBar;
+        title ??= CurrentContext.Title;
+
+        window.AppWindow.Title = title;
+
+        if (info.Size != default)
+            window.AppWindow.Resize(info.Size);
+        if (info.IconPath is not "")
+            window.AppWindow.SetIcon(info.IconPath);
+        else if (info.IconId != default)
+            window.AppWindow.SetIcon(info.IconId);
+
+        if (info.TitleBarType.HasFlag(TitleBarHelper.TitleBarType.Window))
+            _ = TitleBarHelper.TryCustomizeTitleBar(window, titleBar);
+        if (info.TitleBarType.HasFlag(TitleBarHelper.TitleBarType.AppWindow))
+            _ = TitleBarHelper.TryCustomizeTitleBar(window.AppWindow.TitleBar);
+
+        window.SystemBackdrop = info.BackdropType switch
+        {
+            BackdropType.None => null,
+            BackdropType.Acrylic => new DesktopAcrylicBackdrop(),
+            BackdropType.Mica => new MicaBackdrop(),
+            BackdropType.MicaAlt => new MicaBackdrop { Kind = MicaKind.BaseAlt },
+            BackdropType.Maintain => window.SystemBackdrop,
+            _ => ThrowHelper.ArgumentOutOfRange<BackdropType, SystemBackdrop>(info.BackdropType)
+        };
+    }
 }

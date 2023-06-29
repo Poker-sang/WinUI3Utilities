@@ -1,10 +1,12 @@
 using System;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using WinUI3Utilities.Attributes;
 using WinUI3Utilities.Test.Pages;
 
 namespace WinUI3Utilities.Test;
 
+[WindowSizeHelper]
 public sealed partial class MainWindow : Window
 {
     public MainWindow()
@@ -40,9 +42,10 @@ public sealed partial class MainWindow : Window
 
     private void ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs e)
     {
+        MaxWidth = 500;
         if (e.InvokedItemContainer.Tag is Type item && item != NavigateFrame.Content.GetType())
             NavigationHelper.GotoPage(item);
     }
 
-    private void TeachingTipOnLoaded(object sender, RoutedEventArgs e) => SnackBarHelper.RootSnackBar = sender.To<TeachingTip>();
+    private void TeachingTipOnLoaded(object sender, RoutedEventArgs e) => TeachingTipHelper.RootTeachingTip = sender.To<TeachingTip>();
 }

@@ -1,4 +1,4 @@
-namespace WinUI3Utilities.Internal.PlatformInvoke.User32;
+namespace WinUI3Utilities.Internal.PlatformInvoke;
 
 internal enum SystemMetric
 {

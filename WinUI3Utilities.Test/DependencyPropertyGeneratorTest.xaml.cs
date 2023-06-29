@@ -4,7 +4,7 @@ using WinUI3Utilities.Attributes;
 
 namespace WinUI3Utilities.Test;
 
-[DependencyProperty<AppConfig>("Prop", nameof(TestMethod1))]
+[DependencyProperty<AppConfig>("Prop", DependencyPropertyDefaultValue.UnsetValue, nameof(TestMethod1))]
 public sealed partial class DependencyPropertyGeneratorTest : UserControl
 {
     public DependencyPropertyGeneratorTest() => InitializeComponent();

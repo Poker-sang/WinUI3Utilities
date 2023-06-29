@@ -16,11 +16,10 @@ public partial class App : Application
 
     protected override void OnLaunched(LaunchActivatedEventArgs e)
     {
-        _ = new MainWindow();
-
-        AppHelper.Initialize(new()
+        new MainWindow().Initialize(new()
         {
-            Size = WindowHelper.EstimatedWindowSize()
+            Size = new(500, 400),
         });
+        CurrentContext.AppWindow.Show();
     }
 }

@@ -6,7 +6,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using Windows.Graphics;
-using WinUI3Utilities.Internal.PlatformInvoke.User32;
+using WinUI3Utilities.Internal.PlatformInvoke;
 
 namespace WinUI3Utilities;
 
@@ -26,7 +26,7 @@ public static class DragMoveAndResizeHelper
         /// <summary>
         /// Default: 10
         /// </summary>
-        public int MinimumOffset { get; set; } = 10;
+        public int MinOffset { get; set; } = 10;
 
         /// <summary>
         /// Default: 10
@@ -36,12 +36,12 @@ public static class DragMoveAndResizeHelper
         /// <summary>
         /// Default: (1280, 720)
         /// </summary>
-        public (int X, int Y) MinimumSize { get; set; } = (1280, 720);
+        public (int X, int Y) MinSize { get; set; } = (1280, 720);
 
         /// <summary>
         /// Default: <see cref="WindowHelper.GetScreenSize"/>
         /// </summary>
-        public (int X, int Y) MaximumSize { get; set; } = WindowHelper.GetScreenSize();
+        public (int X, int Y) MaxSize { get; set; } = WindowHelper.GetScreenSize();
     }
 
     /// <summary>
@@ -208,10 +208,10 @@ public static class DragMoveAndResizeHelper
 
         if (presenter.State is not OverlappedPresenterState.Maximized && info.Mode.HasFlag(Mode.Resize))
         {
-            var left = position._x < info.MinimumOffset;
-            var top = position._y < info.MinimumOffset;
-            var right = width - position._x < info.MinimumOffset;
-            var bottom = height - position._y < info.MinimumOffset;
+            var left = position._x < info.MinOffset;
+            var top = position._y < info.MinOffset;
+            var right = width - position._x < info.MinOffset;
+            var bottom = height - position._y < info.MinOffset;
             pointerShape = 0 switch
             {
                 0 when (left && top) || (right && bottom) => InputSystemCursorShape.SizeNorthwestSoutheast,
@@ -241,7 +241,7 @@ public static class DragMoveAndResizeHelper
         var yOffset = point.Y - _lastPoint.Y;
         var offset = Vector2.DistanceSquared(Vector2.Zero, new(xOffset, yOffset));
 
-        if (offset < info.MinimumOffset)
+        if (offset < info.MinOffset)
             return;
 
         if (presenter.State is OverlappedPresenterState.Maximized)
@@ -266,13 +266,13 @@ public static class DragMoveAndResizeHelper
             {
                 yPos += yOffset;
                 var newYSize = ySize - yOffset;
-                if (info.MinimumSize.Y < newYSize && newYSize < info.MaximumSize.Y)
+                if (info.MinSize.Y < newYSize && newYSize < info.MaxSize.Y)
                     ySize = newYSize;
             }
             if (_type.HasFlag(PointerOperationType.Bottom))
             {
                 var newYSize = ySize + yOffset;
-                if (info.MinimumSize.Y < newYSize && newYSize < info.MaximumSize.Y)
+                if (info.MinSize.Y < newYSize && newYSize < info.MaxSize.Y)
                     ySize = newYSize;
                 else
                     yPos += yOffset;
@@ -281,13 +281,13 @@ public static class DragMoveAndResizeHelper
             {
                 xPos += xOffset;
                 var newXSize = xSize - xOffset;
-                if (info.MinimumSize.X < newXSize && newXSize < info.MaximumSize.X)
+                if (info.MinSize.X < newXSize && newXSize < info.MaxSize.X)
                     xSize = newXSize;
             }
             if (_type.HasFlag(PointerOperationType.Right))
             {
                 var newXSize = xSize + xOffset;
-                if (info.MinimumSize.X < newXSize && newXSize < info.MaximumSize.X)
+                if (info.MinSize.X < newXSize && newXSize < info.MaxSize.X)
                     xSize = newXSize;
                 else
                     xPos += xOffset;

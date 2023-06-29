@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -22,11 +25,16 @@ public class DependencyPropertyGenerator : TypeWithAttributeGenerator
             if (attribute.AttributeClass is not { TypeArguments: [var type, ..] })
                 return null;
 
-            if (attribute.ConstructorArguments is not [{ Value: string propertyName }, { Value: string propertyChanged }, ..])
+            if (attribute.ConstructorArguments is not
+                [
+                    { Value: string propertyName },
+                    var defaultValueArgument,
+                    { Value: string propertyChanged },
+                    ..
+                ])
                 continue;
 
             var isSetterPrivate = false;
-            var defaultValue = "global::Microsoft.UI.Xaml.DependencyProperty.UnsetValue";
             var isNullable = false;
 
             foreach (var namedArgument in attribute.NamedArguments)
@@ -36,17 +44,36 @@ public class DependencyPropertyGenerator : TypeWithAttributeGenerator
                         case "IsSetterPrivate":
                             isSetterPrivate = (bool)value;
                             break;
-                        case "DefaultValue":
-                            defaultValue = (string)value;
-                            break;
                         case "IsNullable":
                             isNullable = (bool)value;
                             break;
                     }
 
+            var defaultValueExpression = (ExpressionSyntax)null!;
+
+            if (defaultValueArgument is { Kind: TypedConstantKind.Enum, Value: int defaultValueType })
+            {
+                var typeSyntax = type.GetTypeSyntax(isNullable);
+                defaultValueExpression = defaultValueType switch
+                {
+                    0 => ParseExpression("global::Microsoft.UI.Xaml.DependencyProperty.UnsetValue"),
+                    1 => DefaultExpression(typeSyntax),
+                    2 => ObjectCreationExpression(typeSyntax).AddArgumentListArguments(),
+                    _ => throw new ArgumentOutOfRangeException(nameof(defaultValueType), defaultValueType,
+                        "\"DefaultValueType\" should be within 0-2.")
+                };
+            }
+            else if (defaultValueArgument is { Value: string defaultValue })
+            {
+                defaultValueExpression = ParseExpression(defaultValue);
+            }
+            else
+            {
+                throw new ArgumentException("\"DefaultValue\" should be enum or string.", nameof(defaultValue));
+            }
+
             var fieldName = propertyName + "Property";
 
-            var defaultValueExpression = ParseExpression(defaultValue);
             var metadataCreation = GetObjectCreationExpression(defaultValueExpression);
             if (propertyChanged is not "")
                 metadataCreation = GetMetadataCreation(metadataCreation, propertyChanged);

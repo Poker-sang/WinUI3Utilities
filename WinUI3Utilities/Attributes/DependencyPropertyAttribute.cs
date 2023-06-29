@@ -17,11 +17,24 @@ public sealed class DependencyPropertyAttribute<T> : Attribute where T : notnull
 {
     /// <inheritdoc cref="DependencyPropertyAttribute{T}"/>
     /// <param name="name">Property name</param>
+    /// <param name="defaultValueType">Possible value of property</param>
     /// <param name="propertyChanged">The name of the method, which called when property changed</param>
-    public DependencyPropertyAttribute(string name, string propertyChanged = "")
+    public DependencyPropertyAttribute(string name, DependencyPropertyDefaultValue defaultValueType = DependencyPropertyDefaultValue.UnsetValue, string propertyChanged = "")
     {
         Name = name;
         PropertyChanged = propertyChanged;
+        DefaultValueType = defaultValueType;
+    }
+
+    /// <inheritdoc cref="DependencyPropertyAttribute{T}"/>
+    /// <param name="name">Property name</param>
+    /// <param name="defaultValue">Default value of the property</param>
+    /// <param name="propertyChanged">The name of the method, which called when property changed</param>
+    public DependencyPropertyAttribute(string name, string defaultValue, string propertyChanged = "")
+    {
+        Name = name;
+        PropertyChanged = propertyChanged;
+        DefaultValue = defaultValue;
     }
 
     /// <summary>
@@ -35,20 +48,26 @@ public sealed class DependencyPropertyAttribute<T> : Attribute where T : notnull
     public string PropertyChanged { get; }
 
     /// <summary>
+    /// <inheritdoc cref="DependencyPropertyDefaultValue"/>
+    /// </summary>
+    /// <remarks>Default: <see cref="DependencyPropertyDefaultValue.UnsetValue"/></remarks>
+    public DependencyPropertyDefaultValue DefaultValueType { get; } = DependencyPropertyDefaultValue.UnsetValue;
+
+    /// <summary>
+    /// Default value of the property
+    /// </summary>
+    /// <remarks>Default: <see cref="DependencyProperty.UnsetValue"/></remarks>
+    public string DefaultValue { get; } = "";
+
+    /// <summary>
     /// Whether property setter is private
     /// </summary>
-    /// <remarks>default: <see langword="false"/></remarks>
+    /// <remarks>Default: <see langword="false"/></remarks>
     public bool IsSetterPrivate { get; init; } = false;
 
     /// <summary>
     /// Whether property type is nullable (nullable value type are not allowed)
     /// </summary>
-    /// <remarks>default: <see langword="false"/></remarks>
+    /// <remarks>Default: <see langword="false"/></remarks>
     public bool IsNullable { get; init; }
-
-    /// <summary>
-    /// Default value of property
-    /// </summary>
-    /// <remarks>default: <see cref="DependencyProperty.UnsetValue"/></remarks>
-    public string DefaultValue { get; init; } = "DependencyProperty.UnsetValue";
 }

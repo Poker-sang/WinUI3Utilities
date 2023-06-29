@@ -14,7 +14,7 @@ internal static class SourceGeneratorHelper
     internal const string AttributeNamespace = $"{nameof(WinUI3Utilities)}.Attributes.";
     internal const string DisableSourceGeneratorAttribute = AttributeNamespace + "DisableSourceGeneratorAttribute";
     internal const string AssemblyName = $"{nameof(WinUI3Utilities)}.{nameof(SourceGenerator)}.";
-    internal const string AssemblyVersion = "1.1.1";
+    internal const string AssemblyVersion = "1.2.0";
 
     #region Abstract Syntax Tree Generate
 
@@ -280,7 +280,7 @@ internal static class SourceGeneratorHelper
     /// </code>
     /// </summary>
     /// <returns>CompilationUnit</returns>
-    private static TypeSyntax GetTypeSyntax(this ITypeSymbol typeSymbol, bool isNullable)
+    internal static TypeSyntax GetTypeSyntax(this ITypeSymbol typeSymbol, bool isNullable)
     {
         var typeName = ParseTypeName(typeSymbol.ToDisplayString());
         return isNullable ? NullableType(typeName) : typeName;

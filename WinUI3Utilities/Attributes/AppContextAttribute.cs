@@ -59,12 +59,12 @@ public class AppContextAttribute<T> : Attribute
     /// <summary>
     /// Configuration container key
     /// </summary>
-    /// <remarks>default: "Configuration"</remarks>
+    /// <remarks>Default: "Configuration"</remarks>
     public string ConfigKey { get; init; } = "Configuration";
 
     /// <summary>
     /// The fullname of method to cast settings properties
     /// </summary>
-    /// <remarks>default: (the fullname of) <see cref="Misc.ToNotNull{T}"/></remarks>
+    /// <remarks>Default: (the fullname of) <see cref="Misc.ToNotNull{T}"/></remarks>
     public string CastMethod { get; init; } = $"{nameof(WinUI3Utilities)}.{nameof(Misc)}.{nameof(Misc.ToNotNull)}";
 }
