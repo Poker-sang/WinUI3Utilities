@@ -27,11 +27,7 @@ public static class TeachingTipHelper
     /// <param name="e"></param>
     public static void TeachingTipLoaded(object sender, RoutedEventArgs e) => RootTeachingTip = sender.To<TeachingTip>();
 
-    /// <inheritdoc cref="Show(string, TeachingTipSeverity, string, bool)"/>
-    public static void Show(string title, IconSource icon, string hint = "", bool isLightDismissEnabled = false)
-    {
-        RootTeachingTip.Show(title, icon, hint, isLightDismissEnabled);
-    }
+    #region Basic TeachingTip helper
 
     /// <inheritdoc cref="Show(TeachingTip, string, TeachingTipSeverity, string, bool)"/>
     public static void Show(this TeachingTip teachingTip, string title, IconSource? icon, string subtitle = "", bool isLightDismissEnabled = false)
@@ -44,27 +40,12 @@ public static class TeachingTipHelper
     }
 
     /// <summary>
-    /// Show <see cref="RootTeachingTip"/>
-    /// </summary>
-    /// <inheritdoc cref="Show(TeachingTip, string, TeachingTipSeverity, string, bool)"/>
-    public static void Show(string title, TeachingTipSeverity icon = TeachingTipSeverity.Ok, string subtitle = "", bool isLightDismissEnabled = false)
-    {
-        RootTeachingTip.Show(title, icon, subtitle, isLightDismissEnabled);
-    }
-
-    /// <summary>
     /// Show <paramref name="teachingTip"/>
     /// </summary>
     /// <inheritdoc cref="ShowAndHide(TeachingTip, string, TeachingTipSeverity, string, int, bool)"/>
     public static void Show(this TeachingTip teachingTip, string title, TeachingTipSeverity icon = TeachingTipSeverity.Ok, string subtitle = "", bool isLightDismissEnabled = false)
     {
-        RootTeachingTip.Show(title, icon.GetIconSource(), subtitle, isLightDismissEnabled);
-    }
-
-    /// <inheritdoc cref="ShowAndHide(TeachingTip, string, IconSource?, string, int, bool)"/>
-    public static void ShowAndHide(string title, IconSource? icon, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true)
-    {
-        RootTeachingTip.ShowAndHide(title, icon, subtitle, mSec, isLightDismissEnabled);
+        teachingTip.Show(title, icon.GetIconSource(), subtitle, isLightDismissEnabled);
     }
 
     /// <inheritdoc cref="ShowAndHide(TeachingTip, string, TeachingTipSeverity, string, int, bool)"/>
@@ -81,15 +62,6 @@ public static class TeachingTipHelper
     }
 
     /// <summary>
-    /// Show <see cref="RootTeachingTip"/> and hide after <paramref name="mSec"/> microseconds
-    /// </summary>
-    /// <inheritdoc cref="ShowAndHide(TeachingTip, string, TeachingTipSeverity, string, int, bool)"/>
-    public static void ShowAndHide(string title, TeachingTipSeverity icon = TeachingTipSeverity.Ok, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true)
-    {
-        RootTeachingTip.ShowAndHide(title, icon, subtitle, mSec, isLightDismissEnabled);
-    }
-
-    /// <summary>
     /// Show <paramref name="teachingTip"/> and hide after <paramref name="mSec"/> microseconds
     /// </summary>
     /// <param name="teachingTip"></param>
@@ -102,6 +74,75 @@ public static class TeachingTipHelper
     {
         teachingTip.ShowAndHide(title, icon.GetIconSource(), subtitle, mSec, isLightDismissEnabled);
     }
+
+    #endregion
+
+    #region RootTeachingTip helper
+    
+    /// <inheritdoc cref="Show(string, TeachingTipSeverity, string, bool)"/>
+    public static void Show(string title, IconSource icon, string hint = "", bool isLightDismissEnabled = false)
+    {
+        RootTeachingTip.Show(title, icon, hint, isLightDismissEnabled);
+    }
+
+    /// <inheritdoc cref="Show(TeachingTip, string, TeachingTipSeverity, string, bool)"/>
+    public static void Show(string title, TeachingTipSeverity icon = TeachingTipSeverity.Ok, string subtitle = "", bool isLightDismissEnabled = false)
+    {
+        RootTeachingTip.Show(title, icon, subtitle, isLightDismissEnabled);
+    }
+
+    /// <inheritdoc cref="ShowAndHide(TeachingTip, string, IconSource?, string, int, bool)"/>
+    public static void ShowAndHide(string title, IconSource? icon, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true)
+    {
+        RootTeachingTip.ShowAndHide(title, icon, subtitle, mSec, isLightDismissEnabled);
+    }
+    
+    /// <inheritdoc cref="ShowAndHide(TeachingTip, string, TeachingTipSeverity, string, int, bool)"/>
+    public static void ShowAndHide(string title, TeachingTipSeverity icon = TeachingTipSeverity.Ok, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true)
+    {
+        RootTeachingTip.ShowAndHide(title, icon, subtitle, mSec, isLightDismissEnabled);
+    }
+
+    #endregion
+
+    #region ObservableTeachingTipProperties helper
+    
+    /// <inheritdoc cref="Show(string, TeachingTipSeverity, string, bool)"/>
+    public static void Show(this ObservableTeachingTipProperties teachingTip, string title, IconSource? icon, string subtitle = "", bool isLightDismissEnabled = false)
+    {
+        teachingTip.IsLightDismissEnabled = isLightDismissEnabled;
+        teachingTip.Title = title;
+        teachingTip.Subtitle = subtitle;
+        teachingTip.IconSource = icon;
+        teachingTip.IsOpen = true;
+    }
+
+    /// <inheritdoc cref="Show(TeachingTip, string, TeachingTipSeverity, string, bool)"/>
+    public static void Show(this ObservableTeachingTipProperties teachingTip, string title, TeachingTipSeverity icon = TeachingTipSeverity.Ok, string subtitle = "", bool isLightDismissEnabled = false)
+    {
+        teachingTip.Show(title, icon.GetIconSource(), subtitle, isLightDismissEnabled);
+    }
+
+    /// <inheritdoc cref="ShowAndHide(TeachingTip, string, IconSource?, string, int, bool)"/>
+    public static async void ShowAndHide(this ObservableTeachingTipProperties teachingTip, string title, IconSource? icon, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true)
+    {
+        HideSnakeBarTime = DateTime.Now + TimeSpan.FromMilliseconds(mSec - 100);
+
+        teachingTip.Show(title, icon, subtitle, isLightDismissEnabled);
+
+        await Task.Delay(mSec);
+
+        if (DateTime.Now > HideSnakeBarTime)
+            teachingTip.IsOpen = false;
+    }
+
+    /// <inheritdoc cref="ShowAndHide(TeachingTip, string, TeachingTipSeverity, string, int, bool)"/>
+    public static void ShowAndHide(this ObservableTeachingTipProperties teachingTip, string title, TeachingTipSeverity icon = TeachingTipSeverity.Ok, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true)
+    {
+        teachingTip.ShowAndHide(title, icon.GetIconSource(), subtitle, mSec, isLightDismissEnabled);
+    }
+
+    #endregion
 
     private static IconSource? GetIconSource(this TeachingTipSeverity severity)
     {

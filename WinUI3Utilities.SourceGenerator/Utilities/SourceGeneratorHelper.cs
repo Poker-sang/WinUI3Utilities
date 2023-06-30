@@ -43,9 +43,9 @@ internal static class SourceGeneratorHelper
     /// <summary>
     /// Generate the following code
     /// <code>
-    /// partial <paramref name="symbol" /> <paramref name="name" />
-    /// {
-    ///     <paramref name="member" />
+    /// partial <paramref name="symbol" /> <paramref name="name" /><br/>
+    /// {<br/>
+    ///     <paramref name="member" /><br/>
     /// }
     /// </code>
     /// </summary>

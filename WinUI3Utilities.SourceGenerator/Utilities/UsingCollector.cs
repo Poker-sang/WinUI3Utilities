@@ -10,5 +10,9 @@ internal class UsingCollector : CSharpSyntaxWalker
 
     public UsingCollector(HashSet<string> namespaces) => _namespaces = namespaces;
 
-    public override void VisitUsingDirective(UsingDirectiveSyntax node) => _namespaces.Add(node.Name.ToString());
+    public override void VisitUsingDirective(UsingDirectiveSyntax node)
+    {
+        if (node.Name?.ToString() is { } name)
+            _ = _namespaces.Add(name);
+    }
 }
