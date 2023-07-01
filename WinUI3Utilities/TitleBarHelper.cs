@@ -3,6 +3,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.Foundation.Metadata;
+using Windows.UI;
 using WinUI3Utilities.Internal.PlatformInvoke;
 
 namespace WinUI3Utilities;
@@ -101,10 +102,11 @@ public static class TitleBarHelper
     /// Customize title bar when supported
     /// </summary>
     /// <remarks>
-    /// Related to <see cref="TitleBarType.Window"/>, set <see cref="Window.ExtendsContentIntoTitleBar"/> and <see cref="Window.SetTitleBar"/>
+    /// Related to <see cref="TitleBarType.Window"/>, set <see cref="Window.ExtendsContentIntoTitleBar"/> and <see cref="Window.SetTitleBar"/>.
+    /// May need to call <see cref="SetWindowTitleBarButtonColor"/>
     /// </remarks>
     /// <returns>Whether customization of title bar is supported</returns>
-    public static void TryCustomizeTitleBar(Window window, FrameworkElement titleBar)
+    public static void SetWindowTitleBar(Window window, FrameworkElement titleBar)
     {
         window.ExtendsContentIntoTitleBar = true;
         window.SetTitleBar(titleBar);
@@ -114,13 +116,16 @@ public static class TitleBarHelper
     /// Customize title bar when supported
     /// </summary>
     /// <remarks>
-    /// Related to <see cref="TitleBarType.AppWindow"/>, set <see cref="AppWindowTitleBar.ExtendsContentIntoTitleBar"/>
+    /// Related to <see cref="TitleBarType.AppWindow"/>, set <see cref="AppWindowTitleBar.ExtendsContentIntoTitleBar"/> and <see cref="AppWindowTitleBar.IconShowOptions"/>
+    /// May need to call <see cref="SetWindowTitleBarButtonColor"/>
     /// </remarks>
-    /// <returns>Whether customization of title bar is supported</returns>
-    public static void TryCustomizeTitleBar(AppWindowTitleBar appWindowTitleBar)
+    public static void SetAppWindowTitleBar(AppWindowTitleBar appWindowTitleBar)
     {
+        appWindowTitleBar.IconShowOptions = IconShowOptions.HideIconAndSystemMenu;
         appWindowTitleBar.ExtendsContentIntoTitleBar = true;
     }
+
+    private static Color WithAlpha(this Color color, byte alpha) => Color.FromArgb(alpha, color.R, color.G, color.B);
 
     /// <summary>
     /// Work when in <see cref="TitleBarType.AppWindow"/>
@@ -129,22 +134,16 @@ public static class TitleBarHelper
     /// <param name="useDark">use dark theme</param>
     public static void SetAppWindowTitleBarButtonColor(Window window, bool useDark)
     {
-        window.AppWindow.TitleBar.ButtonForegroundColor = useDark ? Colors.White : Colors.Black;
-        window.AppWindow.TitleBar.ButtonHoverBackgroundColor = useDark
-            ? new()
-            {
-                A = 0x33,
-                R = 0xFF,
-                G = 0xFF,
-                B = 0xFF
-            }
-            : new()
-            {
-                A = 0x33,
-                R = 0,
-                G = 0,
-                B = 0
-            };
+        var titleBar = window.AppWindow.TitleBar;
+        var foreground = useDark ? Colors.White : Colors.Black;
+        titleBar.ButtonBackgroundColor = Colors.Transparent;
+        titleBar.ButtonForegroundColor = foreground;
+        titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+        titleBar.ButtonInactiveForegroundColor = useDark ? Color.FromArgb(0xFF, 0x73, 0x73, 0x73) : Color.FromArgb(0xFF, 0x9B, 0x9B, 0x9B);
+        titleBar.ButtonHoverBackgroundColor = useDark ? Color.FromArgb(0xFF, 0x2D, 0x2D, 0x2D) : Color.FromArgb(0xFF, 0xE9, 0xE9, 0xE9);
+        titleBar.ButtonHoverForegroundColor = foreground;
+        titleBar.ButtonPressedBackgroundColor = useDark ? Color.FromArgb(0xFF, 0x29, 0x29, 0x29) : Color.FromArgb(0xFF, 0xED, 0xED, 0xED);
+        titleBar.ButtonPressedForegroundColor = useDark ? Color.FromArgb(0xFF, 0xA7, 0xA7, 0xA7) : Color.FromArgb(0xFF, 0x5F, 0x5F, 0x5F);// 1 bw
     }
 
     /// <summary>

@@ -19,7 +19,9 @@ public partial class App : Application
         new MainWindow().Initialize(new()
         {
             Size = new(500, 400),
+            TitleBarType = TitleBarType.AppWindow,
         });
+        TitleBarHelper.SetAppWindowTitleBarButtonColor(CurrentContext.Window, false);
         CurrentContext.AppWindow.Show();
     }
 }

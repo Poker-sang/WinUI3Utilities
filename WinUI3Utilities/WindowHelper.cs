@@ -106,7 +106,7 @@ public static class WindowHelper
     /// <param name="info"></param>
     /// <param name="window"></param>
     /// <param name="title"></param>
-    /// <param name="titleBar"></param>
+    /// <param name="titleBar">Only needed when in <see cref="TitleBarType.Window"/></param>
     public static void Initialize(this Window window, InitializeInfo info, string title = "", FrameworkElement? titleBar = null)
     {
         window.AppWindow.Title = title;
@@ -119,9 +119,9 @@ public static class WindowHelper
             window.AppWindow.SetIcon(info.IconId);
 
         if (info.TitleBarType.HasFlag(TitleBarType.Window) && titleBar is not null)
-            TitleBarHelper.TryCustomizeTitleBar(window, titleBar);
+            TitleBarHelper.SetWindowTitleBar(window, titleBar);
         if (info.TitleBarType.HasFlag(TitleBarType.AppWindow))
-            TitleBarHelper.TryCustomizeTitleBar(window.AppWindow.TitleBar);
+            TitleBarHelper.SetAppWindowTitleBar(window.AppWindow.TitleBar);
 
         window.SystemBackdrop = info.BackdropType switch
         {

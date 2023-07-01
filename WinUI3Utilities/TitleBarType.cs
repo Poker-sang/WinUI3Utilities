@@ -16,18 +16,18 @@ public enum TitleBarType
     Neither,
 
     /// <summary>
-    /// Use <see cref="TitleBarHelper.TryCustomizeTitleBar(Microsoft.UI.Xaml.Window, FrameworkElement)"/>
+    /// Use <see cref="TitleBarHelper.SetWindowTitleBar"/>
     /// </summary>
     Window,
 
     /// <summary>
-    /// Use <see cref="TitleBarHelper.TryCustomizeTitleBar(AppWindowTitleBar)"/>
+    /// Use <see cref="TitleBarHelper.SetAppWindowTitleBar"/>
     /// </summary>
     AppWindow,
 
     /// <summary>
     /// <strong>Use with Caution</strong><br/>
-    /// Use both of <see cref="TitleBarHelper.TryCustomizeTitleBar(Microsoft.UI.Xaml.Window, FrameworkElement)"/> and <see cref="TitleBarHelper.TryCustomizeTitleBar(AppWindowTitleBar)"/>
+    /// Use both of <see cref="TitleBarHelper.SetWindowTitleBar"/> and <see cref="TitleBarHelper.SetAppWindowTitleBar"/>
     /// </summary>
     Both = Window | AppWindow
 }
