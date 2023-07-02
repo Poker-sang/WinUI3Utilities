@@ -1,6 +1,8 @@
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -74,7 +76,8 @@ public class DependencyPropertyAnalyzer : DiagnosticAnalyzer
                     { Expression: TypeOfExpressionSyntax { Type: { } propertyType } },
                     { Expression: TypeOfExpressionSyntax { Type: { } classType } },
                     {
-                        Expression: ObjectCreationExpressionSyntax
+                        Expression: ImplicitObjectCreationExpressionSyntax
+                        or ObjectCreationExpressionSyntax
                         {
                             Type: IdentifierNameSyntax { Identifier.ValueText: "PropertyMetadata" }
                         }
@@ -95,7 +98,11 @@ public class DependencyPropertyAnalyzer : DiagnosticAnalyzer
 
         var propertyName = propertyNameExpression switch
         {
-            LiteralExpressionSyntax { Token.ValueText: var tempName } => tempName,
+            LiteralExpressionSyntax
+            {
+                RawKind: (int)SyntaxKind.StringLiteralExpression,
+                Token.ValueText: var tempName
+            } => tempName,
             InvocationExpressionSyntax
             {
                 Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" },

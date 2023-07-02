@@ -1,7 +1,11 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Composition;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -33,7 +37,7 @@ public class DependencyPropertyCodeFixProvider001 : DependencyPropertyCodeFixPro
         var ancestor = root!.FindToken(context.Span.Start).Parent!.AncestorsAndSelf().ToImmutableArray();
 
         context.RegisterCodeFix(
-            CodeAction.Create("删除字段和属性，改为DependencyPropertyAttribute",
+            CodeAction.Create("删除字段和属性，改为使用DependencyPropertyAttribute",
                 c => AddNewProperty(context.Document, ancestor, propertyName, c),
                 diagnostic.Id),
             diagnostic);
@@ -72,17 +76,55 @@ public class DependencyPropertyCodeFixProvider001 : DependencyPropertyCodeFixPro
             })
             throw new();
 
+        var propertyTypeInfo = semanticModel.GetTypeInfo(propertyType);
+
         var args = new List<AttributeArgumentSyntax>
         {
-            AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(propertyName)))
+            AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(propertyName))),
+            AttributeArgument(defaultValue.Expression switch
+            {
+                LiteralExpressionSyntax
+                    {
+                        RawKind: (int)SyntaxKind.NullLiteralExpression
+                        or (int)SyntaxKind.DefaultLiteralExpression
+                    }
+                    or MemberAccessExpressionSyntax
+                    {
+                        RawKind: (int)SyntaxKind.SimpleMemberAccessExpression,
+                        Name.Identifier.ValueText: "DefaultValue",
+                        Expression: MemberAccessExpressionSyntax
+                        {
+                            Name.Identifier.ValueText: "DependencyProperty"
+                        }
+                        or IdentifierNameSyntax { Identifier.ValueText: "DependencyProperty" }
+                    }
+                    => MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression,
+                        IdentifierName("DependencyPropertyDefaultValue"), IdentifierName(
+                            defaultValue.Expression switch
+                            {
+                                LiteralExpressionSyntax => "Default",
+                                MemberAccessExpressionSyntax => "UnsetValue",
+                                _ => throw new()
+                            })),
+                ObjectCreationExpressionSyntax { Type: { } objectCreationType }
+                    when SymbolEqualityComparer.Default
+                        // semanticModel.GetTypeInfo(objectCreationType).Type 得到null不知道为什么
+                        .Equals(semanticModel.GetSymbolInfo(objectCreationType).Symbol, propertyTypeInfo.Type)
+                    => MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression, IdentifierName("DependencyPropertyDefaultValue"),
+                        IdentifierName("New")),
+                //todo
+                _ => LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(defaultValue.ToString()))
+            })
         };
 
-        if (arguments.Count > 1)
-            args.Add(AttributeArgument(NameOfExpression(arguments[1].Expression)));
-
-        args.Add(AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression,
-                Literal(defaultValue.ToString())))
-            .WithNameEquals(NameEquals("DefaultValue")));
+        if (arguments is [_, { } propertyChangedCallback])
+        {
+            if (propertyChangedCallback.Expression is IdentifierNameSyntax identifier)
+                args.Add(AttributeArgument(NameOfExpression(identifier)));
+            else
+                throw new();
+        }
 
         var propertyDeclaration = (PropertyDeclarationSyntax)typeDeclaration.Members
             .First(t => t is PropertyDeclarationSyntax { Identifier.ValueText: { } name } && name == propertyName);
@@ -94,7 +136,7 @@ public class DependencyPropertyCodeFixProvider001 : DependencyPropertyCodeFixPro
             args.Add(AttributeArgument(LiteralExpression(SyntaxKind.TrueLiteralExpression))
                 .WithNameEquals(NameEquals("IsSetterPrivate")));
 
-        var isNullable = semanticModel.GetTypeInfo(propertyType).Nullability.Annotation is NullableAnnotation.Annotated;
+        var isNullable = propertyTypeInfo.Nullability.Annotation is NullableAnnotation.Annotated;
 
         if (isNullable)
             args.Add(AttributeArgument(LiteralExpression(SyntaxKind.TrueLiteralExpression)));

@@ -5,15 +5,13 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace WinUI3Utilities.Analyzer;
 
-
-
 // [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class AppContextAttributeAnalyzer : DiagnosticAnalyzer
 {
     private const string DiagnosticId = "Utilities";
 
     private static readonly DiagnosticDescriptor _needFullName = new(
-        DiagnosticId + "004",
+        DiagnosticId + "005",
         "填写方法全限定名",
         "'{0}' 应该是扩展方法的全限定名{1}",
         "Fix", DiagnosticSeverity.Warning, true,
@@ -59,7 +57,7 @@ public class AppContextAttributeAnalyzer : DiagnosticAnalyzer
                             var symbolName = method.ToDisplayString().Split('(')[0];
                             if (symbolName == castMethod
                                 && method is { TypeParameters: [{ } type], Parameters: [{ } param] }
-                                && SymbolEqualityComparer.Default.Equals(param.Type, type))
+                                && SymbolEqualityComparer.Default.Equals(param.Type, type))// nullable
                             {
                                 return true;
                             }

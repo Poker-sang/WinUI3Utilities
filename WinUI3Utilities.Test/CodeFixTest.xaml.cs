@@ -7,9 +7,9 @@ public sealed partial class CodeFixTest : UserControl
 {
     public CodeFixTest() => InitializeComponent();
 
-    public static readonly DependencyProperty AProperty = DependencyProperty.Register(nameof(A), typeof(int), typeof(CodeFixTest), new(null));
+    public static readonly DependencyProperty AProperty = DependencyProperty.Register(nameof(A), typeof(CodeFixTest), typeof(CodeFixTest), new(new CodeFixTest()));
 
-    public int A { get => (int)GetValue(AProperty); set => SetValue(AProperty, value); }
+    public CodeFixTest A { get => (CodeFixTest)GetValue(AProperty); set => SetValue(AProperty, value); }
 
     public static readonly DependencyProperty B = DependencyProperty.Register("D", typeof(int), typeof(CodeFixTest), new PropertyMetadata(1, TestMethod1));
 
