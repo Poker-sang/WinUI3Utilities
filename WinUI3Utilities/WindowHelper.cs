@@ -119,10 +119,10 @@ public static class WindowHelper
             window.AppWindow.SetIcon(info.IconId);
 
         if (info.TitleBarType.HasFlag(TitleBarType.Window) && titleBar is not null)
-            TitleBarHelper.SetWindowTitleBar(window, titleBar);
+            window.SetWindowTitleBar(titleBar);
         if (info.TitleBarType.HasFlag(TitleBarType.AppWindow))
             TitleBarHelper.SetAppWindowTitleBar(window.AppWindow.TitleBar);
-
+        
         window.SystemBackdrop = info.BackdropType switch
         {
             BackdropType.None => null,

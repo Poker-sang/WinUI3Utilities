@@ -13,6 +13,8 @@ namespace WinUI3Utilities;
 /// </summary>
 public static class TitleBarHelper
 {
+    #region For NavigationView
+
     /// <summary>
     /// Simply call <see cref="UpdateAppTitleMargin"/>, should be invoked by <see cref="NavigationView.PaneClosing"/>
     /// </summary>
@@ -98,6 +100,10 @@ public static class TitleBarHelper
         }
     }
 
+    #endregion
+
+    #region For Window
+
     /// <summary>
     /// Customize title bar when supported
     /// </summary>
@@ -106,53 +112,21 @@ public static class TitleBarHelper
     /// May need to call <see cref="SetWindowTitleBarButtonColor"/>
     /// </remarks>
     /// <returns>Whether customization of title bar is supported</returns>
-    public static void SetWindowTitleBar(Window window, FrameworkElement titleBar)
+    public static void SetWindowTitleBar(this Window window, FrameworkElement titleBar)
     {
+        if (!AppWindowTitleBar.IsCustomizationSupported())
+            return;
         window.ExtendsContentIntoTitleBar = true;
         window.SetTitleBar(titleBar);
     }
 
     /// <summary>
-    /// Customize title bar when supported
-    /// </summary>
-    /// <remarks>
-    /// Related to <see cref="TitleBarType.AppWindow"/>, set <see cref="AppWindowTitleBar.ExtendsContentIntoTitleBar"/> and <see cref="AppWindowTitleBar.IconShowOptions"/>
-    /// May need to call <see cref="SetWindowTitleBarButtonColor"/>
-    /// </remarks>
-    public static void SetAppWindowTitleBar(AppWindowTitleBar appWindowTitleBar)
-    {
-        appWindowTitleBar.IconShowOptions = IconShowOptions.HideIconAndSystemMenu;
-        appWindowTitleBar.ExtendsContentIntoTitleBar = true;
-    }
-
-    private static Color WithAlpha(this Color color, byte alpha) => Color.FromArgb(alpha, color.R, color.G, color.B);
-
-    /// <summary>
-    /// Work when in <see cref="TitleBarType.AppWindow"/>
-    /// </summary>
-    /// <param name="window"></param>
-    /// <param name="useDark">use dark theme</param>
-    public static void SetAppWindowTitleBarButtonColor(Window window, bool useDark)
-    {
-        var titleBar = window.AppWindow.TitleBar;
-        var foreground = useDark ? Colors.White : Colors.Black;
-        titleBar.ButtonBackgroundColor = Colors.Transparent;
-        titleBar.ButtonForegroundColor = foreground;
-        titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
-        titleBar.ButtonInactiveForegroundColor = useDark ? Color.FromArgb(0xFF, 0x73, 0x73, 0x73) : Color.FromArgb(0xFF, 0x9B, 0x9B, 0x9B);
-        titleBar.ButtonHoverBackgroundColor = useDark ? Color.FromArgb(0xFF, 0x2D, 0x2D, 0x2D) : Color.FromArgb(0xFF, 0xE9, 0xE9, 0xE9);
-        titleBar.ButtonHoverForegroundColor = foreground;
-        titleBar.ButtonPressedBackgroundColor = useDark ? Color.FromArgb(0xFF, 0x29, 0x29, 0x29) : Color.FromArgb(0xFF, 0xED, 0xED, 0xED);
-        titleBar.ButtonPressedForegroundColor = useDark ? Color.FromArgb(0xFF, 0xA7, 0xA7, 0xA7) : Color.FromArgb(0xFF, 0x5F, 0x5F, 0x5F);// 1 bw
-    }
-
-    /// <summary>
-    /// Work when in <see cref="TitleBarType.Window"/>
+    /// Set title bar button color for window with <see cref="TitleBarType.Window"/>
     /// </summary>
     /// <param name="window"></param>
     /// <param name="useDark">use dark theme</param>
     /// <param name="setAppResources">Set <see cref="Application.Current"/>.Resources["WindowCaptionForeground"]</param>
-    public static void SetWindowTitleBarButtonColor(Window window, bool useDark, bool setAppResources)
+    public static void SetWindowTitleBarButtonColor(this Window window, bool useDark, bool setAppResources = false)
     {
         if (setAppResources)
             Application.Current.Resources["WindowCaptionForeground"] = useDark ? Colors.White : Colors.Black;
@@ -161,10 +135,26 @@ public static class TitleBarHelper
     }
 
     /// <summary>
+    /// Set theme for window with <see cref="TitleBarType.Window"/>
+    /// </summary>
+    /// <remarks>
+    /// <strong>Make sure <see cref="Window.Content"/> is <see cref="FrameworkElement"/> and loaded</strong><br/>
+    /// <see cref="ElementTheme.Default"/> will be obtained correctly only if <see cref="Application.RequestedTheme"/> has not been changed 
+    /// </remarks>
+    /// <param name="window"></param>
+    /// <param name="theme">SHOULD NOT be <see cref="ElementTheme.Default"/></param>
+    public static void SetWindowTheme(this Window window, ElementTheme theme)
+    {
+        var t = GetElementTheme(theme);
+        window.Content.To<FrameworkElement>().RequestedTheme = t;
+        window.SetWindowTitleBarButtonColor(t is ElementTheme.Dark);
+    }
+
+    /// <summary>
     /// To trigger repaint tracking task id 38044406
     /// </summary>
     /// <param name="window"></param>
-    private static void TriggerTitleBarRepaint(Window window)
+    private static void TriggerTitleBarRepaint(this Window window)
     {
         var hWnd = (nint)window.AppWindow.Id.Value;
         var activeWindow = User32.GetActiveWindow();
@@ -179,4 +169,100 @@ public static class TitleBarHelper
             _ = User32.SendMessage(hWnd, WindowMessage.WM_ACTIVATE, (nint)WindowMessage.WA_INACTIVE, 0);
         }
     }
+
+    #endregion
+
+    #region For AppWindow
+
+    /// <summary>
+    /// Customize title bar when supported
+    /// </summary>
+    /// <remarks>
+    /// Related to <see cref="TitleBarType.AppWindow"/>, set <see cref="AppWindowTitleBar.ExtendsContentIntoTitleBar"/> and <see cref="AppWindowTitleBar.IconShowOptions"/>
+    /// May need to call <see cref="SetAppWindowTitleBarButtonColor"/>
+    /// </remarks>
+    public static void SetAppWindowTitleBar(AppWindowTitleBar appWindowTitleBar)
+    {
+        if (!AppWindowTitleBar.IsCustomizationSupported())
+            return;
+        appWindowTitleBar.IconShowOptions = IconShowOptions.HideIconAndSystemMenu;
+        appWindowTitleBar.ExtendsContentIntoTitleBar = true;
+    }
+
+    /// <summary>
+    /// Set title bar button color for window with <see cref="TitleBarType.AppWindow"/>
+    /// </summary>
+    /// <param name="window"></param>
+    /// <param name="useDark">use dark theme</param>
+    public static void SetAppWindowTitleBarButtonColor(this Window window, bool useDark)
+    {
+        var titleBar = window.AppWindow.TitleBar;
+        var foreground = useDark ? Colors.White : Colors.Black;
+        titleBar.ButtonBackgroundColor = Colors.Transparent;
+        titleBar.ButtonForegroundColor = foreground;
+        titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+        titleBar.ButtonInactiveForegroundColor = useDark ? Color.FromArgb(0xFF, 0x73, 0x73, 0x73) : Color.FromArgb(0xFF, 0x9B, 0x9B, 0x9B);
+        titleBar.ButtonHoverBackgroundColor = useDark ? Color.FromArgb(0xFF, 0x2D, 0x2D, 0x2D) : Color.FromArgb(0xFF, 0xE9, 0xE9, 0xE9);
+        titleBar.ButtonHoverForegroundColor = foreground;
+        titleBar.ButtonPressedBackgroundColor = useDark ? Color.FromArgb(0xFF, 0x29, 0x29, 0x29) : Color.FromArgb(0xFF, 0xED, 0xED, 0xED);
+        titleBar.ButtonPressedForegroundColor = useDark ? Color.FromArgb(0xFF, 0xA7, 0xA7, 0xA7) : Color.FromArgb(0xFF, 0x5F, 0x5F, 0x5F);// 1 bw
+    }
+
+    /// <summary>
+    /// Set theme for window with <see cref="TitleBarType.AppWindow"/>
+    /// </summary>
+    /// <remarks>
+    /// <strong>Make sure <see cref="Window.Content"/> is <see cref="FrameworkElement"/> and loaded</strong><br/>
+    /// <see cref="ElementTheme.Default"/> will be obtained correctly only if <see cref="Application.RequestedTheme"/> has not been changed 
+    /// </remarks>
+    /// <param name="window"></param>
+    /// <param name="theme"></param>
+    public static void SetAppWindowTheme(this Window window, ElementTheme theme)
+    {
+        var t = GetElementTheme(theme);
+        window.Content.To<FrameworkElement>().RequestedTheme = t;
+        window.SetAppWindowTitleBarButtonColor(t is ElementTheme.Dark);
+    }
+
+    #endregion
+
+    #region For theme
+
+    /// <summary>
+    /// If given <see cref="ElementTheme.Default"/>, returns <see cref="GetDefaultTheme"/>
+    /// </summary>
+    /// <remarks>
+    /// <see cref="ElementTheme.Default"/> will be obtained correctly only if <see cref="Application.RequestedTheme"/> has not been changed 
+    /// </remarks>
+    /// <param name="theme"></param>
+    /// <returns><see cref="ElementTheme.Light"/> or <see cref="ElementTheme.Dark"/></returns>
+    public static ElementTheme GetElementTheme(ElementTheme theme)
+    {
+        return theme switch
+        {
+            ElementTheme.Dark => ElementTheme.Dark,
+            ElementTheme.Light => ElementTheme.Light,
+            ElementTheme.Default => GetDefaultTheme(),
+            _ => ThrowHelper.ArgumentOutOfRange<ElementTheme, ElementTheme>(theme)
+        };
+    }
+
+    /// <summary>
+    /// Returns <see cref="ElementTheme.Light"/> or <see cref="ElementTheme.Dark"/> based on <see cref="Application.RequestedTheme"/>
+    /// </summary>
+    /// <remarks>
+    /// <see cref="ElementTheme.Default"/> will be obtained correctly only if <see cref="Application.RequestedTheme"/> has not been changed 
+    /// </remarks>
+    /// <returns><see cref="ElementTheme.Light"/> or <see cref="ElementTheme.Dark"/></returns>
+    public static ElementTheme GetDefaultTheme()
+    {
+        return Application.Current.RequestedTheme switch
+        {
+            ApplicationTheme.Light => ElementTheme.Light,
+            ApplicationTheme.Dark => ElementTheme.Dark,
+            _ => ThrowHelper.ArgumentOutOfRange<ApplicationTheme, ElementTheme>(Application.Current.RequestedTheme)
+        };
+    }
+
+    #endregion
 }

@@ -108,7 +108,7 @@ public static class DragZoneHelper
     public static void SetDragZones(DragZoneInfo info, Window? window = null)
     {
         window ??= CurrentContext.Window;
-        var scaleAdjustment = WindowHelper.GetScaleAdjustment(window);
+        var scaleAdjustment = window.GetScaleAdjustment();
         var windowWidth = (int)(window.AppWindow.Size.Width / scaleAdjustment);
         var nonDraggingZones = info.NonDraggingZones;
 
