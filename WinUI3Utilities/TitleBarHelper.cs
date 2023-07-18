@@ -9,7 +9,7 @@ using WinUI3Utilities.Internal.PlatformInvoke;
 namespace WinUI3Utilities;
 
 /// <summary>
-/// A set of methods for title bar
+/// Helper to set title bar
 /// </summary>
 public static class TitleBarHelper
 {

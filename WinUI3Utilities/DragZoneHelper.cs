@@ -7,7 +7,7 @@ using Windows.Graphics;
 namespace WinUI3Utilities;
 
 /// <summary>
-/// A set of methods for easily using <see cref="AppWindowTitleBar.SetDragRectangles"/>
+/// Helper to calculate non-dragging zones for <see cref="AppWindowTitleBar.SetDragRectangles"/>
 /// </summary>
 public static class DragZoneHelper
 {

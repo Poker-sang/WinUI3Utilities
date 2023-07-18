@@ -6,7 +6,7 @@ using WinUI3Utilities.Internal.PlatformInvoke;
 namespace WinUI3Utilities;
 
 /// <summary>
-/// Helper to limit the size of the window, use <see cref="WindowSizeHelperAttribute"/>
+/// Helper to limit the size of the window, works with <see cref="WindowSizeHelperAttribute"/>
 /// </summary>
 public static class WindowSizeHelper
 {

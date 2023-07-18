@@ -4,7 +4,7 @@ using Microsoft.Windows.ApplicationModel.Resources;
 namespace WinUI3Utilities.Attributes;
 
 /// <summary>
-/// Generate for all the .resw files under the specified namespace
+/// Generate for all the .resw files in <see langword="PRIResource"/> under the specified namespace
 /// </summary>
 /// <remarks>
 /// <seealso href="https://platform.uno/blog/using-msbuild-items-and-properties-in-c-9-source-generators/"/><br/>

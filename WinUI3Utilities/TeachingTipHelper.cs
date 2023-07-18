@@ -6,7 +6,7 @@ using Microsoft.UI.Xaml.Controls;
 namespace WinUI3Utilities;
 
 /// <summary>
-/// A set of methods for <see cref="TeachingTip"/>
+/// Helper for <see cref="TeachingTip"/>
 /// </summary>
 public static class TeachingTipHelper
 {
@@ -78,7 +78,7 @@ public static class TeachingTipHelper
     #endregion
 
     #region RootTeachingTip helper
-    
+
     /// <inheritdoc cref="Show(string, TeachingTipSeverity, string, bool)"/>
     public static void Show(string title, IconSource icon, string hint = "", bool isLightDismissEnabled = false)
     {
@@ -96,7 +96,7 @@ public static class TeachingTipHelper
     {
         RootTeachingTip.ShowAndHide(title, icon, subtitle, mSec, isLightDismissEnabled);
     }
-    
+
     /// <inheritdoc cref="ShowAndHide(TeachingTip, string, TeachingTipSeverity, string, int, bool)"/>
     public static void ShowAndHide(string title, TeachingTipSeverity icon = TeachingTipSeverity.Ok, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true)
     {
@@ -106,7 +106,7 @@ public static class TeachingTipHelper
     #endregion
 
     #region ObservableTeachingTipProperties helper
-    
+
     /// <inheritdoc cref="Show(string, TeachingTipSeverity, string, bool)"/>
     public static void Show(this ObservableTeachingTipProperties teachingTip, string title, IconSource? icon, string subtitle = "", bool isLightDismissEnabled = false)
     {

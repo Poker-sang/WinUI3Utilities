@@ -2,11 +2,12 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
+using WinUI3Utilities.Internal.PlatformInvoke;
 
 namespace WinUI3Utilities;
 
 /// <summary>
-/// A set of methods for <see cref="Application"/>
+/// Helper for <see cref="Application"/>
 /// </summary>
 public static class AppHelper
 {
@@ -15,6 +16,14 @@ public static class AppHelper
     /// </summary>
     /// <remarks>Windows 11 starts with 10.0.22000</remarks>
     public static bool IsWindows11 => Environment.OSVersion.Version.Build >= 22000;
+
+    /// <summary>
+    /// Get the dpi-aware screen size using win32 API, where by "dpi-aware" means that
+    /// the result will be divided by the scale factor of the monitor that hosts the app
+    /// </summary>
+    /// <returns>Screen size</returns>
+    public static (int, int) GetScreenSize()
+        => (User32.GetSystemMetrics(SystemMetric.CxScreen), User32.GetSystemMetrics(SystemMetric.CyScreen));
 
     /// <summary>
     /// Method to register exception handler

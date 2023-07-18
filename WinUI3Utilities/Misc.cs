@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 namespace WinUI3Utilities;
 
 /// <summary>
-/// A set of miscellaneous methods
+/// Miscellaneous extension methods
 /// </summary>
 public static class Misc
 {
