@@ -71,7 +71,6 @@ public static class WindowSizeHelper
                     minMaxInfo.ptMaxTrackSize.Y = (int)(maxHeight * scalingFactor);
                 Marshal.StructureToPtr(minMaxInfo, lParam, true);
                 break;
-
         }
         return User32.CallWindowProc(oldWndProc, hWnd, msg, wParam, lParam);
     }
