@@ -48,7 +48,7 @@ public static class WindowSizeHelper
         parameter.NewWndProc = (wnd, msg, wParam, lParam) =>
             WndProc(parameter.MinWidth, parameter.MinHeight, parameter.MaxWidth, parameter.MaxHeight,
                 parameter.OldWndProc, wnd, msg, wParam, lParam);
-        parameter.OldWndProc = User32.SetWindowLongPtr((nint)window.AppWindow.Id.Value, WindowLongIndexFlags.GWL_WNDPROC, parameter.NewWndProc);
+        parameter.OldWndProc = User32.SetWindowLongPtr((nint)window.AppWindow.Id.Value, WindowLongIndexFlag.GWL_WNDPROC, parameter.NewWndProc);
     }
 
     /// <summary>

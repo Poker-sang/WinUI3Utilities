@@ -3,7 +3,7 @@ using System;
 namespace WinUI3Utilities.Internal.PlatformInvoke;
 
 [Flags]
-internal enum WindowLongIndexFlags
+internal enum WindowLongIndexFlag
 {
     GWL_WNDPROC = -4,
 }
