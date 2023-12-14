@@ -1,7 +1,7 @@
 using System;
 using Microsoft.UI.Xaml.Controls;
 
-namespace WinUI3Utilities.Test.Pages;
+namespace WinUI3Utilities.Samples.Pages;
 
 public sealed partial class SettingsPage : Page, ITypeGetter
 {

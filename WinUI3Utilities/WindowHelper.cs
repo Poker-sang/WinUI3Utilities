@@ -1,3 +1,4 @@
+using System;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -86,7 +87,8 @@ public static class WindowHelper
     /// </summary>
     /// <remarks>
     /// <code>
-    /// <paramref name="window"/>.AppWindow.Title = <paramref name="title"/>;<br/>
+    /// <see langword="if"/> (<paramref name="title"/> <see langword="is not null"/>)<br/>
+    ///     <paramref name="window"/>.AppWindow.Title = <paramref name="title"/>;<br/>
     /// <br/>
     /// <see langword="if"/> (<paramref name="info"/>.Size.HasValue)
     ///     <paramref name="window"/>.AppWindow.Resize(<paramref name="info"/>.Size.Value);<br/>
@@ -95,21 +97,20 @@ public static class WindowHelper
     /// <see langword="else if"/> (<paramref name="info"/>.IconId != <see langword="default"/>)
     ///     <paramref name="window"/>.AppWindow.SetIcon(<paramref name="info"/>.IconId);<br/>
     /// <br/>
-    /// // try apply customize title bar (depends on <see cref="InitializeInfo.TitleBarType"/>)<br/>
+    /// // Apply customized title bar if supported (depends on <see cref="InitializeInfo.TitleBarType"/>)<br/>
     /// <see cref="TitleBarHelper"/>... 
-    /// // try apply backdrop (depends on <see cref="InitializeInfo.BackdropType"/>)<br/>
-    /// <paramref name="window"/>.Window.SystemBackdrop = <paramref name="info"/>.BackdropType <see langword="switch"/> { ... }
-    /// // try set minimum size and maximum size of the window
-    /// _ = SetWindowSubclass(...);
+    /// // Apply backdrop if supported (depends on <see cref="InitializeInfo.BackdropType"/>)<br/>
+    /// <paramref name="window"/>.SystemBackdrop = <paramref name="info"/>.BackdropType <see langword="switch"/> { ... }
     /// </code>
     /// </remarks>
     /// <param name="info"></param>
     /// <param name="window"></param>
     /// <param name="title"></param>
     /// <param name="titleBar">Only needed when in <see cref="TitleBarType.Window"/></param>
-    public static void Initialize(this Window window, InitializeInfo info, string title = "", FrameworkElement? titleBar = null)
+    public static void Initialize(this Window window, InitializeInfo info, string? title = null, FrameworkElement? titleBar = null)
     {
-        window.AppWindow.Title = title;
+        if (title is not null)
+            window.AppWindow.Title = title;
 
         if (info.Size != default)
             window.AppWindow.Resize(info.Size);
@@ -118,18 +119,24 @@ public static class WindowHelper
         else if (info.IconId != default)
             window.AppWindow.SetIcon(info.IconId);
 
-        if (info.TitleBarType.HasFlag(TitleBarType.Window) && titleBar is not null)
+        if (info.TitleBarType.HasFlag(TitleBarType.Window))
+        {
+            ArgumentNullException.ThrowIfNull(titleBar);
             window.SetWindowTitleBar(titleBar);
+        }
         if (info.TitleBarType.HasFlag(TitleBarType.AppWindow))
             TitleBarHelper.SetAppWindowTitleBar(window.AppWindow.TitleBar);
         
         window.SystemBackdrop = info.BackdropType switch
         {
-            BackdropType.None => null,
-            BackdropType.Acrylic => new DesktopAcrylicBackdrop(),
-            BackdropType.Mica => new MicaBackdrop(),
-            BackdropType.MicaAlt => new MicaBackdrop { Kind = MicaKind.BaseAlt },
+            BackdropType.Acrylic when DesktopAcrylicController.IsSupported() => new DesktopAcrylicBackdrop(),
+            BackdropType.Mica when MicaController.IsSupported() => new MicaBackdrop(),
+            BackdropType.MicaAlt when MicaController.IsSupported() => new MicaBackdrop { Kind = MicaKind.BaseAlt },
             BackdropType.Maintain => window.SystemBackdrop,
+            BackdropType.None
+                or BackdropType.Acrylic
+                or BackdropType.Mica
+                or BackdropType.MicaAlt => null,
             _ => ThrowHelper.ArgumentOutOfRange<BackdropType, SystemBackdrop>(info.BackdropType)
         };
     }

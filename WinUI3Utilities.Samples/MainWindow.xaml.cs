@@ -2,9 +2,9 @@ using System;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using WinUI3Utilities.Attributes;
-using WinUI3Utilities.Test.Pages;
+using WinUI3Utilities.Samples.Pages;
 
-namespace WinUI3Utilities.Test;
+namespace WinUI3Utilities.Samples;
 
 [WindowSizeHelper]
 public sealed partial class MainWindow : Window
@@ -23,7 +23,6 @@ public sealed partial class MainWindow : Window
     private void Loaded(object sender, RoutedEventArgs e)
     {
         NavigationView.SettingsItem.To<NavigationViewItem>().Tag = typeof(SettingsPage);
-
         NavigationHelper.GotoPage<IndexPage>();
         NavigationView.SelectedItem = NavigationView.MenuItems[0];
     }

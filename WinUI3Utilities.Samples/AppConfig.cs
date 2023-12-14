@@ -1,7 +1,7 @@
 using Microsoft.UI.Xaml;
 using WinUI3Utilities.Attributes;
 
-namespace WinUI3Utilities.Test;
+namespace WinUI3Utilities.Samples;
 
 [GenerateConstructor]
 public partial class AppConfig

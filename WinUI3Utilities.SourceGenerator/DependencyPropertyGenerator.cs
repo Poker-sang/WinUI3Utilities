@@ -25,9 +25,9 @@ public class DependencyPropertyGenerator : TypeWithAttributeGenerator
 
             if (attribute.ConstructorArguments is not
                 [
-                { Value: string propertyName },
+                    { Value: string propertyName },
                     var defaultValueArgument,
-                { Value: string propertyChanged },
+                    { Value: string propertyChanged },
                     ..
                 ])
                 continue;

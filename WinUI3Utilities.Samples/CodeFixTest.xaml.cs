@@ -1,7 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
-namespace WinUI3Utilities.Test;
+namespace WinUI3Utilities.Samples;
 
 public sealed partial class CodeFixTest : UserControl
 {

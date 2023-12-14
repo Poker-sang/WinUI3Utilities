@@ -1,6 +1,6 @@
 using Microsoft.UI.Xaml;
 
-namespace WinUI3Utilities.Test;
+namespace WinUI3Utilities.Samples;
 
 public partial class App : Application
 {
@@ -21,7 +21,7 @@ public partial class App : Application
             Size = new(500, 400),
             TitleBarType = TitleBarType.AppWindow,
         });
-        TitleBarHelper.SetAppWindowTitleBarButtonColor(CurrentContext.Window, false);
+        CurrentContext.Window.SetAppWindowTitleBarButtonColor(false);
         CurrentContext.AppWindow.Show();
     }
 }

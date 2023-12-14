@@ -1,4 +1,4 @@
-namespace WinUI3Utilities.Test;
+namespace WinUI3Utilities.Samples;
 
 public interface ITypeGetter
 {

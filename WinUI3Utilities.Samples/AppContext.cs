@@ -1,6 +1,6 @@
 using WinUI3Utilities.Attributes;
 
-namespace WinUI3Utilities.Test;
+namespace WinUI3Utilities.Samples;
 
 [AppContext<AppConfig>(CastMethod = "WinUI3Utilities.Misc.ToNotNull")]
 public static partial class AppContext
