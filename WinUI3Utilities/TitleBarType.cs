@@ -1,6 +1,4 @@
 using System;
-using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
 
 namespace WinUI3Utilities;
 

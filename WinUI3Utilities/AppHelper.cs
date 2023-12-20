@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 
@@ -29,7 +30,7 @@ public static class AppHelper
     /// </remarks>
     /// <param name="window"></param>
     /// <param name="func"></param>
-    public static void RegisterUnhandledExceptionHandler(Window window, Func<Exception, Task>? func = null)
+    public static void RegisterUnhandledExceptionHandler(Window window, Action<Exception>? func = null)
     {
         func ??= UncaughtExceptionHandler;
 
@@ -50,13 +51,15 @@ public static class AppHelper
             if (args.ExceptionObject is Exception e)
                 _ = window.DispatcherQueue.TryEnqueue(() => func(e));
             else
-                CurrentContext.App.Exit();
+                Debugger.Break();
         };
 
-        static Task UncaughtExceptionHandler(Exception e)
+        return;
+        [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
+        static void UncaughtExceptionHandler(Exception e)
         {
+            var inner = e.InnerException;
             Debugger.Break();
-            return Task.CompletedTask;
         }
     }
 }

@@ -29,7 +29,4 @@ namespace WinUI3Utilities.Attributes;
 /// </code>
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
-public sealed class GenerateConstructorAttribute : Attribute
-{
-
-}
+public sealed class GenerateConstructorAttribute : Attribute;

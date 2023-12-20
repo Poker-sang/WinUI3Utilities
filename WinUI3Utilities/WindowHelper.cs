@@ -127,17 +127,6 @@ public static class WindowHelper
         if (info.TitleBarType.HasFlag(TitleBarType.AppWindow))
             TitleBarHelper.SetAppWindowTitleBar(window.AppWindow.TitleBar);
         
-        window.SystemBackdrop = info.BackdropType switch
-        {
-            BackdropType.Acrylic when DesktopAcrylicController.IsSupported() => new DesktopAcrylicBackdrop(),
-            BackdropType.Mica when MicaController.IsSupported() => new MicaBackdrop(),
-            BackdropType.MicaAlt when MicaController.IsSupported() => new MicaBackdrop { Kind = MicaKind.BaseAlt },
-            BackdropType.Maintain => window.SystemBackdrop,
-            BackdropType.None
-                or BackdropType.Acrylic
-                or BackdropType.Mica
-                or BackdropType.MicaAlt => null,
-            _ => ThrowHelper.ArgumentOutOfRange<BackdropType, SystemBackdrop>(info.BackdropType)
-        };
+        window.SetBackdrop(info.BackdropType);
     }
 }

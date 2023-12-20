@@ -175,7 +175,7 @@ public static class TitleBarHelper
     #region For AppWindow
 
     /// <summary>
-    /// Customize title bar when supported
+    /// Customize title bar if supported
     /// </summary>
     /// <remarks>
     /// Related to <see cref="TitleBarType.AppWindow"/>, set <see cref="AppWindowTitleBar.ExtendsContentIntoTitleBar"/> and <see cref="AppWindowTitleBar.IconShowOptions"/>
