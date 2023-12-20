@@ -38,7 +38,7 @@ For more details, see the XAML docs of the corresponding attributes.
 | LocalizedStringResourcesAttribute | Generate for all the .resw files in `PRIResource` under the specified namespace |
 | **SettingsViewModelAttribute*** | Generate property according to the properties of the settings class `T` for the specified viewmodel class |
 | **GenerateConstructorAttribute*** | Generate constructor like `record` for the specified type, according to the properties of it |
-| **AppContextAttribute*** | Generate field `_configurationContainer` and methods `Load/SaveConfiguration` for the specified class |
+| **AppContextAttribute*** | Generate field `_containerConfiguration` and methods `Initialize/Load/SaveConfiguration` for the specified class |
 | WindowSizeHelperAttribute | Generate helper properties to limit the window size (works with `WindowSizeHelper`) |
 | AttributeIgnoreAttribute | Ignores the effect of the specified attributes on this target |
 | DisableSourceGeneratorAttribute | Indicates that the source generator is disabled. This is usually used for debug purpose |
@@ -65,7 +65,7 @@ public static partial class AppContext
     public static void Initialize()
     {
         AppLocalFolder = ApplicationData.Current.LocalFolder.Path;
-        InitializeConfigurationContainer();
+        InitializeConfiguration();
         AppConfig = LoadConfiguration() is not { } appConfigurations
             ? new() : appConfigurations;
     }

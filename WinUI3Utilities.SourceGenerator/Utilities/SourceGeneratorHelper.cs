@@ -238,11 +238,11 @@ internal static class SourceGeneratorHelper
     /// </code>
     /// </summary>
     /// <returns>FileScopedNamespaceDeclaration</returns>
-    internal static FileScopedNamespaceDeclarationSyntax GetFileScopedNamespaceDeclaration(ISymbol specificClass, MemberDeclarationSyntax generatedClass)
+    internal static FileScopedNamespaceDeclarationSyntax GetFileScopedNamespaceDeclaration(ISymbol specificClass, MemberDeclarationSyntax generatedClass, bool nullableEnable)
         => FileScopedNamespaceDeclaration(ParseName(specificClass.ContainingNamespace.ToDisplayString()))
             .AddMembers(generatedClass)
             .WithNamespaceKeyword(Token(SyntaxKind.NamespaceKeyword)
-                .WithLeadingTrivia(Trivia(NullableDirectiveTrivia(Token(SyntaxKind.EnableKeyword), true))));
+                .WithLeadingTrivia(Trivia(NullableDirectiveTrivia(Token(SyntaxKind.EnableKeyword), nullableEnable))));
 
     /// <summary>
     /// Generate the following code

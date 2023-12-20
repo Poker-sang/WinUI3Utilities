@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -16,114 +17,152 @@ public class AppContextGenerator : TypeWithAttributeGenerator
 
     internal override string? TypeWithAttribute(INamedTypeSymbol typeSymbol, ImmutableArray<AttributeData> attributeList)
     {
-        var attribute = attributeList[0];
-
-        if (attribute.AttributeClass is not { TypeArguments: [var type, ..] })
-            return null;
-
-        var staticClassName = "static WinUI3Utilities.Misc";
-        var methodName = "ToNotNull";
-
-        string? configKey = null;
-
-        foreach (var namedArgument in attribute.NamedArguments)
-            if (namedArgument.Value.Value is { } value)
-                switch (namedArgument.Key)
-                {
-                    case "ConfigKey":
-                        configKey = (string)value;
-                        break;
-                    case "CastMethod":
-                        var castMethodFullName = (string)value;
-                        var dotPosition = castMethodFullName.LastIndexOf('.');
-                        if (dotPosition is -1)
-                            throw new InvalidDataException($"{namedArgument.Key} must contain the full name.");
-                        staticClassName = "static " + castMethodFullName[..dotPosition];
-                        methodName = castMethodFullName[(dotPosition + 1)..];
-                        break;
-                }
-
-        configKey ??= "Configuration";
-
-        var specificType = typeSymbol.ToDisplayString();
-        var typeName = type.ToDisplayString();
         var namespaces = new HashSet<string>();
-        // methodName方法所用namespace
-        _ = namespaces.Add(staticClassName);
-        var usedTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
-        /*-----Body Begin-----*/
-        var classBegin = @$"
-namespace {typeSymbol.ContainingNamespace.ToDisplayString()};
+        var specificType = typeSymbol.ToDisplayString();
+        var classBegin =
+            $$"""
 
-partial class {typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}
-{{
-    private static Windows.Storage.ApplicationDataContainer _configurationContainer = null!;
+              namespace {{typeSymbol.ContainingNamespace.ToDisplayString()}};
 
-    private const string ConfigurationContainerKey = ""{configKey}"";
-
-    public static void InitializeConfigurationContainer()
-    {{
-        var roamingSettings = Windows.Storage.ApplicationData.Current.RoamingSettings;
-        if (!roamingSettings.Containers.ContainsKey({specificType}.ConfigurationContainerKey))
-            _ = roamingSettings.CreateContainer({specificType}.ConfigurationContainerKey, Windows.Storage.ApplicationDataCreateDisposition.Always);
-
-        _configurationContainer = roamingSettings.Containers[{specificType}.ConfigurationContainerKey];
-    }}
-
-    public static {typeName}? LoadConfiguration()
-    {{
-        try
-        {{
-            return new {typeName}(";
-        /*-----Splitter-----*/
-        var loadConfigurationContent = new StringBuilder();
-        /*-----Splitter-----*/
-        var loadConfigurationEndAndSaveConfigurationBegin = $@"           );
-        }}
-        catch
-        {{
-            return default;
-        }}
-    }}
-
-    public static void SaveConfiguration({typeName}? configuration)
-    {{
-        if (configuration is {{ }} appConfiguration)
-        {{";
-        /*-----Splitter-----*/
-        var saveConfigurationContent = new StringBuilder();
-        /*-----Splitter-----*/
-        const string saveConfigurationEndAndClassEnd = $@"        }}
-    }}
-}}";
-        /*-----Body End-----*/
-        foreach (var property in type.GetProperties(attributeList[0].AttributeClass!))
+              partial class {{typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}}
+              {
+              """;
+        const string classEnd = "}";
+        var containers = new StringBuilder();
+        var keys = new StringBuilder();
+        var initializeMethods = new StringBuilder();
+        var loadMethods = new StringBuilder();
+        var saveMethods = new StringBuilder();
+        foreach (var attribute in attributeList)
         {
-            _ = loadConfigurationContent.AppendLine(LoadRecord(specificType, property.Name, property.Type.Name, typeName, methodName));
-            _ = saveConfigurationContent.AppendLine(SaveRecord(specificType, property.Name, property.Type, typeName, methodName));
-            namespaces.UseNamespace(usedTypes, typeSymbol, property.Type);
-        }
+            if (attribute.AttributeClass is not { TypeArguments: [var type, ..] })
+                return null;
 
-        // 去除" \r\n"
-        _ = loadConfigurationContent.Remove(loadConfigurationContent.Length - 3, 3);
+            var configKey = "Configuration";
+            var methodName = "Configuration";
+            var applicationDataContainerType = "LocalSettings";
+            var createDispositionValue = "Always";
+            var staticClassName = "static WinUI3Utilities.Misc";
+            var castMethod = "ToNotNull";
+
+            foreach (var namedArgument in attribute.NamedArguments)
+                if (namedArgument.Value.Value is { } value)
+                    switch (namedArgument.Key)
+                    {
+                        case "ConfigKey":
+                            configKey = (string)value;
+                            break;
+                        case "MethodName":
+                            methodName = (string)value;
+                            break;
+                        case "Type" when namedArgument.Value is { Kind: TypedConstantKind.Enum, Value: int containerType and (0 or 1) }:
+                            applicationDataContainerType =
+                                containerType switch
+                                {
+                                    0 => "LocalSettings",
+                                    _ => "RoamingSettings"
+                                };
+                            break;
+                        case "CreateDisposition" when namedArgument.Value is { Kind: TypedConstantKind.Enum, Value: int createDisposition and (0 or 1) }:
+                            createDispositionValue =
+                                createDisposition switch
+                                {
+                                    0 => "Always",
+                                    _ => "Existing"
+                                };
+                            break;
+                        case "CastMethod":
+                            var castMethodFullName = (string)value;
+                            var dotPosition = castMethodFullName.LastIndexOf('.');
+                            if (dotPosition is -1)
+                                throw new InvalidDataException($"{namedArgument.Key} must contain the full name.");
+                            staticClassName = "static " + castMethodFullName[..dotPosition];
+                            castMethod = castMethodFullName[(dotPosition + 1)..];
+                            break;
+                    }
+
+            var typeName = type.ToDisplayString();
+            // castMethod方法所用namespace
+            _ = namespaces.Add(staticClassName);
+            var usedTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+            /*-----Body Begin-----*/
+            _ = containers.AppendLine($"{Spacing(1)}private static Windows.Storage.ApplicationDataContainer _container{methodName} = null!;");
+            _ = keys.AppendLine($"{Spacing(1)}private const string {methodName}ContainerKey = \"{configKey}\";");
+            _ = initializeMethods.AppendLine(
+                $$"""
+                      public static void Initialize{{methodName}}()
+                      {
+                          var settings = Windows.Storage.ApplicationData.Current.{{applicationDataContainerType}};
+                          if (!settings.Containers.ContainsKey({{specificType}}.{{methodName}}ContainerKey))
+                          {
+                              _ = settings.CreateContainer({{specificType}}.{{methodName}}ContainerKey, Windows.Storage.ApplicationDataCreateDisposition.{{createDispositionValue}});
+                          }
+                  
+                          _container{{methodName}} = settings.Containers[{{specificType}}.{{methodName}}ContainerKey];
+                      }
+                  """).AppendLine();
+            _ = loadMethods.AppendLine(
+                $$"""
+                      public static {{typeName}}? Load{{methodName}}()
+                      {
+                          try
+                          {
+                              var values = _container{{methodName}}.Values;
+                              return new {{typeName}}(
+                  """);
+            _ = saveMethods.AppendLine(
+                  $$"""
+                      public static void Save{{methodName}}({{typeName}}? configuration)
+                      {
+                          if (configuration is { } appConfiguration)
+                          {
+                              var values = _container{{methodName}}.Values;
+                  """);
+            foreach (var property in type.GetProperties(attributeList[0].AttributeClass!))
+            {
+                _ = loadMethods.AppendLine(LoadRecord(property.Name, property.Type.Name, typeName, castMethod));
+                _ = saveMethods.AppendLine(SaveRecord(property.Name, property.Type, typeName, castMethod));
+                namespaces.UseNamespace(usedTypes, typeSymbol, property.Type);
+            }
+
+            // 去除','
+            _ = loadMethods.Remove(loadMethods.Length - 3, 1);
+            _ = loadMethods.AppendLine(
+                """
+                           );
+                        }
+                        catch
+                        {
+                            return default;
+                        }
+                    }
+                """).AppendLine();
+            _ = saveMethods.AppendLine(
+                 """
+                        }
+                    }
+                """).AppendLine();
+
+        }
 
         return namespaces.GenerateFileHeader()
             .AppendLine(classBegin)
-            .AppendLine(loadConfigurationContent.ToString())
-            .AppendLine(loadConfigurationEndAndSaveConfigurationBegin)
-            // saveConfigurationContent 后已有空行
-            .Append(saveConfigurationContent)
-            .AppendLine(saveConfigurationEndAndClassEnd)
+            .AppendLine(containers.ToString())
+            .AppendLine(keys.ToString())
+            .AppendLine(initializeMethods.ToString())
+            .AppendLine(loadMethods.ToString())
+            .AppendLine(saveMethods.ToString())
+            .AppendLine(classEnd)
             .ToString();
     }
 
-    private static string LoadRecord(string specificType, string propertyName, string type, string typeName, string? methodName) => methodName is null
-            ? $"{Spacing(4)}({type}){specificType}._configurationContainer.Values[nameof({typeName}.{propertyName})],"
-            : $"{Spacing(4)}{specificType}._configurationContainer.Values[nameof({typeName}.{propertyName})].{methodName}<{type}>(),";
+    private static string LoadRecord(string propertyName, string type, string typeName, string? methodName) => methodName is null
+            ? $"{Spacing(4)}({type})values[nameof({typeName}.{propertyName})],"
+            : $"{Spacing(4)}values[nameof({typeName}.{propertyName})].{methodName}<{type}>(),";
 
-    private static string SaveRecord(string specificType, string name, ITypeSymbol type, string typeName, string? methodName)
+    private static string SaveRecord(string name, ITypeSymbol type, string typeName, string? methodName)
     {
-        var body = $"{specificType}._configurationContainer.Values[nameof({typeName}.{name})] = appConfiguration.{name}";
+        var body = $"values[nameof({typeName}.{name})] = appConfiguration.{name}";
         return !_primitiveTypes.Contains(type.Name)
             ? type switch
             {
@@ -136,8 +175,8 @@ partial class {typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualified
             : $"{Spacing(3)}{body};";
     }
 
-    private static readonly HashSet<string> _primitiveTypes = new()
-    {
+    private static readonly HashSet<string> _primitiveTypes =
+    [
         nameof(SByte),
         nameof(Byte),
         nameof(Int16),
@@ -154,5 +193,5 @@ partial class {typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualified
         nameof(TimeSpan),
         nameof(Guid),
         nameof(DateTimeOffset)
-    };
+    ];
 }

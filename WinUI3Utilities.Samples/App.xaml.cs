@@ -10,7 +10,7 @@ public partial class App : Application
     {
         InitializeComponent();
         CurrentContext.Title = nameof(WinUI3Utilities);
-        AppContext.InitializeConfigurationContainer();
+        AppContext.InitializeConfiguration();
         AppConfig = AppContext.LoadConfiguration() ?? new AppConfig();
     }
 

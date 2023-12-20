@@ -25,9 +25,9 @@ public class DependencyPropertyGenerator : TypeWithAttributeGenerator
 
             if (attribute.ConstructorArguments is not
                 [
-                    { Value: string propertyName },
+                { Value: string propertyName },
                     var defaultValueArgument,
-                    { Value: string propertyChanged },
+                { Value: string propertyChanged },
                     ..
                 ])
                 continue;
@@ -91,7 +91,7 @@ public class DependencyPropertyGenerator : TypeWithAttributeGenerator
         if (members.Count > 0)
         {
             var generatedClass = GetClassDeclaration(typeSymbol, members);
-            var generatedNamespace = GetFileScopedNamespaceDeclaration(typeSymbol, generatedClass);
+            var generatedNamespace = GetFileScopedNamespaceDeclaration(typeSymbol, generatedClass, false);
             var compilationUnit = GetCompilationUnit(generatedNamespace);
             return SyntaxTree(compilationUnit, encoding: Encoding.UTF8).GetText().ToString();
         }
