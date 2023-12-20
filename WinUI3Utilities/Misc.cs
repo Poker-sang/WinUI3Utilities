@@ -39,7 +39,7 @@ public static class Misc
     /// <param name="target"></param>
     /// <param name="init"></param>
     /// <returns></returns>
-    public static T Get<T>(this WeakReference<T?> target, T init) where T : class
+    public static T GetOrInit<T>(this WeakReference<T?> target, T init) where T : class
     {
         if (!target.TryGetTarget(out var value))
             target.SetTarget(value = init);

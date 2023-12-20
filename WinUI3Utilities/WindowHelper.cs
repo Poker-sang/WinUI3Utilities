@@ -1,7 +1,5 @@
 using System;
-using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Media;
 using Windows.Graphics;
 using WinUI3Utilities.Internal.PlatformInvoke;
 

@@ -4,7 +4,7 @@ Useful template methods for WinUI3 projects
 
 ## Build
 
-![.NET](https://img.shields.io/badge/.Net-7.0-512BD4?&style=for-the-badge&logo=.NET&logoColor=white)
+![.NET](https://img.shields.io/badge/.Net-8.0-512BD4?&style=for-the-badge&logo=.NET&logoColor=white)
 ![Windows](https://img.shields.io/badge/Windows-10.0.19041-0078D6?&style=for-the-badge&logo=Windows&logoColor=white)
 
 ## Usage
@@ -36,14 +36,14 @@ For more details, see the XAML docs of the corresponding attributes.
 | - | - |
 | DependencyPropertyAttribute | Generate a dependency property |
 | LocalizedStringResourcesAttribute | Generate for all the .resw files in `PRIResource` under the specified namespace |
-| __SettingsViewModelAttribute__* | Generate property according to the properties of the settings class `T` for the specified viewmodel class |
-| __GenerateConstructorAttribute__* | Generate constructor like `record` for the specified type, according to the properties of it |
-| __AppContextAttribute__* | Generate field `_configurationContainer` and methods `Load/SaveConfiguration` for the specified class |
+| **SettingsViewModelAttribute*** | Generate property according to the properties of the settings class `T` for the specified viewmodel class |
+| **GenerateConstructorAttribute*** | Generate constructor like `record` for the specified type, according to the properties of it |
+| **AppContextAttribute*** | Generate field `_configurationContainer` and methods `Load/SaveConfiguration` for the specified class |
 | WindowSizeHelperAttribute | Generate helper properties to limit the window size (works with `WindowSizeHelper`) |
 | AttributeIgnoreAttribute | Ignores the effect of the specified attributes on this target |
 | DisableSourceGeneratorAttribute | Indicates that the source generator is disabled. This is usually used for debug purpose |
 
-* Asterisk ("*") or __boldness__ indicates that the attribute supports `AttributeIgnoreAttribute`
+* Asterisk ("*") or **boldness** indicates that the attribute supports `AttributeIgnoreAttribute`
 
 ### Settings Persistence
 

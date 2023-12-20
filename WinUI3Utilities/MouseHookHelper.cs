@@ -1,3 +1,5 @@
+#if false
+
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -120,3 +122,5 @@ public class MouseHookHelper
 }
 
 public delegate void MouseEventHandler(object? sender, PointInt32 p);
+
+#endif
