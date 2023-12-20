@@ -4,7 +4,7 @@ using Microsoft.UI.Xaml;
 namespace WinUI3Utilities.Attributes;
 
 /// <summary>
-/// Generate helper properties to limit the window size
+/// Generate helper properties to limit the window size (works with <see cref="WindowSizeHelper"/>) 
 /// </summary>
 /// <remarks>
 /// <strong>This attribute can ONLY be placed on a <see cref="Window"/> class</strong><br/>

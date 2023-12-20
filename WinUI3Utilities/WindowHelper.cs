@@ -8,7 +8,7 @@ using WinUI3Utilities.Internal.PlatformInvoke;
 namespace WinUI3Utilities;
 
 /// <summary>
-/// A set of methods for <see cref="Window"/>
+/// Helper to get and set properties of <see cref="Window"/>
 /// </summary>
 public static class WindowHelper
 {
@@ -48,7 +48,7 @@ public static class WindowHelper
     /// </remarks>
     /// </returns>
     public static SizeInt32 EstimatedWindowSize() =>
-        GetScreenSize() switch
+        AppHelper.GetScreenSize() switch
         {
             ( >= 2560, >= 1440) => new(1600, 900),
             ( > 1600, > 900) => new(1280, 720),
@@ -100,7 +100,7 @@ public static class WindowHelper
     /// // Apply customized title bar if supported (depends on <see cref="InitializeInfo.TitleBarType"/>)<br/>
     /// <see cref="TitleBarHelper"/>... 
     /// // Apply backdrop if supported (depends on <see cref="InitializeInfo.BackdropType"/>)<br/>
-    /// <paramref name="window"/>.SystemBackdrop = <paramref name="info"/>.BackdropType <see langword="switch"/> { ... }
+    /// <see cref="BackdropHelper"/>... 
     /// </code>
     /// </remarks>
     /// <param name="info"></param>

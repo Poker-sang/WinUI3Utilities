@@ -9,7 +9,7 @@ using WinUI3Utilities.Internal.PlatformInvoke;
 namespace WinUI3Utilities;
 
 /// <summary>
-/// A set of methods for title bar
+/// Helper to set title bar
 /// </summary>
 public static class TitleBarHelper
 {
@@ -160,13 +160,13 @@ public static class TitleBarHelper
         var activeWindow = User32.GetActiveWindow();
         if (hWnd == activeWindow)
         {
-            _ = User32.SendMessage(hWnd, WindowMessage.WM_ACTIVATE, (nint)WindowMessage.WA_INACTIVE, 0);
-            _ = User32.SendMessage(hWnd, WindowMessage.WM_ACTIVATE, (nint)WindowMessage.WA_ACTIVE, 0);
+            _ = User32.SendMessage(hWnd, WindowMessage.WM_ACTIVATE, (nint)NativeConstant.WA_INACTIVE, 0);
+            _ = User32.SendMessage(hWnd, WindowMessage.WM_ACTIVATE, (nint)NativeConstant.WA_ACTIVE, 0);
         }
         else
         {
-            _ = User32.SendMessage(hWnd, WindowMessage.WM_ACTIVATE, (nint)WindowMessage.WA_ACTIVE, 0);
-            _ = User32.SendMessage(hWnd, WindowMessage.WM_ACTIVATE, (nint)WindowMessage.WA_INACTIVE, 0);
+            _ = User32.SendMessage(hWnd, WindowMessage.WM_ACTIVATE, (nint)NativeConstant.WA_ACTIVE, 0);
+            _ = User32.SendMessage(hWnd, WindowMessage.WM_ACTIVATE, (nint)NativeConstant.WA_INACTIVE, 0);
         }
     }
 

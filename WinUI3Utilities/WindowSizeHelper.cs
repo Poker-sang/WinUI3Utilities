@@ -6,7 +6,7 @@ using WinUI3Utilities.Internal.PlatformInvoke;
 namespace WinUI3Utilities;
 
 /// <summary>
-/// Helper to limit the size of the window, use <see cref="WindowSizeHelperAttribute"/>
+/// Helper to limit the size of the window, works with <see cref="WindowSizeHelperAttribute"/>
 /// </summary>
 public static class WindowSizeHelper
 {
@@ -48,7 +48,7 @@ public static class WindowSizeHelper
         parameter.NewWndProc = (wnd, msg, wParam, lParam) =>
             WndProc(parameter.MinWidth, parameter.MinHeight, parameter.MaxWidth, parameter.MaxHeight,
                 parameter.OldWndProc, wnd, msg, wParam, lParam);
-        parameter.OldWndProc = User32.SetWindowLongPtr((nint)window.AppWindow.Id.Value, WindowLongIndexFlags.GWL_WNDPROC, parameter.NewWndProc);
+        parameter.OldWndProc = User32.SetWindowLongPtr((nint)window.AppWindow.Id.Value, WindowLongIndexFlag.GWL_WNDPROC, parameter.NewWndProc);
     }
 
     /// <summary>
@@ -71,7 +71,6 @@ public static class WindowSizeHelper
                     minMaxInfo.ptMaxTrackSize.Y = (int)(maxHeight * scalingFactor);
                 Marshal.StructureToPtr(minMaxInfo, lParam, true);
                 break;
-
         }
         return User32.CallWindowProc(oldWndProc, hWnd, msg, wParam, lParam);
     }

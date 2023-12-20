@@ -1,3 +1,7 @@
+using System;
+using System.Diagnostics.CodeAnalysis;
+#pragma warning disable CA1069
+
 namespace WinUI3Utilities.Internal.PlatformInvoke;
 
 // Good list of message numbers: https://wiki.winehq.org/List_Of_Windows_Messages
@@ -6,13 +10,14 @@ namespace WinUI3Utilities.Internal.PlatformInvoke;
 /// This enum defines the windows messages we respond to.
 /// See more on Windows messages <a href="https://docs.microsoft.com/en-us/windows/win32/learnwin32/window-messages">here</a>
 /// </summary>
-internal enum WindowMessage : uint
+#pragma warning disable IDE0079 // 请删除不必要的忽略
+[SuppressMessage("ReSharper", "InconsistentNaming")]
+[SuppressMessage("ReSharper", "IdentifierTypo")]
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
+#pragma warning restore IDE0079 // 请删除不必要的忽略
+[Flags]
+internal enum WindowMessage
 {
-    WA_ACTIVE = 0x01,
-
-    WA_CLICKACTIVE = 0x02,
-
-    WA_INACTIVE = 0x00,
 
     /// <summary>
     /// Sent after a window has been moved.
