@@ -3,8 +3,6 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.Foundation.Metadata;
-using Windows.UI;
-using WinUI3Utilities.Internal.PlatformInvoke;
 
 namespace WinUI3Utilities;
 
@@ -13,70 +11,13 @@ namespace WinUI3Utilities;
 /// </summary>
 public static class TitleBarHelper
 {
-    #region For NavigationView
-
     /// <summary>
-    /// Simply call <see cref="UpdateAppTitleMargin"/>, should be invoked by <see cref="NavigationView.PaneClosing"/>
-    /// </summary>
-    /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.TitleTextBlock"/></term></item>
-    /// </list>
-    /// </remarks>
-    /// <param name="sender"></param>
-    /// <param name="_"></param>
-    public static void PaneClosing(NavigationView sender, NavigationViewPaneClosingEventArgs _) => UpdateAppTitleMargin(sender, CurrentContext.TitleTextBlock);
-
-    /// <summary>
-    /// Simply call <see cref="UpdateAppTitleMargin"/>, should be invoked by <see cref="NavigationView.PaneOpening"/>
-    /// </summary>
-    /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.TitleTextBlock"/></term></item>
-    /// </list>
-    /// </remarks>
-    /// <param name="sender"></param>
-    /// <param name="_"></param>
-    public static void PaneOpening(NavigationView sender, object _) => UpdateAppTitleMargin(sender, CurrentContext.TitleTextBlock);
-
-    /// <inheritdoc cref="DisplayModeChangedTitleBar(FrameworkElement, TextBlock, NavigationView)"/>
-    /// <remarks>
-    /// Assign Prerequisites:
-    /// <list type="bullet">
-    /// <item><term><see cref="CurrentContext.TitleBar"/></term></item>
-    /// <item><term><see cref="CurrentContext.TitleTextBlock"/></term></item>
-    /// </list>
-    /// </remarks>
-    /// <param name="sender"></param>
-    /// <param name="_"></param>
-    public static void DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs _)
-        => DisplayModeChangedTitleBar(CurrentContext.TitleBar, CurrentContext.TitleTextBlock, sender);
-
-    /// <summary>
-    /// Should be invoked by <see cref="NavigationView.DisplayModeChanged"/><br/>
-    /// Update app title's and its text block's margin when <see cref="NavigationView.DisplayMode"/> changed
-    /// </summary>
-    /// <param name="titleBar"></param>
-    /// <param name="textBlock"></param>
-    /// <param name="navigationView"></param>
-    public static void DisplayModeChangedTitleBar(FrameworkElement titleBar, TextBlock textBlock, NavigationView navigationView)
-    {
-        var currentMargin = titleBar.Margin;
-        titleBar.Margin = navigationView.DisplayMode is NavigationViewDisplayMode.Minimal && navigationView.IsBackButtonVisible is not NavigationViewBackButtonVisible.Collapsed
-            ? new() { Left = navigationView.CompactPaneLength * 2, Top = currentMargin.Top, Right = currentMargin.Right, Bottom = currentMargin.Bottom }
-            : new Thickness { Left = navigationView.CompactPaneLength, Top = currentMargin.Top, Right = currentMargin.Right, Bottom = currentMargin.Bottom };
-
-        UpdateAppTitleMargin(navigationView, textBlock);
-    }
-
-    /// <summary>
-    /// Update app <paramref name="titleTextBlock"/>'s margin when <see cref="NavigationView.DisplayMode"/> changed
+    /// Should be invoked by <see cref="NavigationView.PaneOpening"/> and <see cref="NavigationView.PaneClosing"/><br/>
+    /// Update app <paramref name="titleTextBlock"/>'s margin
     /// </summary>
     /// <param name="navigationView"></param>
     /// <param name="titleTextBlock"></param>
-    public static void UpdateAppTitleMargin(NavigationView navigationView, TextBlock titleTextBlock)
+    public static void UpdateAppTitleMargin(this NavigationView navigationView, TextBlock titleTextBlock)
     {
         const int smallLeftIndent = 4, largeLeftIndent = 24;
 
@@ -100,28 +41,27 @@ public static class TitleBarHelper
         }
     }
 
-    #endregion
-
-    #region For Window
 
     /// <summary>
     /// Customize title bar when supported
     /// </summary>
     /// <remarks>
-    /// Related to <see cref="TitleBarType.Window"/>, set <see cref="Window.ExtendsContentIntoTitleBar"/> and <see cref="Window.SetTitleBar"/>.
-    /// May need to call <see cref="SetWindowTitleBarButtonColor"/>
+    /// Related to <see cref="Window"/>, set <see cref="Window.ExtendsContentIntoTitleBar"/> when <see cref="AppWindowTitleBar.IsCustomizationSupported"/>.
     /// </remarks>
     /// <returns>Whether customization of title bar is supported</returns>
-    public static void SetWindowTitleBar(this Window window, FrameworkElement titleBar)
+    public static void SetWindowTitleBar(this Window window)
     {
         if (!AppWindowTitleBar.IsCustomizationSupported())
             return;
         window.ExtendsContentIntoTitleBar = true;
-        window.SetTitleBar(titleBar);
     }
 
+#if false
+
+    #region For Window
+
     /// <summary>
-    /// Set title bar button color for window with <see cref="TitleBarType.Window"/>
+    /// Set title bar button color for window with <see cref="Window"/>
     /// </summary>
     /// <param name="window"></param>
     /// <param name="useDark">use dark theme</param>
@@ -135,7 +75,7 @@ public static class TitleBarHelper
     }
 
     /// <summary>
-    /// Set theme for window with <see cref="TitleBarType.Window"/>
+    /// Set theme for window with <see cref="Window"/>
     /// </summary>
     /// <remarks>
     /// <strong>Make sure <see cref="Window.Content"/> is <see cref="FrameworkElement"/> and loaded</strong><br/>
@@ -154,7 +94,7 @@ public static class TitleBarHelper
     /// To trigger repaint tracking task id 38044406
     /// </summary>
     /// <param name="window"></param>
-    private static void TriggerTitleBarRepaint(this Window window)
+    public static void TriggerTitleBarRepaint(this Window window)
     {
         var hWnd = (nint)window.AppWindow.Id.Value;
         var activeWindow = User32.GetActiveWindow();
@@ -178,7 +118,7 @@ public static class TitleBarHelper
     /// Customize title bar if supported
     /// </summary>
     /// <remarks>
-    /// Related to <see cref="TitleBarType.AppWindow"/>, set <see cref="AppWindowTitleBar.ExtendsContentIntoTitleBar"/> and <see cref="AppWindowTitleBar.IconShowOptions"/>
+    /// Related to <see cref="AppWindow"/>, set <see cref="AppWindowTitleBar.ExtendsContentIntoTitleBar"/> and <see cref="AppWindowTitleBar.IconShowOptions"/>
     /// May need to call <see cref="SetAppWindowTitleBarButtonColor"/>
     /// </remarks>
     public static void SetAppWindowTitleBar(AppWindowTitleBar appWindowTitleBar)
@@ -190,7 +130,7 @@ public static class TitleBarHelper
     }
 
     /// <summary>
-    /// Set title bar button color for window with <see cref="TitleBarType.AppWindow"/>
+    /// Set title bar button color for window with <see cref="AppWindow"/>
     /// </summary>
     /// <param name="window"></param>
     /// <param name="useDark">use dark theme</param>
@@ -209,7 +149,7 @@ public static class TitleBarHelper
     }
 
     /// <summary>
-    /// Set theme for window with <see cref="TitleBarType.AppWindow"/>
+    /// Set theme for window with <see cref="AppWindow"/>
     /// </summary>
     /// <remarks>
     /// <strong>Make sure <see cref="Window.Content"/> is <see cref="FrameworkElement"/> and loaded</strong><br/>
@@ -225,6 +165,8 @@ public static class TitleBarHelper
     }
 
     #endregion
+
+#endif
 
     #region For theme
 

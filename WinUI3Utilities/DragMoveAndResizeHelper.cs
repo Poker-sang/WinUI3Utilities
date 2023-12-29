@@ -11,37 +11,20 @@ using WinUI3Utilities.Internal.PlatformInvoke;
 namespace WinUI3Utilities;
 
 /// <summary>
-/// Apply drag-move and resize function to <see cref="RootPanel"/>
+/// Apply drag-move and resize function to <see cref="UIElement"/>
 /// </summary>
 public static class DragMoveAndResizeHelper
 {
     /// <summary>
-    /// Once set, 3 events that are subscribed to by <see cref="RootPanel"/> (call <see cref="SetDragMove"/>, and use <see cref="DragMoveAndResizeMode.Both"/>)<br/>
-    /// When set to a new <see cref="UIElement"/> or <see langword="null"/>, the old <see cref="RootPanel"/>'s events will be unsubscribed (call <see cref="UnsetDragMove"/>)
-    /// </summary>
-    public static UIElement? RootPanel
-    {
-        get => _rootPanel;
-        set
-        {
-            if (_rootPanel is not null)
-                UnsetDragMove(_rootPanel);
-            _rootPanel = value;
-            if (_rootPanel is not null)
-                SetDragMove(_rootPanel, new(DragMoveAndResizeMode.Both));
-        }
-    }
-
-    /// <summary>
     /// Subscribe <see cref="UIElement.PointerPressed"/>, <see cref="UIElement.PointerMoved"/>, <see cref="UIElement.PointerReleased"/>
     /// </summary>
+    /// <param name="window"></param>
     /// <param name="element"></param>
     /// <param name="info"></param>
-    /// <param name="window">Default: <see cref="CurrentContext.Window"/></param>
-    public static void SetDragMove(UIElement element, DragMoveAndResizeInfo info, Window? window = null)
+    public static void SetDragMove(this Window window, UIElement element, DragMoveAndResizeInfo info)
     {
         _pointerPressed = (o, e) => RootPointerPressed(o, e, info);
-        _pointerMoved = (o, e) => RootPointerMoved(o, e, info, window ?? CurrentContext.Window);
+        _pointerMoved = (o, e) => RootPointerMoved(o, e, info, window);
         element.PointerPressed += _pointerPressed;
         element.PointerMoved += _pointerMoved;
         element.PointerReleased += RootPointerReleased;
@@ -58,7 +41,6 @@ public static class DragMoveAndResizeHelper
         element.PointerReleased -= RootPointerReleased;
     }
 
-    private static UIElement? _rootPanel;
     private static PointerEventHandler _pointerPressed = null!;
     private static PointerEventHandler _pointerMoved = null!;
 

@@ -1,5 +1,3 @@
-using System;
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using WinUI3Utilities.Attributes;
 using WinUI3Utilities.Samples.Pages;
@@ -7,24 +5,11 @@ using WinUI3Utilities.Samples.Pages;
 namespace WinUI3Utilities.Samples;
 
 [WindowSizeHelper]
-public sealed partial class MainWindow : Window
+public sealed partial class MainWindow
 {
     public MainWindow()
     {
-        CurrentContext.Window = this;
         InitializeComponent();
-        CurrentContext.TitleBar = TitleBar;
-        CurrentContext.TitleTextBlock = TitleTextBlock;
-        // TODO: Microsoft.WindowsAppSDK 1.2后，最小化的NavigationView没有高度
-        CurrentContext.NavigationView = NavigationView;
-        CurrentContext.Frame = NavigateFrame.To<Frame>();
-    }
-
-    private void Loaded(object sender, RoutedEventArgs e)
-    {
-        NavigationView.SettingsItem.To<NavigationViewItem>().Tag = typeof(SettingsPage);
-        NavigationHelper.GotoPage<IndexPage>();
-        NavigationView.SelectedItem = NavigationView.MenuItems[0];
     }
 
     private void BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs e)
@@ -39,12 +24,8 @@ public sealed partial class MainWindow : Window
         NavigationView.IsBackEnabled = NavigateFrame.CanGoBack;
     }
 
-    private void ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs e)
+    private void NavigationView_OnPaneChanging(NavigationView sender, object args)
     {
-        MaxWidth = 500;
-        if (e.InvokedItemContainer.Tag is Type item && item != NavigateFrame.Content.GetType())
-            NavigationHelper.GotoPage(item);
+        sender.UpdateAppTitleMargin(TitleTextBlock);
     }
-
-    private void TeachingTipOnLoaded(object sender, RoutedEventArgs e) => TeachingTipHelper.RootTeachingTip = sender.To<TeachingTip>();
 }

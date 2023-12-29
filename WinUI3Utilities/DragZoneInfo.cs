@@ -1,3 +1,4 @@
+#if false
 using System.Collections.Generic;
 using Windows.Graphics;
 
@@ -34,3 +35,4 @@ public record DragZoneInfo
     /// </summary>
     public bool ExcludeDebugToolbarArea { get; set; }
 }
+#endif

@@ -22,7 +22,7 @@ For more details, see the XAML docs of the corresponding attributes.
 | WindowHelper | Get and set properties of `Window` |
 | WindowSizeHelper | Limit the size of the window (works with `WindowSizeHelperAttribute`) |
 | DragMoveAndResizeHelper | Apply drag-move and resize function to (`UIElement`)`RootPanel` |
-| DragZoneHelper | Calculate non-dragging zones for `AppWindowTitleBar.SetDragRectangles` |
+| DragZoneHelper | Reduce repetitive operations when using `InputNonClientPointerSource` |
 | TitleBarHelper | Set title bar |
 | BackdropHelper | Set backdrop |
 | TeachingTipHelper | Helper for `TeachingTip` |

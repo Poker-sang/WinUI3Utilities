@@ -109,7 +109,7 @@ public class DependencyPropertyCodeFixProvider001 : DependencyPropertyCodeFixPro
                     => MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression, IdentifierName("DependencyPropertyDefaultValue"),
                         IdentifierName("New")),
-                //todo
+                // todo
                 _ => LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(defaultValue.ToString()))
             })
         };

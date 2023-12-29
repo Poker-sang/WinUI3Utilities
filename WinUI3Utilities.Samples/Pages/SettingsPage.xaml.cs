@@ -10,7 +10,7 @@ public sealed partial class SettingsPage : Page, ITypeGetter
     public SettingsPage()
     {
         InitializeComponent();
-        DragMoveAndResizeHelper.RootPanel = Grid;
+        App.MainWindow.SetDragMove(this, new(DragMoveAndResizeMode.Both));
     }
 
     private readonly SettingsViewModel _vm = new();

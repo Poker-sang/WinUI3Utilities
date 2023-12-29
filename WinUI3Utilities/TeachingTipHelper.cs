@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -11,23 +13,52 @@ namespace WinUI3Utilities;
 public static class TeachingTipHelper
 {
     /// <summary>
-    /// Root snack bar (generally placed on main window)
+    /// Create a <see cref="TeachingTip"/> with <paramref name="xamlRoot"/> and <paramref name="target"/>
     /// </summary>
-    public static TeachingTip RootTeachingTip { get; set; } = null!;
+    /// <param name="xamlRoot"></param>
+    /// <param name="target"></param>
+    /// <returns></returns>
+    public static TeachingTip CreateTeachingTip(this UIElement xamlRoot, FrameworkElement? target = null)
+    {
+        return new()
+        {
+            XamlRoot = xamlRoot.XamlRoot,
+            Target = target,
+            IsOpen = false
+        };
+    }
 
-    /// <remarks>
-    /// Value type members require property to enable thread sharing
-    /// </remarks>
-    private static DateTime HideSnakeBarTime { get; set; }
+    /// <inheritdoc cref="Show(TeachingTip, string, IconSource?, string, bool)"/>
+    public static TeachingTip ShowTeachingTip(this UIElement xamlRoot, string title, IconSource? icon, string subtitle = "", bool isLightDismissEnabled = false, FrameworkElement? target = null)
+    {
+        var teachingTip = xamlRoot.CreateTeachingTip(target);
+        teachingTip.Show(title, icon, subtitle, isLightDismissEnabled);
+        return teachingTip;
+    }
 
-    /// <summary>
-    /// Assign <see cref="RootTeachingTip"/> when <paramref name="sender"/> is loaded
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    public static void TeachingTipLoaded(object sender, RoutedEventArgs e) => RootTeachingTip = sender.To<TeachingTip>();
+    /// <inheritdoc cref="Show(TeachingTip, string, TeachingTipSeverity, string, bool)"/>
+    public static TeachingTip ShowTeachingTip(this UIElement xamlRoot, string title, TeachingTipSeverity icon = TeachingTipSeverity.Ok, string subtitle = "", bool isLightDismissEnabled = false, FrameworkElement? target = null)
+    {
+        var teachingTip = xamlRoot.CreateTeachingTip(target);
+        teachingTip.Show(title, icon, subtitle, isLightDismissEnabled);
+        return teachingTip;
+    }
 
-    #region Basic TeachingTip helper
+    /// <inheritdoc cref="ShowAndHide(TeachingTip, string, IconSource?, string, int, bool)"/>
+    public static TeachingTip ShowTeachingTipAndHide(this UIElement xamlRoot, string title, IconSource? icon, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true, FrameworkElement? target = null)
+    {
+        var teachingTip = xamlRoot.CreateTeachingTip(target);
+        teachingTip.ShowAndHide(title, icon, subtitle, mSec, isLightDismissEnabled);
+        return teachingTip;
+    }
+
+    /// <inheritdoc cref="ShowAndHide(TeachingTip, string, TeachingTipSeverity, string, int, bool)"/>
+    public static TeachingTip ShowTeachingTipAndHide(this UIElement xamlRoot, string title, TeachingTipSeverity icon = TeachingTipSeverity.Ok, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true, FrameworkElement? target = null)
+    {
+        var teachingTip = xamlRoot.CreateTeachingTip(target);
+        teachingTip.ShowAndHide(title, icon, subtitle, mSec, isLightDismissEnabled);
+        return teachingTip;
+    }
 
     /// <inheritdoc cref="Show(TeachingTip, string, TeachingTipSeverity, string, bool)"/>
     public static void Show(this TeachingTip teachingTip, string title, IconSource? icon, string subtitle = "", bool isLightDismissEnabled = false)
@@ -49,16 +80,18 @@ public static class TeachingTipHelper
     }
 
     /// <inheritdoc cref="ShowAndHide(TeachingTip, string, TeachingTipSeverity, string, int, bool)"/>
-    public static async void ShowAndHide(this TeachingTip teachingTip, string title, IconSource? icon, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true)
+    public static void ShowAndHide(this TeachingTip teachingTip, string title, IconSource? icon, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true)
     {
-        HideSnakeBarTime = DateTime.Now + TimeSpan.FromMilliseconds(mSec - 100);
+        ref var hideTime = ref CollectionsMarshal.GetValueRefOrAddDefault(HideTimes, teachingTip, out var exists);
+
+        if (!exists)
+            teachingTip.Unloaded += (o, e) => HideTimes.Remove(teachingTip);
+
+        hideTime = DateTime.Now + TimeSpan.FromMilliseconds(mSec - 100);
 
         teachingTip.Show(title, icon, subtitle, isLightDismissEnabled);
 
-        await Task.Delay(mSec);
-
-        if (DateTime.Now > HideSnakeBarTime)
-            teachingTip.IsOpen = false;
+        Hide(teachingTip, hideTime, mSec);
     }
 
     /// <summary>
@@ -75,76 +108,16 @@ public static class TeachingTipHelper
         teachingTip.ShowAndHide(title, icon.GetIconSource(), subtitle, mSec, isLightDismissEnabled);
     }
 
-    #endregion
-
-    #region RootTeachingTip helper
-
-    /// <inheritdoc cref="Show(string, TeachingTipSeverity, string, bool)"/>
-    public static void Show(string title, IconSource icon, string hint = "", bool isLightDismissEnabled = false)
+    private static async void Hide(this TeachingTip teachingTip, DateTime hideTime, int mSec)
     {
-        RootTeachingTip.Show(title, icon, hint, isLightDismissEnabled);
-    }
-
-    /// <inheritdoc cref="Show(TeachingTip, string, TeachingTipSeverity, string, bool)"/>
-    public static void Show(string title, TeachingTipSeverity icon = TeachingTipSeverity.Ok, string subtitle = "", bool isLightDismissEnabled = false)
-    {
-        RootTeachingTip.Show(title, icon, subtitle, isLightDismissEnabled);
-    }
-
-    /// <inheritdoc cref="ShowAndHide(TeachingTip, string, IconSource?, string, int, bool)"/>
-    public static void ShowAndHide(string title, IconSource? icon, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true)
-    {
-        RootTeachingTip.ShowAndHide(title, icon, subtitle, mSec, isLightDismissEnabled);
-    }
-
-    /// <inheritdoc cref="ShowAndHide(TeachingTip, string, TeachingTipSeverity, string, int, bool)"/>
-    public static void ShowAndHide(string title, TeachingTipSeverity icon = TeachingTipSeverity.Ok, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true)
-    {
-        RootTeachingTip.ShowAndHide(title, icon, subtitle, mSec, isLightDismissEnabled);
-    }
-
-    #endregion
-
-    #region ObservableTeachingTipProperties helper
-
-    /// <inheritdoc cref="Show(string, TeachingTipSeverity, string, bool)"/>
-    public static void Show(this ObservableTeachingTipProperties teachingTip, string title, IconSource? icon, string subtitle = "", bool isLightDismissEnabled = false)
-    {
-        teachingTip.IsLightDismissEnabled = isLightDismissEnabled;
-        teachingTip.Title = title;
-        teachingTip.Subtitle = subtitle;
-        teachingTip.IconSource = icon;
-        teachingTip.IsOpen = true;
-    }
-
-    /// <inheritdoc cref="Show(TeachingTip, string, TeachingTipSeverity, string, bool)"/>
-    public static void Show(this ObservableTeachingTipProperties teachingTip, string title, TeachingTipSeverity icon = TeachingTipSeverity.Ok, string subtitle = "", bool isLightDismissEnabled = false)
-    {
-        teachingTip.Show(title, icon.GetIconSource(), subtitle, isLightDismissEnabled);
-    }
-
-    /// <inheritdoc cref="ShowAndHide(TeachingTip, string, IconSource?, string, int, bool)"/>
-    public static async void ShowAndHide(this ObservableTeachingTipProperties teachingTip, string title, IconSource? icon, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true)
-    {
-        HideSnakeBarTime = DateTime.Now + TimeSpan.FromMilliseconds(mSec - 100);
-
-        teachingTip.Show(title, icon, subtitle, isLightDismissEnabled);
-
         await Task.Delay(mSec);
-
-        if (DateTime.Now > HideSnakeBarTime)
+        if (DateTime.Now > hideTime)
             teachingTip.IsOpen = false;
     }
 
-    /// <inheritdoc cref="ShowAndHide(TeachingTip, string, TeachingTipSeverity, string, int, bool)"/>
-    public static void ShowAndHide(this ObservableTeachingTipProperties teachingTip, string title, TeachingTipSeverity icon = TeachingTipSeverity.Ok, string subtitle = "", int mSec = 3000, bool isLightDismissEnabled = true)
-    {
-        teachingTip.ShowAndHide(title, icon.GetIconSource(), subtitle, mSec, isLightDismissEnabled);
-    }
+    private static Dictionary<TeachingTip, DateTime> HideTimes { get; } = [];
 
-    #endregion
-
-    private static IconSource? GetIconSource(this TeachingTipSeverity severity)
+    private static FontIconSource? GetIconSource(this TeachingTipSeverity severity)
     {
         return severity is TeachingTipSeverity.None
             ? null
@@ -157,8 +130,16 @@ public static class TeachingTipHelper
                     TeachingTipSeverity.Important => "\xE171", // Important
                     TeachingTipSeverity.Warning => "\xE7BA", // Warning
                     TeachingTipSeverity.Error => "\xEA39", // ErrorBadge
+                    TeachingTipSeverity.Processing => "\xE9F5", // Processing
                     _ => ThrowHelper.ArgumentOutOfRange<TeachingTipSeverity, string>(severity)
                 }
             };
     }
 }
+
+/// <summary>
+/// 
+/// </summary>
+/// <param name="TeachingTip"></param>
+/// <param name="HideSnakeBarTime">Value type members require property to enable thread sharing</param>
+file record TeachingTipHelperCore(TeachingTip TeachingTip, DateTime HideSnakeBarTime);

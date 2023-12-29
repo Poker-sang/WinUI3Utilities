@@ -1,16 +1,63 @@
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Windows.Graphics;
+using Microsoft.UI.Input;
 
 namespace WinUI3Utilities;
 
 /// <summary>
-/// Helper to calculate non-dragging zones for <see cref="AppWindowTitleBar.SetDragRectangles"/>
+/// Helper to Reduce repetitive operations when using <see cref="InputNonClientPointerSource"/>
 /// </summary>
 public static class DragZoneHelper
 {
+    /// <summary>
+    /// Set <see cref="NonClientRegionKind.LeftBorder"/>, <see cref="NonClientRegionKind.RightBorder"/>, <see cref="NonClientRegionKind.Caption"/> for <paramref name="window"/>
+    /// acrording to <paramref name="titleBarHeight"/>. Will not set if <paramref name="titleBarHeight"/> is negative.
+    /// </summary>
+    /// <param name="window"></param>
+    /// <param name="titleBarHeight">Needs to be >= 0</param>
+    /// <param name="xamlRoot">Default: <paramref name="window"/>.Content</param>
+    public static void SetCaptionAndBorder(this Window window, int titleBarHeight, UIElement? xamlRoot = null)
+    {
+        if (titleBarHeight < 0)
+            return;
+        var source = InputNonClientPointerSource.GetForWindowId(window.AppWindow.Id);
+        // UIElement.RasterizationScale is always 1
+        var size = window.AppWindow.Size;
+        // region under the buttons
+        const int borderThickness = 5;
+        xamlRoot ??= window.Content;
+        source.SetRegionRects(NonClientRegionKind.LeftBorder, [new RectInt32(0, 0, borderThickness, titleBarHeight).GetScaledRectFrom(xamlRoot)]);
+        source.SetRegionRects(NonClientRegionKind.RightBorder, [new RectInt32(size.Width, 0, borderThickness, titleBarHeight).GetScaledRectFrom(xamlRoot)]);
+        source.SetRegionRects(NonClientRegionKind.Caption, [new RectInt32(0, 0, size.Width, titleBarHeight).GetScaledRectFrom(xamlRoot)]);
+    }
+
+    /// <summary>
+    /// Scale the <paramref name="rect"/> by <see cref="UIElement.XamlRoot"/>
+    /// </summary>
+    /// <param name="rect"></param>
+    /// <param name="xamlRoot"></param>
+    /// <returns></returns>
+    public static RectInt32 GetScaledRectFrom(this RectInt32 rect, UIElement xamlRoot)
+    {
+        var scaleFactor = xamlRoot.XamlRoot.RasterizationScale;
+        return new((int)(rect.X * scaleFactor), (int)(rect.Y * scaleFactor), (int)(rect.Width * scaleFactor), (int)(rect.Height * scaleFactor));
+    }
+
+    /// <summary>
+    /// Get the rectangle of <paramref name="uiElement"/> and scaled by <see cref="UIElement.XamlRoot"/>
+    /// </summary>
+    /// <param name="uiElement"></param>
+    /// <param name="xamlRoot"></param>
+    /// <returns></returns>
+    public static RectInt32 GetScaledRectFrom(this UIElement uiElement, UIElement xamlRoot)
+    {
+        var pos = uiElement.TransformToVisual(null).TransformPoint(new(0, 0));
+        var rect = new RectInt32((int)pos.X, (int)pos.Y, (int)uiElement.ActualSize.X, (int)uiElement.ActualSize.Y);
+        return rect.GetScaledRectFrom(xamlRoot);
+    }
+
+#if false
+    
     /// <summary>
     /// Calculate dragging-zones of title bar<br/>
     /// <strong>You MUST transform the rectangles with <see cref="WindowHelper.GetScaleAdjustment(Window)"/> before calling <see cref="AppWindowTitleBar.SetDragRectangles"/></strong><br/>
@@ -105,10 +152,9 @@ public static class DragZoneHelper
     /// Set dragging-zones of title bar
     /// </summary>
     /// <param name="info"></param>
-    /// <param name="window">Default: <see cref="CurrentContext.Window"/></param>
-    public static void SetDragZones(DragZoneInfo info, Window? window = null)
+    /// <param name="window"></param>
+    public static void SetDragZones(this Window window, DragZoneInfo info)
     {
-        window ??= CurrentContext.Window;
         var scaleAdjustment = window.GetScaleAdjustment();
         var windowWidth = (int)(window.AppWindow.Size.Width / scaleAdjustment);
         var nonDraggingZones = info.NonDraggingZones;
@@ -128,27 +174,28 @@ public static class DragZoneHelper
 
     private const int DebugToolbarWidth = 217;
     private const int DebugToolbarHeight = 25;
-}
 
-file record Range(int Lower, int Upper)
-{
-    public int Distance => Upper - Lower;
-
-    private bool Intersects(Range other) => other.Lower <= Upper && other.Upper >= Lower;
-
-    public static IEnumerable<Range> operator -(Range minuend, Range subtrahend)
+    private record Range(int Lower, int Upper)
     {
-        if (!minuend.Intersects(subtrahend))
-        {
-            yield return minuend;
-            yield break;
-        }
-        if (minuend.Lower < subtrahend.Lower)
-            yield return minuend with { Upper = subtrahend.Lower };
-        if (minuend.Upper > subtrahend.Upper)
-            yield return minuend with { Lower = subtrahend.Upper };
-    }
+        public int Distance => Upper - Lower;
 
-    public static IEnumerable<Range> operator -(IEnumerable<Range> minuends, Range subtrahend)
-        => minuends.SelectMany(minuend => minuend - subtrahend);
+        private bool Intersects(Range other) => other.Lower <= Upper && other.Upper >= Lower;
+
+        public static IEnumerable<Range> operator -(Range minuend, Range subtrahend)
+        {
+            if (!minuend.Intersects(subtrahend))
+            {
+                yield return minuend;
+                yield break;
+            }
+            if (minuend.Lower < subtrahend.Lower)
+                yield return minuend with { Upper = subtrahend.Lower };
+            if (minuend.Upper > subtrahend.Upper)
+                yield return minuend with { Lower = subtrahend.Upper };
+        }
+
+        public static IEnumerable<Range> operator -(IEnumerable<Range> minuends, Range subtrahend)
+            => minuends.SelectMany(minuend => minuend - subtrahend);
+    }
+#endif
 }

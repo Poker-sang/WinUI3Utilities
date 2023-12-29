@@ -39,11 +39,11 @@ public static class AppHelper
     /// </remarks>
     /// <param name="window"></param>
     /// <param name="func"></param>
-    public static void RegisterUnhandledExceptionHandler(Window window, Action<Exception>? func = null)
+    public static void RegisterUnhandledExceptionHandler(this Window window, Action<Exception>? func = null)
     {
         func ??= UncaughtExceptionHandler;
 
-        CurrentContext.App.UnhandledException += (o, args) =>
+        Application.Current.UnhandledException += (o, args) =>
         {
             args.Handled = true;
             _ = window.DispatcherQueue.TryEnqueue(() => func(args.Exception));

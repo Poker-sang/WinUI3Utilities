@@ -17,12 +17,20 @@ public record InitializeInfo
     public SizeInt32 Size { get; set; }
 
     /// <summary>
-    /// TitleBar type
+    /// Window title
     /// </summary>
     /// <remarks>
-    /// Default: <see cref="TitleBarType.Window"/>
+    /// Default: ""
     /// </remarks>
-    public TitleBarType TitleBarType { get; set; } = TitleBarType.Window;
+    public string Title { get; set; } = "";
+
+    /// <summary>
+    /// Extend TitleBar if supported
+    /// </summary>
+    /// <remarks>
+    /// Default: <see langword="true"/>
+    /// </remarks>
+    public bool ExtendTitleBar { get; set; } = true;
 
     /// <summary>
     /// Backdrop type
@@ -36,7 +44,7 @@ public record InitializeInfo
     /// Icon's absolute path
     /// </summary>
     /// <remarks>
-    /// Has the same effect as <see cref="IconId"/>, and only works when using default titlebar (<see cref="TitleBarType.Neither"/>)
+    /// Has the same effect as <see cref="IconId"/>
     /// <br/>
     /// Default: ""
     /// </remarks>
@@ -46,7 +54,7 @@ public record InitializeInfo
     /// Icon id 
     /// </summary>
     /// <remarks>
-    /// Has the same effect as <see cref="IconPath"/>, and only works when using default titlebar (<see cref="TitleBarType.Neither"/>)
+    /// Has the same effect as <see cref="IconPath"/>
     /// <br/>
     /// Default: <see langword="default"/>
     /// </remarks>

@@ -6,22 +6,24 @@ public partial class App : Application
 {
     public static AppConfig AppConfig { get; private set; } = null!;
 
+    public static MainWindow MainWindow { get; private set; } = null!;
+
     public App()
     {
         InitializeComponent();
-        CurrentContext.Title = nameof(WinUI3Utilities);
         AppContext.InitializeConfiguration();
         AppConfig = AppContext.LoadConfiguration() ?? new AppConfig();
     }
 
     protected override void OnLaunched(LaunchActivatedEventArgs e)
     {
-        new MainWindow().Initialize(new()
+        MainWindow = new MainWindow();
+        MainWindow.Initialize(new()
         {
             Size = new(500, 400),
-            TitleBarType = TitleBarType.AppWindow,
+            ExtendTitleBar = true,
+            Title = nameof(Samples)
         });
-        CurrentContext.Window.SetAppWindowTitleBarButtonColor(false);
-        CurrentContext.AppWindow.Show();
+        MainWindow.AppWindow.Show();
     }
 }

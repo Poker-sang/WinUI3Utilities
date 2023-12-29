@@ -33,6 +33,11 @@ public enum TeachingTipSeverity
     Error,
 
     /// <summary>
+    /// Processing (E9F5)
+    /// </summary>
+    Processing,
+
+    /// <summary>
     /// <see langword="null"/>
     /// </summary>
     None

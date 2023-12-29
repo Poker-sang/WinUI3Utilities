@@ -7,11 +7,11 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:pages="using:WinUI3Utilities.Samples.Pages"
     mc:Ignorable="d">
-
     <Grid>
         <Border
             x:Name="TitleBar"
             Height="{x:Bind NavigationView.CompactPaneLength}"
+            Margin="48,0,0,0"
             VerticalAlignment="Top"
             IsHitTestVisible="True">
             <StackPanel
@@ -26,19 +26,16 @@
                     x:Name="TitleTextBlock"
                     VerticalAlignment="Center"
                     Style="{StaticResource CaptionTextBlockStyle}"
-                    Text="{x:Bind helper:CurrentContext.Title}" />
+                    Text="WinUI3Utilities" />
             </StackPanel>
         </Border>
         <NavigationView
             x:Name="NavigationView"
             BackRequested="BackRequested"
-            DisplayModeChanged="{x:Bind helper:TitleBarHelper.DisplayModeChanged}"
             IsBackButtonVisible="Visible"
             IsTabStop="False"
-            ItemInvoked="ItemInvoked"
-            Loaded="Loaded"
-            PaneClosing="{x:Bind helper:TitleBarHelper.PaneClosing}"
-            PaneOpening="{x:Bind helper:TitleBarHelper.PaneOpening}">
+            PaneClosing="NavigationView_OnPaneChanging"
+            PaneOpening="NavigationView_OnPaneChanging">
             <NavigationView.MenuItems>
                 <NavigationViewItem
                     Content="主页"
@@ -53,6 +50,5 @@
             </NavigationView.FooterMenuItems>
             <Frame x:Name="NavigateFrame" />
         </NavigationView>
-        <TeachingTip Loaded="TeachingTipOnLoaded" />
     </Grid>
 </Window>
