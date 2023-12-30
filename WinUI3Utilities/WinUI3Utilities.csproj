@@ -18,36 +18,32 @@
         <Title>$(AssemblyName)</Title>
         <RepositoryUrl>git@github.com:Poker-sang/WinUI3Utilities.git</RepositoryUrl>
         <PackageProjectUrl>https://github.com/Poker-sang/WinUI3Utilities</PackageProjectUrl>
-        <AssemblyVersion>1.1.5</AssemblyVersion>
+        <AssemblyVersion>1.1.5.5</AssemblyVersion>
         <FileVersion>$(AssemblyVersion)</FileVersion>
         <VersionPrefix>$(AssemblyVersion)</VersionPrefix>
         <Version>$(AssemblyVersion)</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-      <NoWarn>IDE0060</NoWarn>
+        <NoWarn>IDE0060</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.4.231115000" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.2428" />
+        <PackageReference Include="System.Text.Json" Version="8.0.1" GeneratePathProperty="true" PrivateAssets="all" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <ItemGroup>
+        <Folder Include="NuGet Info\" />
         <ProjectReference Include="..\$(AssemblyName).SourceGenerator\$(AssemblyName).SourceGenerator.csproj" ReferenceOutputAssembly="false" />
         <ProjectReference Include="..\$(AssemblyName).Analyzer\$(AssemblyName).Analyzer.csproj" ReferenceOutputAssembly="false" />
         <ProjectReference Include="..\$(AssemblyName).CodeFix\$(AssemblyName).CodeFix.csproj" ReferenceOutputAssembly="false" />
         <None Include="..\$(AssemblyName).SourceGenerator\$(OutputPath)\..\netstandard2.0\$(AssemblyName).SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
         <None Include="..\$(AssemblyName).Analyzer\$(OutputPath)\..\netstandard2.0\$(AssemblyName).Analyzer.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
         <None Include="..\$(AssemblyName).CodeFix\$(OutputPath)\..\netstandard2.0\$(AssemblyName).CodeFix.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-        <None Include="..\README.md" Link="NuGet Info\README.md">
-            <Pack>True</Pack>
-            <PackagePath>\</PackagePath>
-        </None>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="NuGet Info\" />
+        <None Include="..\README.md" Link="NuGet Info\README.md" Pack="true" PackagePath="/" />
+        <None Include="$(PkgSystem_Text_Json)\lib\netstandard2.0\System.Text.Json.dll" Pack="true" PackagePath="analyzers\dotnet\cs\System.Text.Json.dll" Visible="false" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
 </Project>

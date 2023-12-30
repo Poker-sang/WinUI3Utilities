@@ -1,7 +1,10 @@
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Json;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Xml.XPath;
@@ -28,7 +31,7 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
                 .Combine(context.AnalyzerConfigOptionsProvider)
                 .Where(t => t.Right.GetOptions(t.Left).TryGetValue(SourceItemGroupMetadata, out var sourceItemGroup)
                             && sourceItemGroup is "PRIResource"
-                            && t.Left.Path.EndsWith(".resw"))
+                            && (t.Left.Path.EndsWith(".resw") || t.Left.Path.EndsWith(".resjson")))
                 .Select((tuple, _) => tuple.Left).Collect())
             .Combine(context.CompilationProvider);
 
@@ -49,36 +52,63 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
         if (attribute.ConstructorArguments.Length < 1 || attribute.ConstructorArguments[0].Value is not string specifiedNamespace)
             return null;
 
-        var source = new StringBuilder($@"#nullable enable
+        var source = new StringBuilder(
+            $"""
+             #nullable enable
 
-using Microsoft.Windows.ApplicationModel.Resources;
+             using Microsoft.Windows.ApplicationModel.Resources;
 
-namespace {specifiedNamespace};
+             namespace {specifiedNamespace};
 
-");
+             """);
+
         foreach (var additionalText in additionalTexts)
         {
-            var fileName = Path.GetFileNameWithoutExtension(additionalText.Path)!;
+            var extension = Path.GetExtension(additionalText.Path);
+            var fileName = Path.GetFileNameWithoutExtension(additionalText.Path);
 
-            var doc = XDocument.Parse(additionalText.GetText()?.ToString()!);
+            _ = source.AppendLine(
+                $$"""
 
-            _ = source.AppendLine($@"
-public static class {fileName}Resources
-{{
-    private static readonly ResourceLoader _resourceLoader = new(ResourceLoader.GetDefaultResourceFilePath(), ""{Path.GetFileNameWithoutExtension(additionalText.Path)}"");
-");
-            if (doc.XPathSelectElements("//data") is { } elements)
-                foreach (var node in elements)
+                  public static class {{fileName}}Resources
+                  {
+                      private static readonly ResourceLoader _resourceLoader = new(ResourceLoader.GetDefaultResourceFilePath(), "{{Path.GetFileNameWithoutExtension(additionalText.Path)}}");
+
+                  """);
+
+            switch (extension)
+            {
+                case ".resw":
                 {
-                    var name = node.Attribute("name")!.Value;
-                    if (name.Contains("["))
-                        continue;
+                    var doc = XDocument.Parse(additionalText.GetText()!.ToString());
 
-                    _ = source.AppendLine(@$"{Spacing(1)}public static readonly string {new Regex(@"\.|\:|\[|\]").Replace(name, "")} = _resourceLoader.GetString(""{name.Replace('.', '/')}"");");
+                    if (doc.XPathSelectElements("//data") is { } elements)
+                        foreach (var node in elements)
+                            AppendSource(node.Attribute("name")!.Value, source);
+                    break;
                 }
+                case ".resjson":
+                {
+                    var doc = JsonDocument.Parse(additionalText.GetText()!.ToString());
+
+                    if (doc.RootElement.EnumerateObject() is var elements)
+                        foreach (var node in elements)
+                            AppendSource(node.Name, source);
+                    break;
+                }
+            }
 
             _ = source.AppendLine("}").AppendLine();
         }
+
         return source.ToString();
+
+        static void AppendSource(string name, StringBuilder sb)
+        {
+            if (name.Contains("["))
+                return;
+
+            _ = sb.AppendLine($"""{Spacing(1)}public static readonly string {new Regex(@"\.|\:|\[|\]|/").Replace(name, "")} = _resourceLoader.GetString("{name.Replace('.', '/')}");""");
+        }
     }
 }

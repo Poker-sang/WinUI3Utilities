@@ -1,4 +1,7 @@
 using Microsoft.UI.Xaml;
+using WinUI3Utilities.Attributes;
+
+[assembly: LocalizedStringResources(nameof(WinUI3Utilities))]
 
 namespace WinUI3Utilities.Samples;
 

@@ -26,6 +26,7 @@ For more details, see the XAML docs of the corresponding attributes.
 | TitleBarHelper | Set title bar |
 | BackdropHelper | Set backdrop |
 | TeachingTipHelper | Helper for `TeachingTip` |
+| ContentDialogHelper | Helper for `ContentDialog` |
 | FrameworkElementHelper | Extension methods for `FrameworkElement` |
 | Misc | Miscellaneous extension methods |
 | ThrowHelper | Throw helper |

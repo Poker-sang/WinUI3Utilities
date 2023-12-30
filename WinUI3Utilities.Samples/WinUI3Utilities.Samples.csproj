@@ -13,6 +13,7 @@
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
         <DefaultLanguage>zh-CN</DefaultLanguage>
+        <EnableDefaultPriItems>false</EnableDefaultPriItems>
     </PropertyGroup>
 
     <ItemGroup>
@@ -45,6 +46,17 @@
         <ProjectReference Include="..\WinUI3Utilities.Analyzer\WinUI3Utilities.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="..\WinUI3Utilities.CodeFix\WinUI3Utilities.CodeFix.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="..\WinUI3Utilities.SourceGenerator\WinUI3Utilities.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <Target Name="InjectAdditionalFiles" BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun">
+        <ItemGroup>
+            <AdditionalFiles Include="@(PRIResource)" SourceItemGroup="PRIResource" />
+        </ItemGroup>
+    </Target>
+    <ItemGroup>
+        <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="SourceItemGroup" />
+        <PRIResource Include="Strings\zh-Hans\Resources.resw" />
+        <PRIResource Include="Strings\zh-Hans\Res.resjson" />
     </ItemGroup>
 
     <!-- 

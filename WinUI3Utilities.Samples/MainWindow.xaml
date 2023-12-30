@@ -24,9 +24,9 @@
                     Glyph="&#xEA3A;" />
                 <TextBlock
                     x:Name="TitleTextBlock"
+                    x:Uid="/Res/String1"
                     VerticalAlignment="Center"
-                    Style="{StaticResource CaptionTextBlockStyle}"
-                    Text="WinUI3Utilities" />
+                    Style="{StaticResource CaptionTextBlockStyle}" />
             </StackPanel>
         </Border>
         <NavigationView
