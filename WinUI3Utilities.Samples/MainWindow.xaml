@@ -48,7 +48,12 @@
                     Icon="People"
                     Tag="{x:Bind pages:IndexPage.TypeGetter}" />
             </NavigationView.FooterMenuItems>
-            <Frame x:Name="NavigateFrame" />
+            <Frame x:Name="NavigateFrame">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Button x:Uid="/Res/String2" VerticalAlignment="Center" />
+                    <Button x:Uid="/Resources/String1" VerticalAlignment="Center" />
+                </StackPanel>
+            </Frame>
         </NavigationView>
     </Grid>
 </Window>

@@ -1,8 +1,6 @@
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -105,10 +103,15 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
 
         static void AppendSource(string name, StringBuilder sb)
         {
-            if (name.Contains("["))
-                return;
+            if (name.IndexOf('[') is var index and not -1)
+            {
+                var endIndex = name.IndexOf(']');
+                name = name.Remove(index, endIndex - index + 1);
+            }
 
-            _ = sb.AppendLine($"""{Spacing(1)}public static readonly string {new Regex(@"\.|\:|\[|\]|/").Replace(name, "")} = _resourceLoader.GetString("{name.Replace('.', '/')}");""");
+            var uid = name.Replace('.', '/');
+
+            _ = sb.AppendLine($"""{Spacing(1)}public static readonly string {uid.Replace("/", "")} = _resourceLoader.GetString("{uid}");""");
         }
     }
 }

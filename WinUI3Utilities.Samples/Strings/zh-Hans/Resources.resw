@@ -117,7 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="String1.Text" xml:space="preserve">
+  <data name="String1.Content" xml:space="preserve">
     <value>WinUI3Utilities</value>
+  </data>
+  <data name="String1.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>ToolTip2</value>
   </data>
 </root>

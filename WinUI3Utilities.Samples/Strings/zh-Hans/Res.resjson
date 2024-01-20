@@ -1,3 +1,5 @@
 {
-    "String1/Text": "WinUI3Utilities"
+    "String1/Text": "WinUI3Utilities",
+    "String2/Content": "WinUI3Utilities",
+    "String2/ToolTipService/ToolTip": "ToolTip"
 }
