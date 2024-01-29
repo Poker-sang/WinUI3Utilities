@@ -57,7 +57,7 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
              using Microsoft.Windows.ApplicationModel.Resources;
 
              namespace {specifiedNamespace};
-
+             
              """);
 
         foreach (var additionalText in additionalTexts)
@@ -67,7 +67,7 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
 
             _ = source.AppendLine(
                 $$"""
-
+                  
                   public static class {{fileName}}Resources
                   {
                       private static readonly ResourceLoader _resourceLoader = new(ResourceLoader.GetDefaultResourceFilePath(), "{{Path.GetFileNameWithoutExtension(additionalText.Path)}}");
@@ -96,7 +96,7 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
                 }
             }
 
-            _ = source.AppendLine("}").AppendLine();
+            _ = source.AppendLine("}");
         }
 
         return source.ToString();
@@ -111,7 +111,7 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
 
             var uid = name.Replace('.', '/');
 
-            _ = sb.AppendLine($"""{Spacing(1)}public static readonly string {uid.Replace("/", "")} = _resourceLoader.GetString("{uid}");""");
+            _ = sb.AppendLine($$"""{{Spacing(1)}}public static string {{uid.Replace("/", "")}} { get; } = _resourceLoader.GetString("{{uid}}");""");
         }
     }
 }
