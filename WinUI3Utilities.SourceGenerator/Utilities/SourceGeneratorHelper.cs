@@ -92,12 +92,12 @@ internal static class SourceGeneratorHelper
     /// </summary>
     /// <returns>Registration</returns>
     internal static InvocationExpressionSyntax GetRegistration(string propertyName, ITypeSymbol type, ITypeSymbol specificClass, ExpressionSyntax metadataCreation) => InvocationExpression(MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression, IdentifierName("global::Microsoft.UI.Xaml.DependencyProperty"), IdentifierName("Register")))
-            .AddArgumentListArguments(
-                Argument(NameOfExpression(propertyName)),
-                Argument(TypeOfExpression(type.GetTypeSyntax(false))),
-                Argument(TypeOfExpression(specificClass.GetTypeSyntax(false))),
-                Argument(metadataCreation));
+            SyntaxKind.SimpleMemberAccessExpression, IdentifierName("global::Microsoft.UI.Xaml.DependencyProperty"), IdentifierName("Register")))
+        .AddArgumentListArguments(
+            Argument(NameOfExpression(propertyName)),
+            Argument(TypeOfExpression(type.GetTypeSyntax(false))),
+            Argument(TypeOfExpression(specificClass.GetTypeSyntax(false))),
+            Argument(metadataCreation));
 
     /// <summary>
     /// Generate the following code
@@ -177,14 +177,13 @@ internal static class SourceGeneratorHelper
             .AddAccessorListAccessors(getter, setter);
 
     internal static AttributeListSyntax[] GetAttributeForField(string generatorName) =>
-        new[]
-        {
-            AttributeList().AddAttributes(Attribute(IdentifierName("global::System.CodeDom.Compiler.GeneratedCode"))
+    [
+        AttributeList().AddAttributes(Attribute(IdentifierName("global::System.CodeDom.Compiler.GeneratedCode"))
                 .AddArgumentListArguments(
                     AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(AssemblyName + generatorName))),
                     AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(AssemblyVersion)))
                 ))
-        };
+    ];
 
     internal static AttributeListSyntax[] GetAttributeForEvent(string generatorName) =>
         new[]
@@ -226,7 +225,7 @@ internal static class SourceGeneratorHelper
 
         return ClassDeclaration(specificType.Name)
             .AddModifiers(Token(SyntaxKind.PartialKeyword))
-            .AddMembers(members.ToArray());
+            .AddMembers([.. members]);
     }
 
     /// <summary>

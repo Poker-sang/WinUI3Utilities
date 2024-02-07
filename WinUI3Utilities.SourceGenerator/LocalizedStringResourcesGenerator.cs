@@ -1,9 +1,9 @@
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using Microsoft.CodeAnalysis;
@@ -50,29 +50,14 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
         if (attribute.ConstructorArguments.Length < 1 || attribute.ConstructorArguments[0].Value is not string specifiedNamespace)
             return null;
 
-        var source = new StringBuilder(
-            $"""
-             #nullable enable
-
-             using Microsoft.Windows.ApplicationModel.Resources;
-
-             namespace {specifiedNamespace};
-             
-             """);
+        var resources = new Dictionary<string, HashSet<string>>();
 
         foreach (var additionalText in additionalTexts)
         {
             var extension = Path.GetExtension(additionalText.Path);
             var fileName = Path.GetFileNameWithoutExtension(additionalText.Path);
 
-            _ = source.AppendLine(
-                $$"""
-                  
-                  public static class {{fileName}}Resources
-                  {
-                      private static readonly ResourceLoader _resourceLoader = new(ResourceLoader.GetDefaultResourceFilePath(), "{{Path.GetFileNameWithoutExtension(additionalText.Path)}}");
-
-                  """);
+            var resource = resources.TryGetValue(fileName, out var r) ? r : resources[fileName] = [];
 
             switch (extension)
             {
@@ -82,7 +67,7 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
 
                     if (doc.XPathSelectElements("//data") is { } elements)
                         foreach (var node in elements)
-                            AppendSource(node.Attribute("name")!.Value, source);
+                            _ = resource.Add(node.Attribute("name")!.Value);
                     break;
                 }
                 case ".resjson":
@@ -91,10 +76,36 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
 
                     if (doc.RootElement.EnumerateObject() is var elements)
                         foreach (var node in elements)
-                            AppendSource(node.Name, source);
+                            _ = resource.Add(node.Name);
                     break;
                 }
             }
+        }
+
+        var source = new StringBuilder(
+            $"""
+             #nullable enable
+
+             using Microsoft.Windows.ApplicationModel.Resources;
+
+             namespace {specifiedNamespace};
+
+             """);
+
+        foreach (var resource in resources)
+        {
+
+            _ = source.AppendLine(
+                $$"""
+
+                  public static class {{resource.Key}}Resources
+                  {
+                      private static readonly ResourceLoader _resourceLoader = new(ResourceLoader.GetDefaultResourceFilePath(), "{{resource.Key}}");
+
+                  """);
+
+            foreach (var p in resource.Value) 
+                AppendSource(p, source);
 
             _ = source.AppendLine("}");
         }
