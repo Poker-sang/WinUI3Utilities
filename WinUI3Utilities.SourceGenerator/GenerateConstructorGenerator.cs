@@ -10,10 +10,8 @@ using static WinUI3Utilities.SourceGenerator.Utilities.SourceGeneratorHelper;
 namespace WinUI3Utilities.SourceGenerator;
 
 [Generator]
-public class GenerateConstructorGenerator : TypeWithAttributeGenerator
+public class GenerateConstructorGenerator() : TypeWithAttributeGenerator("GenerateConstructorAttribute")
 {
-    internal override string AttributeName => "GenerateConstructorAttribute";
-
     internal override string TypeWithAttribute(INamedTypeSymbol typeSymbol, ImmutableArray<AttributeData> attributeList)
     {
         var name = typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);

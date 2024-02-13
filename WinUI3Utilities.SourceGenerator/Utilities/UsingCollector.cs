@@ -4,15 +4,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace WinUI3Utilities.SourceGenerator.Utilities;
 
-internal class UsingCollector : CSharpSyntaxWalker
+internal class UsingCollector(HashSet<string> namespaces) : CSharpSyntaxWalker
 {
-    private readonly HashSet<string> _namespaces;
-
-    public UsingCollector(HashSet<string> namespaces) => _namespaces = namespaces;
-
     public override void VisitUsingDirective(UsingDirectiveSyntax node)
     {
         if (node.Name?.ToString() is { } name)
-            _ = _namespaces.Add(name);
+            _ = namespaces.Add(name);
     }
 }

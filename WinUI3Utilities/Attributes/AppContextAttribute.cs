@@ -31,9 +31,10 @@ namespace WinUI3Utilities.Attributes;
 ///         <see langword="try"/><br/>
 ///         {
 ///             <see langword="var"/> values = _container<see cref="MethodName"/>.Values;
+///             <see langword="var"/> converter = <see langword="new"/> <typeparamref name="TConverter"/>();
 ///             <see langword="return new"/> <typeparamref name="T"/>(
-///                 values[<see langword="nameof"/>(<typeparamref name="T"/>.Property1)].<see cref="CastMethod"/>&lt;Type1&gt;()
-///                 values[<see langword="nameof"/>(<typeparamref name="T"/>.Property2)].<see cref="CastMethod"/>&lt;Type2&gt;()
+///                 converter.ConvertBack&lt;Type1&gt;(values[<see langword="nameof"/>(<typeparamref name="T"/>.Property1)])
+///                 converter.ConvertBack&lt;Type2&gt;(values[<see langword="nameof"/>(<typeparamref name="T"/>.Property2)])
 ///                 ...
 ///             );
 ///         }
@@ -48,8 +49,9 @@ namespace WinUI3Utilities.Attributes;
 ///         <see langword="if"/> (configuration <see langword="is"/> { } appConfiguration)
 ///         {
 ///             <see langword="var"/> values = _container<see cref="MethodName"/>.Values;
-///             values[<see langword="nameof"/>(<typeparamref name="T"/>.Property1)] = appConfiguration.Property1;
-///             values[<see langword="nameof"/>(<typeparamref name="T"/>.Property2)] = appConfiguration.Property2;
+///             <see langword="var"/> converter = <see langword="new"/> <typeparamref name="TConverter"/>();
+///             values[<see langword="nameof"/>(<typeparamref name="T"/>.Property1)] = converter.Convert(appConfiguration.Property1);
+///             values[<see langword="nameof"/>(<typeparamref name="T"/>.Property2)] = converter.Convert(appConfiguration.Property2);
 ///             ...
 ///         }
 ///     }
@@ -57,8 +59,9 @@ namespace WinUI3Utilities.Attributes;
 /// </code>
 /// </summary>
 /// <typeparam name="T"></typeparam>
+/// <typeparam name="TConverter"></typeparam>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
-public class AppContextAttribute<T> : Attribute
+public class AppContextAttribute<T, TConverter> : Attribute where TConverter : ISettingsValueConverter, new()
 {
     /// <summary>
     /// Configuration container key
@@ -79,10 +82,7 @@ public class AppContextAttribute<T> : Attribute
     /// <inheritdoc cref="ApplicationDataCreateDisposition"/>
     /// <remarks>Default: <see cref="ApplicationDataCreateDisposition.Always"/></remarks>
     public ApplicationDataCreateDisposition CreateDisposition { get; init; } = ApplicationDataCreateDisposition.Always;
-
-    /// <summary>
-    /// The fullname of method to cast settings properties
-    /// </summary>
-    /// <remarks>Default: (the fullname of) <see cref="Misc.ToNotNull{T}"/></remarks>
-    public string CastMethod { get; init; } = $"{nameof(WinUI3Utilities)}.{nameof(Misc)}.{nameof(Misc.ToNotNull)}";
 }
+
+/// <inheritdoc />
+public class AppContextAttribute<T> : AppContextAttribute<T, SettingsValueConverter>;

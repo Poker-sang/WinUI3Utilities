@@ -12,7 +12,7 @@ public static class Misc
 {
     /// <summary>
     /// Cast <paramref name="obj"/> to type <typeparamref name="T"/> without null check<br/>
-    /// <strong>This is not Force conversion</strong>
+    /// <strong>This is NOT Force conversion</strong>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="obj"></param>
@@ -22,7 +22,7 @@ public static class Misc
 
     /// <summary>
     /// Cast of <paramref name="obj"/> to type <typeparamref name="T"/>, throw when <paramref name="obj"/> is <see langword="null"/><br/>
-    /// <strong>This is not Force conversion</strong>
+    /// <strong>This is NOT Force conversion</strong>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="obj"></param>

@@ -9,10 +9,8 @@ using static WinUI3Utilities.SourceGenerator.Utilities.SourceGeneratorHelper;
 namespace WinUI3Utilities.SourceGenerator;
 
 [Generator]
-internal class SettingsViewModelGenerator : TypeWithAttributeGenerator
+internal class SettingsViewModelGenerator() : TypeWithAttributeGenerator("SettingsViewModelAttribute`1")
 {
-    internal override string AttributeName => "SettingsViewModelAttribute`1";
-
     internal override string? TypeWithAttribute(INamedTypeSymbol typeSymbol, ImmutableArray<AttributeData> attributeList)
     {
         var attribute = attributeList[0];

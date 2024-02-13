@@ -5,11 +5,9 @@ using static WinUI3Utilities.SourceGenerator.Utilities.SourceGeneratorHelper;
 
 namespace WinUI3Utilities.SourceGenerator;
 
-public abstract class TypeWithAttributeGenerator : IIncrementalGenerator
+public abstract class TypeWithAttributeGenerator(string attributeName) : IIncrementalGenerator
 {
-    internal abstract string AttributeName { get; }
-
-    private string AttributeFullName => AttributeNamespace + AttributeName;
+    protected string AttributeFullName { get; } = AttributeNamespace + attributeName;
 
     internal abstract string? TypeWithAttribute(INamedTypeSymbol typeSymbol, ImmutableArray<AttributeData> attributeList);
 

@@ -6,15 +6,14 @@ namespace WinUI3Utilities.Attributes;
 /// Ignores the effect of the specified attributes on this target<br/>
 /// For specific effects, see corresponding attributes
 /// </summary>
+/// <inheritdoc cref="AttributeIgnoreAttribute"/>
+/// <param name="attributes">Attributes to ignore</param>
 [AttributeUsage(AttributeTargets.All, Inherited = false)]
-public class AttributeIgnoreAttribute : Attribute
+public class AttributeIgnoreAttribute(params Type[] attributes) : Attribute
 {
-    /// <inheritdoc cref="AttributeIgnoreAttribute"/>
-    /// <param name="attributes">Attributes to ignore</param>
-    public AttributeIgnoreAttribute(params Type[] attributes) => Attributes = attributes;
 
     /// <summary>
     /// Attributes to ignore
     /// </summary>
-    public Type[] Attributes { get; }
+    public Type[] Attributes { get; } = attributes;
 }

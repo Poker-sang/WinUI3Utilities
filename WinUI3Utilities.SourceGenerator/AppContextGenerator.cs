@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using WinUI3Utilities.SourceGenerator.Utilities;
@@ -10,13 +8,15 @@ using static WinUI3Utilities.SourceGenerator.Utilities.SourceGeneratorHelper;
 namespace WinUI3Utilities.SourceGenerator;
 
 [Generator]
-public class AppContextGenerator : TypeWithAttributeGenerator
-{
-    internal override string AttributeName => "AppContextAttribute`1";
+public class AppContextGenerator1() : AppContextGenerator("AppContextAttribute`1");
 
-    internal override string? TypeWithAttribute(INamedTypeSymbol typeSymbol, ImmutableArray<AttributeData> attributeList)
+[Generator]
+public class AppContextGenerator2() : AppContextGenerator("AppContextAttribute`2");
+
+public abstract class AppContextGenerator(string attributeName) : TypeWithAttributeGenerator(attributeName)
+{
+    internal override string TypeWithAttribute(INamedTypeSymbol typeSymbol, ImmutableArray<AttributeData> attributeList)
     {
-        var namespaces = new HashSet<string>();
         var specificType = typeSymbol.ToDisplayString();
         var classBegin =
             $$"""
@@ -34,15 +34,21 @@ public class AppContextGenerator : TypeWithAttributeGenerator
         var saveMethods = new StringBuilder();
         foreach (var attribute in attributeList)
         {
-            if (attribute.AttributeClass is not { TypeArguments: [var type, ..] })
-                return null;
+            var converterTypeName = $"{nameof(WinUI3Utilities)}.SettingsValueConverter";
+            if (attribute.AttributeClass is { TypeArguments: [var type, .. var rest] })
+            {
+                if (rest is [var converterType, ..])
+                    converterTypeName = converterType.ToDisplayString();
+            }
+            else
+            {
+                continue;
+            }
 
             var configKey = "Configuration";
             var methodName = "Configuration";
             var applicationDataContainerType = "LocalSettings";
             var createDispositionValue = "Always";
-            var staticClassName = "static WinUI3Utilities.Misc";
-            var castMethod = "ToNotNull";
 
             foreach (var namedArgument in attribute.NamedArguments)
                 if (namedArgument.Value.Value is { } value)
@@ -70,19 +76,9 @@ public class AppContextGenerator : TypeWithAttributeGenerator
                                     _ => "Existing"
                                 };
                             break;
-                        case "CastMethod":
-                            var castMethodFullName = (string)value;
-                            var dotPosition = castMethodFullName.LastIndexOf('.');
-                            if (dotPosition is -1)
-                                throw new InvalidDataException($"{namedArgument.Key} must contain the full name.");
-                            staticClassName = "static " + castMethodFullName[..dotPosition];
-                            castMethod = castMethodFullName[(dotPosition + 1)..];
-                            break;
                     }
 
             var typeName = type.ToDisplayString();
-            // castMethod方法所用namespace
-            _ = namespaces.Add(staticClassName);
             var usedTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
             /*-----Body Begin-----*/
             _ = containers.AppendLine($"{Spacing(1)}private static Windows.Storage.ApplicationDataContainer _container{methodName} = null!;");
@@ -107,6 +103,7 @@ public class AppContextGenerator : TypeWithAttributeGenerator
                           try
                           {
                               var values = _container{{methodName}}.Values;
+                              var converter = new {{converterTypeName}}();
                               return new {{typeName}}(
                   """);
             _ = saveMethods.AppendLine(
@@ -116,12 +113,12 @@ public class AppContextGenerator : TypeWithAttributeGenerator
                           if (configuration is { } appConfiguration)
                           {
                               var values = _container{{methodName}}.Values;
+                              var converter = new {{converterTypeName}}();
                   """);
             foreach (var property in type.GetProperties(attributeList[0].AttributeClass!))
             {
-                _ = loadMethods.AppendLine(LoadRecord(property.Name, property.Type.Name, typeName, castMethod));
-                _ = saveMethods.AppendLine(SaveRecord(property.Name, property.Type, typeName, castMethod));
-                namespaces.UseNamespace(usedTypes, typeSymbol, property.Type);
+                _ = loadMethods.AppendLine($"{Spacing(4)}converter.ConvertBack<{property.Type.ToDisplayString()}>(values[nameof({typeName}.{property.Name})]),");
+                _ = saveMethods.AppendLine($"{Spacing(3)}values[nameof({typeName}.{property.Name})] = converter.Convert(appConfiguration.{property.Name});");
             }
 
             // 去除','
@@ -137,60 +134,22 @@ public class AppContextGenerator : TypeWithAttributeGenerator
                     }
                 """).AppendLine();
             _ = saveMethods.AppendLine(
-                 """
+                """
                         }
                     }
                 """).AppendLine();
-
         }
 
-        return namespaces.GenerateFileHeader()
+        saveMethods.Remove(saveMethods.Length - 2, 2);
+
+        return new HashSet<string>().GenerateFileHeader()
             .AppendLine(classBegin)
             .AppendLine(containers.ToString())
             .AppendLine(keys.ToString())
-            .AppendLine(initializeMethods.ToString())
-            .AppendLine(loadMethods.ToString())
-            .AppendLine(saveMethods.ToString())
-            .AppendLine(classEnd)
+            .Append(initializeMethods)
+            .Append(loadMethods)
+            .Append(saveMethods)
+            .Append(classEnd)
             .ToString();
     }
-
-    private static string LoadRecord(string propertyName, string type, string typeName, string? methodName) => methodName is null
-            ? $"{Spacing(4)}({type})values[nameof({typeName}.{propertyName})],"
-            : $"{Spacing(4)}values[nameof({typeName}.{propertyName})].{methodName}<{type}>(),";
-
-    private static string SaveRecord(string name, ITypeSymbol type, string typeName, string? methodName)
-    {
-        var body = $"values[nameof({typeName}.{name})] = appConfiguration.{name}";
-        return !_primitiveTypes.Contains(type.Name)
-            ? type switch
-            {
-                { Name: nameof(String) } => $"{Spacing(3)}{body} ?? string.Empty;",
-                { TypeKind: TypeKind.Enum } => methodName is null
-                    ? $"{Spacing(3)}(int)({body});"
-                    : $"{Spacing(3)}{body}.{methodName}<int>();",
-                _ => throw new InvalidCastException("Only primitive and Enum types are supported.")
-            }
-            : $"{Spacing(3)}{body};";
-    }
-
-    private static readonly HashSet<string> _primitiveTypes =
-    [
-        nameof(SByte),
-        nameof(Byte),
-        nameof(Int16),
-        nameof(UInt16),
-        nameof(Int32),
-        nameof(UInt32),
-        nameof(Int64),
-        nameof(UInt64),
-        nameof(Single),
-        nameof(Double),
-        nameof(Boolean),
-        nameof(Char),
-        nameof(DateTime),
-        nameof(TimeSpan),
-        nameof(Guid),
-        nameof(DateTimeOffset)
-    ];
 }

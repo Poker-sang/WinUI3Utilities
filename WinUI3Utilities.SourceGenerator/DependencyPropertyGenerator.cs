@@ -10,10 +10,8 @@ using static WinUI3Utilities.SourceGenerator.Utilities.SourceGeneratorHelper;
 namespace WinUI3Utilities.SourceGenerator;
 
 [Generator]
-public class DependencyPropertyGenerator : TypeWithAttributeGenerator
+public class DependencyPropertyGenerator() : TypeWithAttributeGenerator("DependencyPropertyAttribute`1")
 {
-    internal override string AttributeName => "DependencyPropertyAttribute`1";
-
     internal override string? TypeWithAttribute(INamedTypeSymbol typeSymbol, ImmutableArray<AttributeData> attributeList)
     {
         var members = new List<MemberDeclarationSyntax>();

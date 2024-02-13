@@ -31,17 +31,12 @@ namespace WinUI3Utilities.Attributes;
 /// }
 /// </code>
 /// </summary>
+/// <param name="settingName">The name of the <typeparamref name="T"/> field</param>
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-public class SettingsViewModelAttribute<T> : Attribute
+public class SettingsViewModelAttribute<T>(string settingName) : Attribute
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="settingName">The name of the <typeparamref name="T"/> field</param>
-    public SettingsViewModelAttribute(string settingName) => SettingName = settingName;
-
     /// <summary>
     /// The name of the <typeparamref name="T"/> field
     /// </summary>
-    public string SettingName { get; }
+    public string SettingName { get; } = settingName;
 }

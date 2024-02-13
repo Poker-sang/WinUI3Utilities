@@ -52,18 +52,16 @@ namespace WinUI3Utilities.Attributes;
 /// ...
 /// </code>
 /// </remarks>
+/// <remarks>
+/// 
+/// </remarks>
+/// <param name="specifiedNamespace">In which namespace the code will be generated</param>
 [AttributeUsage(AttributeTargets.Assembly)]
-public sealed class LocalizedStringResourcesAttribute : Attribute
+public sealed class LocalizedStringResourcesAttribute(string specifiedNamespace) : Attribute
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="specifiedNamespace">In which namespace the code will be generated</param>
-    public LocalizedStringResourcesAttribute(string specifiedNamespace) => SpecifiedNamespace = specifiedNamespace;
-
     /// <summary>
     /// In which namespace the code will be generated
     /// </summary>
-    public string SpecifiedNamespace { get; set; }
+    public string SpecifiedNamespace { get; set; } = specifiedNamespace;
 }
 
