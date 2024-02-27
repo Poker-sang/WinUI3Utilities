@@ -186,19 +186,17 @@ internal static class SourceGeneratorHelper
     ];
 
     internal static AttributeListSyntax[] GetAttributeForEvent(string generatorName) =>
-        new[]
-        {
+        [
             AttributeList().AddAttributes(
                 Attribute(IdentifierName("global::System.CodeDom.Compiler.GeneratedCode")).AddArgumentListArguments(
                     AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(AssemblyName + generatorName))),
                     AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(AssemblyVersion))))),
             AttributeList().AddAttributes(
                 Attribute(IdentifierName("global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage")))
-        };
+        ];
 
     internal static AttributeListSyntax[] GetAttributeForMethod(string generatorName) =>
-        new[]
-        {
+        [
             AttributeList().AddAttributes(Attribute(IdentifierName("global::System.CodeDom.Compiler.GeneratedCode"))
                 .AddArgumentListArguments(
                     AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(AssemblyName + generatorName))),
@@ -206,7 +204,7 @@ internal static class SourceGeneratorHelper
                 )),
             AttributeList().AddAttributes(Attribute(IdentifierName("global::System.Diagnostics.DebuggerNonUserCode"))),
             AttributeList().AddAttributes(Attribute(IdentifierName("global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage")))
-        };
+        ];
 
     /// <summary>
     /// Generate the following code
@@ -318,16 +316,20 @@ internal static class SourceGeneratorHelper
 
     internal static IEnumerable<IPropertySymbol> GetProperties(this ITypeSymbol typeSymbol, INamedTypeSymbol attribute)
     {
-        foreach (var member in typeSymbol.GetMembers())
+        var symbol = typeSymbol;
+        do
         {
-            if (member is not IPropertySymbol { Name: not "EqualityContract" } property)
-                continue;
+            foreach (var member in symbol.GetMembers())
+            {
+                if (member is not IPropertySymbol { Name: not "EqualityContract" } property)
+                    continue;
 
-            if (IgnoreAttribute(property, attribute))
-                continue;
+                if (IgnoreAttribute(property, attribute))
+                    continue;
 
-            yield return property;
-        }
+                yield return property;
+            }
+        } while ((symbol = symbol.BaseType) is not null);
     }
 
     internal static bool IgnoreAttribute(ISymbol symbol, INamedTypeSymbol attribute)
