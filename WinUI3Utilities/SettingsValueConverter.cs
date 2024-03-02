@@ -28,11 +28,13 @@ public class SettingsValueConverter : ISettingsValueConverter
         };
 
     /// <inheritdoc />
-    public T ConvertBack<T>(object? value) =>
-        value switch
+    public T? ConvertBack<T>(object? value, bool isNullable) where T : notnull
+    {
+        return value switch
         {
-            null => default!,
+            null when !isNullable => ThrowHelper.ArgumentNull<object, T>(value),
             string s when typeof(T).IsAssignableTo(typeof(IEnumerable)) => JsonSerializer.Deserialize<T>(s)!,
-            _ => (T)value
+            _ => (T?)value
         };
+    }
 }

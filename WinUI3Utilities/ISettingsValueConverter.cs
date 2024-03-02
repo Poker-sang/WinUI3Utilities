@@ -21,6 +21,7 @@ public interface ISettingsValueConverter
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="value"></param>
+    /// <param name="isNullable"><typeparamref name="T"/>is nullable</param>
     /// <returns></returns>
-    T ConvertBack<T>(object? value);
+    T? ConvertBack<T>(object? value, bool isNullable) where T : notnull;
 }
