@@ -12,7 +12,7 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
-        <DefaultLanguage>zh-CN</DefaultLanguage>
+        <DefaultLanguage>zh-cn</DefaultLanguage>
         <EnableDefaultPriItems>false</EnableDefaultPriItems>
     </PropertyGroup>
 
@@ -28,7 +28,7 @@
 
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240227000" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240311000" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.3233" />
         <Manifest Include="$(ApplicationManifest)" />
 
@@ -45,8 +45,8 @@
     </Target>
     <ItemGroup>
         <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="SourceItemGroup" />
-        <PRIResource Include="Strings\zh-cn\Resources.resw" />
-        <PRIResource Include="Strings\zh-cn\Res.resjson" />
+        <PRIResource Include="Strings\*\*.resw" />
+        <PRIResource Include="Strings\*\*.resjson" />
     </ItemGroup>
 
     <!-- 
@@ -66,14 +66,10 @@
     <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
         <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
     </PropertyGroup>
+
     <ItemGroup>
-        <Page Update="Pages\IndexPage.xaml">
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-        <Page Update="Pages\SettingsPage.xaml">
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-        <Page Update="DependencyPropertyGeneratorTest.xaml">
+        <None Remove="**\*.xaml" />
+        <Page Update="**\*.xaml">
             <Generator>MSBuild:Compile</Generator>
         </Page>
     </ItemGroup>

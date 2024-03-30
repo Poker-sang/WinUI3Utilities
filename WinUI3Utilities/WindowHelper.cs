@@ -10,21 +10,6 @@ namespace WinUI3Utilities;
 public static class WindowHelper
 {
     /// <summary>
-    /// Call <see cref="WinRT.Interop.InitializeWithWindow.Initialize"/> and return <paramref name="obj"/> itself
-    /// </summary>
-    /// <typeparam name="T">Target type</typeparam>
-    /// <param name="obj"></param>
-    /// <param name="window"></param>
-    /// <returns><paramref name="obj"/></returns>
-    public static T InitializeWithWindow<T>(this T obj, Window window)
-    {
-        var hWnd = (nint)window.AppWindow.Id.Value;
-        // When running on win32, FileOpenPicker needs to know the top-level hWnd via IInitializeWithWindow::Initialize.
-        WinRT.Interop.InitializeWithWindow.Initialize(obj, hWnd);
-        return obj;
-    }
-
-    /// <summary>
     /// Get the dpi-aware screen size using win32 API, where by "dpi-aware" means that
     /// the result will be divided by the scale factor of the monitor that hosts the app
     /// </summary>

@@ -17,7 +17,7 @@ namespace WinUI3Utilities.CodeFix;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(DependencyPropertyCodeFixProvider001)), Shared]
 public class DependencyPropertyCodeFixProvider001 : DependencyPropertyCodeFixProvider
 {
-    public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(DiagnosticId + "001");
+    public sealed override ImmutableArray<string> FixableDiagnosticIds => [DiagnosticId + "001"];
 
     public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
@@ -138,11 +138,11 @@ public class DependencyPropertyCodeFixProvider001 : DependencyPropertyCodeFixPro
             args.Add(AttributeArgument(LiteralExpression(SyntaxKind.TrueLiteralExpression)));
 
         var attribute = Attribute(GenericName("DependencyProperty").AddTypeArgumentListArguments(propertyType))
-            .AddArgumentListArguments(args.ToArray());
+            .AddArgumentListArguments([.. args]);
 
         var newTypeDeclaration = typeDeclaration
             .RemoveNodes(
-                new SyntaxNode[] { fieldDeclaration, propertyDeclaration },
+                [fieldDeclaration, propertyDeclaration],
                 SyntaxRemoveOptions.KeepNoTrivia)!
             .AddAttributeLists(AttributeList().AddAttributes(attribute));
 

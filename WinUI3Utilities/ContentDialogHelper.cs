@@ -38,7 +38,7 @@ public static class ContentDialogHelper
     /// </summary>
     /// <param name="contentDialog"></param>
     /// <param name="title"><see cref="ContentDialog.Title"/></param>
-    /// <param name="content"><see cref="ContentDialog.Content"/></param>
+    /// <param name="content"><see cref="ContentControl.Content"/></param>
     /// <param name="primaryButtonText"><see cref="ContentDialog.PrimaryButtonText"/></param>
     /// <param name="secondaryButtonText"><see cref="ContentDialog.SecondaryButtonText"/></param>
     /// <param name="closeButtonText"><see cref="ContentDialog.CloseButtonText"/></param>

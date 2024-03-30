@@ -41,7 +41,7 @@ public class DependencyPropertyAnalyzer : DiagnosticAnalyzer
         "此字段应与属性保持一致.");
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-        ImmutableArray.Create(_missingProperty, _convertible, _wrongNamingEnd, _wrongNamingConsistent);
+        [_missingProperty, _convertible, _wrongNamingEnd, _wrongNamingConsistent];
 
     public override void Initialize(AnalysisContext context)
     {

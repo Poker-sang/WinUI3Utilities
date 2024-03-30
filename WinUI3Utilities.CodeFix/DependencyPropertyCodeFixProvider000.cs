@@ -16,7 +16,7 @@ namespace WinUI3Utilities.CodeFix;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(DependencyPropertyCodeFixProvider000)), Shared]
 public class DependencyPropertyCodeFixProvider000 : DependencyPropertyCodeFixProvider
 {
-    public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(DiagnosticId + "000");
+    public sealed override ImmutableArray<string> FixableDiagnosticIds => [DiagnosticId + "000"];
 
     public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {

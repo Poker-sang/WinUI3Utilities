@@ -3,6 +3,7 @@ using Windows.Graphics;
 
 namespace WinUI3Utilities.Internal.PlatformInvoke;
 
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:命名样式", Justification = "<挂起>")]
 [StructLayout(LayoutKind.Sequential)]
 internal struct MSLLHOOKSTRUCT
 {

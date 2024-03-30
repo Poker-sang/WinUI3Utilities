@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-#pragma warning disable CA1069
 
 namespace WinUI3Utilities.Internal.PlatformInvoke;
 

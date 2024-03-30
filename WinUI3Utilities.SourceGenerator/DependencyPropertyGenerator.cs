@@ -59,14 +59,10 @@ public class DependencyPropertyGenerator() : TypeWithAttributeGenerator("Depende
                         "\"DefaultValueType\" should be within 0-2.")
                 };
             }
-            else if (defaultValueArgument is { Value: string defaultValue })
-            {
-                defaultValueExpression = ParseExpression(defaultValue);
-            }
             else
-            {
-                throw new ArgumentException("\"DefaultValue\" should be enum or string.", nameof(defaultValue));
-            }
+                defaultValueExpression = defaultValueArgument is { Value: string defaultValue }
+                    ? ParseExpression(defaultValue)
+                    : throw new ArgumentException("\"DefaultValue\" should be enum or string.", nameof(defaultValue));
 
             var fieldName = propertyName + "Property";
 

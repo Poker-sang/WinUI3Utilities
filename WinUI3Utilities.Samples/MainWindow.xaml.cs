@@ -7,10 +7,7 @@ namespace WinUI3Utilities.Samples;
 [WindowSizeHelper]
 public sealed partial class MainWindow
 {
-    public MainWindow()
-    {
-        InitializeComponent();
-    }
+    public MainWindow() => InitializeComponent();
 
     private void BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs e)
     {

@@ -27,7 +27,6 @@ For more details, see the XAML docs of the corresponding attributes.
 | BackdropHelper | Set backdrop |
 | TeachingTipHelper | Helper for `TeachingTip` |
 | ContentDialogHelper | Helper for `ContentDialog` |
-| FrameworkElementHelper | Extension methods for `FrameworkElement` |
 | Misc | Miscellaneous extension methods |
 | ThrowHelper | Throw helper |
 
@@ -36,7 +35,7 @@ For more details, see the XAML docs of the corresponding attributes.
 | Attributes | Usage |
 | - | - |
 | DependencyPropertyAttribute | Generate a dependency property |
-| LocalizedStringResourcesAttribute | Generate for all the .resw files in `PRIResource` under the specified namespace |
+| LocalizedStringResourcesAttribute | Generate for all the .resw and .resjson files in `PRIResource` under the specified namespace |
 | **SettingsViewModelAttribute*** | Generate property according to the properties of the settings class `T` for the specified viewmodel class |
 | **GenerateConstructorAttribute*** | Generate constructor like `record` for the specified type, according to the properties of it |
 | **AppContextAttribute*** | Generate field `_containerConfiguration` and methods `Initialize/Load/SaveConfiguration` for the specified class |
@@ -101,7 +100,7 @@ AppContext.SaveConfiguration(AppContext.AppConfig)
 
 ### Localization ([Reference](https://platform.uno/blog/using-msbuild-items-and-properties-in-c-9-source-generators/))
 
-Generate for all the .resw files in `PRIResource` under the specified namespace.
+Generate for all the .resw and .resjson files in `PRIResource` under the specified namespace.
 
 Sample.csproj
 
@@ -121,8 +120,8 @@ Sample.csproj
     </ItemGroup>
     ...
     <ItemGroup>
-        <PRIResource Include="XXX\APage.resw" />
-        <PRIResource Include="XXX\BWindow.resw" />
+        <PRIResource Include="**\*.resw" />
+        <PRIResource Include="**\*.resjson" />
     </ItemGroup>
     ...
 </Project>
@@ -136,7 +135,7 @@ AssemblyInfo.cs:
 
 XXX\APage.resw: ...
 
-XXX\BWindow.resw: ...
+XXX\BWindow.resjson: ...
 
 ## Project Link
 

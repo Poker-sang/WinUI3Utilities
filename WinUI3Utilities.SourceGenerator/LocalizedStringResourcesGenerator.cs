@@ -40,14 +40,16 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
             if (compilation.Assembly.GetAttributes().Any(attrData => attrData.AttributeClass?.ToDisplayString() == DisableSourceGeneratorAttribute))
                 return;
 
-            if (Execute(left, right) is { } s)
+            if (Execute(left, right, compilation.Assembly.Name) is { } s)
                 spc.AddSource(AttributeFullName + ".g.cs", s);
         });
     }
 
-    public string? Execute(AttributeData attribute, ImmutableArray<AdditionalText> additionalTexts)
+    public string? Execute(AttributeData attribute, ImmutableArray<AdditionalText> additionalTexts, string assemblyName)
     {
-        if (attribute.ConstructorArguments.Length < 1 || attribute.ConstructorArguments[0].Value is not string specifiedNamespace)
+        if (attribute.ConstructorArguments.Length < 2
+            || attribute.ConstructorArguments[0].Value is not string specifiedNamespace
+            || attribute.ConstructorArguments[1].Value is not bool isSubProject)
             return null;
 
         var resources = new Dictionary<string, HashSet<string>>();
@@ -85,7 +87,7 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
         var source = new StringBuilder(
             $"""
              #nullable enable
-
+             {(isSubProject ? "\r\nusing System.IO;" : "")}
              using Microsoft.Windows.ApplicationModel.Resources;
 
              namespace {specifiedNamespace};
@@ -100,7 +102,11 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
 
                   public static class {{resource.Key}}Resources
                   {
-                      private static readonly ResourceLoader _resourceLoader = new(ResourceLoader.GetDefaultResourceFilePath(), "{{resource.Key}}");
+                      private static readonly ResourceLoader _resourceLoader = new({{
+                          (isSubProject 
+                              ? $@"Path.GetDirectoryName(ResourceLoader.GetDefaultResourceFilePath()) + ""\\{assemblyName}.pri"", ""ms-resource://{assemblyName}/{assemblyName}/{resource.Key}"""
+                              : $@"ResourceLoader.GetDefaultResourceFilePath(), ""{resource.Key}""")
+                      }});
 
                   """);
 

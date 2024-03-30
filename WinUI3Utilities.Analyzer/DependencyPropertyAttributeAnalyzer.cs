@@ -16,8 +16,7 @@ public class DependencyPropertyAttributeAnalyzer : DiagnosticAnalyzer
         "Refactor", DiagnosticSeverity.Info, true,
         "没有对应的属性，应该声明.");
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-        ImmutableArray.Create(_convertible);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [_convertible];
 
     public override void Initialize(AnalysisContext context)
     {
