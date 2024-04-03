@@ -1,4 +1,5 @@
 using Microsoft.UI;
+using Microsoft.UI.Xaml;
 using Windows.Graphics;
 
 namespace WinUI3Utilities;
@@ -59,4 +60,20 @@ public record InitializeInfo
     /// Default: <see langword="default"/>
     /// </remarks>
     public IconId IconId { get; set; } = default;
+
+    /// <summary>
+    /// Is maximized
+    /// </summary>
+    /// <remarks>
+    /// Default: <see langword="false"/>
+    /// </remarks>
+    public bool IsMaximized { get; set; }
+
+    /// <summary>
+    /// Theme
+    /// </summary>
+    /// <remarks>
+    /// Default: <see cref="ElementTheme.Default"/>
+    /// </remarks>
+    public ElementTheme Theme { get; set; }
 }

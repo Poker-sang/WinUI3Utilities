@@ -1,6 +1,12 @@
+using Microsoft.UI.Composition.SystemBackdrops;
+using System.Runtime.InteropServices;
+using System;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Media;
 using Windows.Graphics;
+using Microsoft.UI.Windowing;
 using WinUI3Utilities.Internal.PlatformInvoke;
+using Microsoft.UI;
 
 namespace WinUI3Utilities;
 
@@ -10,7 +16,7 @@ namespace WinUI3Utilities;
 public static class WindowHelper
 {
     /// <summary>
-    /// Get the dpi-aware screen size using win32 API, where by "dpi-aware" means that
+    /// Get the dpi-aware screen size using win32 API, whereby "dpi-aware" means that
     /// the result will be divided by the scale factor of the monitor that hosts the app
     /// </summary>
     /// <returns>Screen size</returns>
@@ -32,8 +38,8 @@ public static class WindowHelper
     public static SizeInt32 EstimatedWindowSize() =>
         AppHelper.GetScreenSize() switch
         {
-            ( >= 2560, >= 1440) => new(1600, 900),
-            ( > 1600, > 900) => new(1280, 720),
+            (>= 2560, >= 1440) => new(1600, 900),
+            (> 1600, > 900) => new(1280, 720),
             _ => new(800, 600)
         };
 
@@ -82,8 +88,9 @@ public static class WindowHelper
     /// <see langword="if"/> (<paramref name="info"/>.ExtendTitleBar)<br/>
     ///     <paramref name="window"/>.SetWindowTitleBar();<br/>
     /// <br/>
+    /// // Apply maximization (depends on <see cref="InitializeInfo.IsMaximized"/>)<br/>
     /// // Apply backdrop if supported (depends on <see cref="InitializeInfo.BackdropType"/>)<br/>
-    /// <see cref="BackdropHelper"/>... 
+    /// // Apply theme (depends on <see cref="InitializeInfo.Theme"/>)<br/>
     /// </code>
     /// </remarks>
     /// <param name="info"></param>
@@ -102,6 +109,88 @@ public static class WindowHelper
         if (info.ExtendTitleBar)
             window.SetWindowTitleBar();
 
-        window.SetBackdrop(info.BackdropType);
+        if (info.IsMaximized && window.AppWindow.Presenter is OverlappedPresenter presenter)
+            presenter.Maximize();
+
+        window.SetBackdrop(info.BackdropType, info.Theme is ElementTheme.Dark);
+
+        window.SetTheme(info.Theme);
+    }
+
+    /// <summary>
+    /// Set <see cref="Window.SystemBackdrop"/> if supported.
+    /// Otherwise, set to <see langword="null"/>.
+    /// </summary>
+    /// <param name="window"></param>
+    /// <param name="backdropType"></param>
+    /// <param name="isDarkMode">Set <see cref="DefaultBrushBackdrop.IsDarkMode"/>, use <paramref name="window"/>.Content.ActualTheme when <see langword="null"/></param>
+    public static void SetBackdrop(this Window window, BackdropType backdropType, bool? isDarkMode = null)
+    {
+        window.SystemBackdrop = backdropType switch
+        {
+            BackdropType.Acrylic when DesktopAcrylicController.IsSupported() => new DesktopAcrylicBackdrop(),
+            BackdropType.Mica when MicaController.IsSupported() => new MicaBackdrop(),
+            BackdropType.MicaAlt when MicaController.IsSupported() => new MicaBackdrop { Kind = MicaKind.BaseAlt },
+            BackdropType.Maintain => window.SystemBackdrop,
+            _ => new DefaultBrushBackdrop(isDarkMode ?? window.Content?.To<FrameworkElement>().ActualTheme is ElementTheme.Dark)
+        };
+    }
+
+    /// <summary>
+    /// Set theme for <paramref name="window"/>
+    /// </summary>
+    /// <param name="window"></param>
+    /// <param name="theme"></param>
+    public static void SetTheme(this Window window, ElementTheme theme)
+    {
+        var actualTheme = theme switch
+        {
+            ElementTheme.Default => AppHelper.IsDarkMode ? ElementTheme.Dark : ElementTheme.Light,
+            _ => theme
+        };
+
+        if (window.Content is FrameworkElement framework)
+        {
+            framework.RequestedTheme = actualTheme;
+            if (window.SystemBackdrop is DefaultBrushBackdrop backdrop) 
+                backdrop.IsDarkMode = actualTheme is ElementTheme.Dark;
+        }
+
+        window.AppWindow.TitleBar.ButtonForegroundColor = actualTheme is ElementTheme.Dark ? Colors.White : Colors.Black;
+    }
+
+    private static void EnsureDispatcherQueueController()
+    {
+        if (Windows.System.DispatcherQueue.GetForCurrentThread() is null && _dispatcherQueueController is 0)
+        {
+            DispatcherQueueOptions options;
+            options.dwSize = Marshal.SizeOf(typeof(DispatcherQueueOptions));
+            options.threadType = 2; // DQTYPE_THREAD_CURRENT
+            options.apartmentType = 2; // DQTAT_COM_STA
+
+            _ = CoreMessaging.CreateDispatcherQueueController(options, out _dispatcherQueueController);
+        }
+    }
+
+    private static nint _dispatcherQueueController;
+
+    private static Windows.UI.Composition.Compositor? _compositor;
+
+    private static readonly object _compositorLock = new();
+
+    internal static Windows.UI.Composition.Compositor Compositor
+    {
+        get
+        {
+            if (_compositor is null)
+                lock (_compositorLock)
+                    if (_compositor is null)
+                    {
+                        EnsureDispatcherQueueController();
+                        _compositor = new();
+                    }
+
+            return _compositor;
+        }
     }
 }

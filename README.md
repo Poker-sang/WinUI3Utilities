@@ -24,7 +24,6 @@ For more details, see the XAML docs of the corresponding attributes.
 | DragMoveAndResizeHelper | Apply drag-move and resize function to (`UIElement`)`RootPanel` |
 | DragZoneHelper | Reduce repetitive operations when using `InputNonClientPointerSource` |
 | TitleBarHelper | Set title bar |
-| BackdropHelper | Set backdrop |
 | TeachingTipHelper | Helper for `TeachingTip` |
 | ContentDialogHelper | Helper for `ContentDialog` |
 | Misc | Miscellaneous extension methods |

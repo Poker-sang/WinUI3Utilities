@@ -13,6 +13,25 @@ namespace WinUI3Utilities;
 public static class AppHelper
 {
     /// <summary>
+    /// This static constructor is needed when calling <see cref="InitializeIsDarkMode"/> to initialize <see cref="IsDarkMode"/>.
+    /// </summary>
+    static AppHelper()
+    {
+    }
+
+    /// <summary>
+    /// Initialize <see cref="IsDarkMode"/>
+    /// </summary>
+    public static void InitializeIsDarkMode()
+    {
+    }
+
+    /// <summary>
+    /// Is app dark mode by default.
+    /// </summary>
+    public static bool IsDarkMode { get; } = Application.Current.RequestedTheme is ApplicationTheme.Dark;
+
+    /// <summary>
     /// Is it Windows 11 or not?
     /// </summary>
     /// <remarks>Windows 11 starts with 10.0.22000</remarks>
