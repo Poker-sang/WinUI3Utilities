@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
+using Windows.Graphics;
 using WinUI3Utilities.Internal.PlatformInvoke;
 
 namespace WinUI3Utilities;
@@ -42,8 +43,8 @@ public static class AppHelper
     /// the result will be divided by the scale factor of the monitor that hosts the app
     /// </summary>
     /// <returns>Screen size</returns>
-    public static (int, int) GetScreenSize()
-        => (User32.GetSystemMetrics(SystemMetric.CxScreen), User32.GetSystemMetrics(SystemMetric.CyScreen));
+    public static SizeInt32 GetScreenSize()
+        => new(User32.GetSystemMetrics(SystemMetric.CxScreen), User32.GetSystemMetrics(SystemMetric.CyScreen));
 
     /// <summary>
     /// Method to register exception handler

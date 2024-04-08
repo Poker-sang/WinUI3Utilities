@@ -69,6 +69,6 @@ public static class Misc
     /// <param name="application"></param>
     /// <param name="key"></param>
     /// <returns></returns>
-    public static T GetDataContext<T>(this Application application, object key)
+    public static T GetResource<T>(this Application application, object key)
         => application.Resources[key].To<T>();
 }

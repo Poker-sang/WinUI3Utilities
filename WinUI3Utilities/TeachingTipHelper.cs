@@ -127,7 +127,7 @@ public static class TeachingTipHelper
 
         teachingTip.Show(title, icon, subtitle, isLightDismissEnabled);
 
-        Hide(teachingTip, hideTime, milliseconds);
+        Hide(teachingTip, milliseconds);
     }
 
     /// <summary>
@@ -150,10 +150,10 @@ public static class TeachingTipHelper
         teachingTip.ShowAndHide(title, icon.GetIconSource(), subtitle, milliseconds, isLightDismissEnabled);
     }
 
-    private static async void Hide(this TeachingTip teachingTip, DateTime hideTime, int milliseconds)
+    private static async void Hide(this TeachingTip teachingTip, int milliseconds)
     {
         await Task.Delay(milliseconds);
-        if (DateTime.Now > hideTime)
+        if (!HideTimes.TryGetValue(teachingTip, out var time) || DateTime.Now > time)
             teachingTip.IsOpen = false;
     }
 

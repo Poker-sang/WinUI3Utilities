@@ -30,7 +30,7 @@ public static class WindowHelper
     /// <remarks>
     /// <list type="bullet">
     /// <item><term>(>= 2560, >= 1440)</term><description>(1600, 900)</description></item>
-    /// <item><term>(> 1600, > 900)</term><description>(1280, 720)</description></item>
+    /// <item><term>(>= 1600, >= 900)</term><description>(1280, 720)</description></item>
     /// <item><term>others</term><description>(800, 600)</description></item>
     /// </list>
     /// </remarks>
@@ -38,8 +38,8 @@ public static class WindowHelper
     public static SizeInt32 EstimatedWindowSize() =>
         AppHelper.GetScreenSize() switch
         {
-            (>= 2560, >= 1440) => new(1600, 900),
-            (> 1600, > 900) => new(1280, 720),
+            { Width: >= 2560, Height: >= 1440 } => new(1600, 900),
+            { Width: >= 1600, Height: >= 900 } => new(1280, 720),
             _ => new(800, 600)
         };
 
