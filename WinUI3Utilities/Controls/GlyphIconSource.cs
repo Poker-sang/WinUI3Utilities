@@ -16,20 +16,20 @@ public partial class GlyphIconSource : FontIconSource
 {
     private static void IconGlyphPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        d.To<GlyphIcon>().Glyph = ((char)e.NewValue.To<IconGlyph>()).ToString();
+        d.To<GlyphIconSource>().Glyph = ((char)e.NewValue.To<IconGlyph>()).ToString();
     }
 
     private static void SizePropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (e.NewValue is { } size and not FontSizeType.None)
-            d.To<GlyphIcon>().FontSize = (int)size;
+            d.To<GlyphIconSource>().FontSize = (int)size;
     }
 
     private static void IsBackLayerPropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (e.NewValue is true)
         {
-            var icon = d.To<GlyphIcon>();
+            var icon = d.To<GlyphIconSource>();
             var color = icon.Foreground.To<SolidColorBrush>().Color;
             icon.Foreground = new SolidColorBrush(Color.FromArgb(0x80, (byte)~color.R, (byte)~color.G, (byte)~color.B));
         }

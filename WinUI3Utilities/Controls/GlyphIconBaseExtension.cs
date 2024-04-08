@@ -29,7 +29,7 @@ public abstract class GlyphIconBaseExtension : MarkupExtension
     /// <summary>
     /// Gets or sets the size of the icon to display.
     /// </summary>
-    public FontFamily? FontFamily { get; set; } = SymbolThemeFontFamily;
+    public FontFamily? FontFamily { get; set; } = _symbolThemeFontFamily;
 
     /// <summary>
     /// Gets or sets the size of the icon to display. Priority is higher than <see cref="FontSize"/>.
@@ -37,9 +37,9 @@ public abstract class GlyphIconBaseExtension : MarkupExtension
     public FontSizeType Size { get; set; }
 
     [ThreadStatic]
-    internal static readonly FontFamily SymbolThemeFontFamily;
+    private static readonly FontFamily _symbolThemeFontFamily;
 
-    static GlyphIconBaseExtension() => SymbolThemeFontFamily = new("Segoe Fluent Icons,Segoe MDL2 Assets");
+    static GlyphIconBaseExtension() => _symbolThemeFontFamily = new("Segoe Fluent Icons,Segoe MDL2 Assets");
 
     /// <summary>
     /// Gets or sets the thickness of the icon glyph.

@@ -119,7 +119,7 @@ public static class TeachingTipHelper
         bool isLightDismissEnabled = true)
     {
         ref var hideTime = ref CollectionsMarshal.GetValueRefOrAddDefault(HideTimes, teachingTip, out var exists);
-
+        
         if (!exists)
             teachingTip.Closed += (o, e) => HideTimes.Remove(o);
 
