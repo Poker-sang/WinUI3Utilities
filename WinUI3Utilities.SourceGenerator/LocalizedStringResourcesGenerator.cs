@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -53,6 +54,7 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
             return null;
 
         var resources = new Dictionary<string, HashSet<string>>();
+        var excludedFiles = new HashSet<string>();
 
         foreach (var additionalText in additionalTexts)
         {
@@ -61,26 +63,34 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
 
             var resource = resources.TryGetValue(fileName, out var r) ? r : resources[fileName] = [];
 
-            switch (extension)
+            try
             {
-                case ".resw":
+                switch (extension)
                 {
-                    var doc = XDocument.Parse(additionalText.GetText()!.ToString());
+                    case ".resw":
+                    {
+                        var doc = XDocument.Parse(additionalText.GetText()!.ToString());
 
-                    if (doc.XPathSelectElements("//data") is { } elements)
-                        foreach (var node in elements)
-                            _ = resource.Add(node.Attribute("name")!.Value);
-                    break;
-                }
-                case ".resjson":
-                {
-                    var doc = JsonDocument.Parse(additionalText.GetText()!.ToString());
+                        if (doc.XPathSelectElements("//data") is { } elements)
+                            foreach (var node in elements)
+                                _ = resource.Add(node.Attribute("name")!.Value);
 
-                    if (doc.RootElement.EnumerateObject() is var elements)
-                        foreach (var node in elements)
-                            _ = resource.Add(node.Name);
-                    break;
+                        break;
+                    }
+                    case ".resjson":
+                    {
+                        var doc = JsonDocument.Parse(additionalText.GetText()!.ToString());
+
+                        if (doc.RootElement.EnumerateObject() is var elements)
+                            foreach (var node in elements)
+                                _ = resource.Add(node.Name);
+                        break;
+                    }
                 }
+            }
+            catch
+            {
+                _ = excludedFiles.Add(fileName);
             }
         }
 
@@ -96,21 +106,20 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
 
         foreach (var resource in resources)
         {
-
+            if (excludedFiles.Contains(resource.Key))
+                continue;
             _ = source.AppendLine(
                 $$"""
 
                   public static class {{resource.Key}}Resources
                   {
-                      private static readonly ResourceLoader _resourceLoader = new({{
-                          (isSubProject 
+                      private static readonly ResourceLoader _resourceLoader = new({{(isSubProject
                               ? $@"Path.GetDirectoryName(ResourceLoader.GetDefaultResourceFilePath()) + ""\\{assemblyName}.pri"", ""ms-resource://{assemblyName}/{assemblyName}/{resource.Key}"""
-                              : $@"ResourceLoader.GetDefaultResourceFilePath(), ""{resource.Key}""")
-                      }});
+                              : $@"ResourceLoader.GetDefaultResourceFilePath(), ""{resource.Key}""")}});
 
                   """);
 
-            foreach (var p in resource.Value) 
+            foreach (var p in resource.Value)
                 AppendSource(p, source);
 
             _ = source.AppendLine("}");

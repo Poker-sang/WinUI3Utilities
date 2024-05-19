@@ -34,16 +34,15 @@ public class DependencyPropertyGenerator() : TypeWithAttributeGenerator("Depende
             var isNullable = false;
 
             foreach (var namedArgument in attribute.NamedArguments)
-                if (namedArgument.Value.Value is { } value)
-                    switch (namedArgument.Key)
-                    {
-                        case "IsSetterPrivate":
-                            isSetterPrivate = (bool)value;
-                            break;
-                        case "IsNullable":
-                            isNullable = (bool)value;
-                            break;
-                    }
+                switch (namedArgument.Key, namedArgument.Value.Value)
+                {
+                    case ("IsSetterPrivate", bool value):
+                        isSetterPrivate = value;
+                        break;
+                    case ("IsNullable", bool value):
+                        isNullable = value;
+                        break;
+                }
 
             var defaultValueExpression = (ExpressionSyntax)null!;
 

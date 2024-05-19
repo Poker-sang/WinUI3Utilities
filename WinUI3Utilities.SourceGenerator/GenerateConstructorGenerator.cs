@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -15,18 +17,21 @@ public class GenerateConstructorGenerator() : TypeWithAttributeGenerator("Genera
     internal override string TypeWithAttribute(INamedTypeSymbol typeSymbol, ImmutableArray<AttributeData> attributeList)
     {
         var name = typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-        var namespaces = new HashSet<string>();
+        var attribute = attributeList[0];
         var usedTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+
+        var callParameterlessConstructor = false;
+        if (attribute.NamedArguments is [{ Key: "CallParameterlessConstructor", Value.Value: bool value }])
+            callParameterlessConstructor = value;
+
         var ctor = ConstructorDeclaration(name).WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)));
-        foreach (var property in typeSymbol.GetProperties(attributeList[0].AttributeClass!))
-        {
-            ctor = GetDeclaration(property, ctor);
-            namespaces.UseNamespace(usedTypes, typeSymbol, property.Type);
-        }
+        if (callParameterlessConstructor)
+            ctor = ctor.WithInitializer(ConstructorInitializer(SyntaxKind.ThisConstructorInitializer));
+        ctor = typeSymbol.GetProperties(attributeList[0].AttributeClass!).Where(t => !t.IsReadOnly && !t.IsStatic).Aggregate(ctor, (current, property) => GetDeclaration(property, current));
 
         var generatedType = GetDeclaration(name, typeSymbol, ctor);
         var generatedNamespace = GetFileScopedNamespaceDeclaration(typeSymbol, generatedType, true);
-        var compilationUnit = GetCompilationUnitWithUsings(generatedNamespace, namespaces);
+        var compilationUnit = GetCompilationUnit(generatedNamespace);
         return SyntaxTree(compilationUnit, encoding: Encoding.UTF8).GetText().ToString();
     }
 }

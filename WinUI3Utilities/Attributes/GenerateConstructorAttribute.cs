@@ -20,7 +20,7 @@ namespace WinUI3Utilities.Attributes;
 /// <code>
 /// <see langword="partial class"/> specifiedType
 /// {
-///     <see langword="public"/> specifiedType(Type2 property2 ...)
+///     <see langword="public"/> specifiedType(Type2 property2 ...) [: <see langword="this"/>()(According to <see cref="CallParameterlessConstructor"/>)]
 ///     {
 ///         Property2 = property2;
 ///         ...
@@ -29,4 +29,10 @@ namespace WinUI3Utilities.Attributes;
 /// </code>
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
-public sealed class GenerateConstructorAttribute : Attribute;
+public sealed class GenerateConstructorAttribute : Attribute
+{
+    /// <summary>
+    /// Call parameterless constructor in generated constructor
+    /// </summary>
+    public bool CallParameterlessConstructor { get; init; }
+}

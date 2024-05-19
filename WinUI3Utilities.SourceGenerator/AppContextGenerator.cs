@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using WinUI3Utilities.SourceGenerator.Utilities;
@@ -51,35 +52,33 @@ public abstract class AppContextGenerator(string attributeName) : TypeWithAttrib
             var createDispositionValue = "Always";
 
             foreach (var namedArgument in attribute.NamedArguments)
-                if (namedArgument.Value.Value is { } value)
-                    switch (namedArgument.Key)
-                    {
-                        case "ConfigKey":
-                            configKey = (string)value;
-                            break;
-                        case "MethodName":
-                            methodName = (string)value;
-                            break;
-                        case "Type" when namedArgument.Value is { Kind: TypedConstantKind.Enum, Value: int containerType and (0 or 1) }:
-                            applicationDataContainerType =
-                                containerType switch
-                                {
-                                    0 => "LocalSettings",
-                                    _ => "RoamingSettings"
-                                };
-                            break;
-                        case "CreateDisposition" when namedArgument.Value is { Kind: TypedConstantKind.Enum, Value: int createDisposition and (0 or 1) }:
-                            createDispositionValue =
-                                createDisposition switch
-                                {
-                                    0 => "Always",
-                                    _ => "Existing"
-                                };
-                            break;
-                    }
+                switch (namedArgument.Key, namedArgument.Value)
+                {
+                    case ("ConfigKey", { Value: string value }):
+                        configKey = value;
+                        break;
+                    case ("MethodName", { Value: string value }):
+                        methodName = value;
+                        break;
+                    case ("Type", { Kind: TypedConstantKind.Enum, Value: int containerType and (0 or 1) }):
+                        applicationDataContainerType =
+                            containerType switch
+                            {
+                                0 => "LocalSettings",
+                                _ => "RoamingSettings"
+                            };
+                        break;
+                    case ("CreateDisposition", { Kind: TypedConstantKind.Enum, Value: int createDisposition and (0 or 1) }):
+                        createDispositionValue =
+                            createDisposition switch
+                            {
+                                0 => "Always",
+                                _ => "Existing"
+                            };
+                        break;
+                }
 
             var typeName = type.ToDisplayString();
-            var usedTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
             /*-----Body Begin-----*/
             _ = containers.AppendLine($"{Spacing(1)}private static Windows.Storage.ApplicationDataContainer _container{methodName} = null!;");
             _ = keys.AppendLine($"{Spacing(1)}private const string {methodName}ContainerKey = \"{configKey}\";");
@@ -115,7 +114,7 @@ public abstract class AppContextGenerator(string attributeName) : TypeWithAttrib
                               var values = _container{{methodName}}.Values;
                               var converter = new {{converterTypeName}}();
                   """);
-            foreach (var property in type.GetProperties(attributeList[0].AttributeClass!))
+            foreach (var property in type.GetProperties(attributeList[0].AttributeClass!).Where(t => !t.IsReadOnly && !t.IsStatic))
             {
                 var isNullable = property.Type.NullableAnnotation is NullableAnnotation.Annotated ? "true" : "false";
                 _ = loadMethods.AppendLine($"{Spacing(4)}converter.ConvertBack<{property.Type.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString()}>(values[nameof({typeName}.{property.Name})], {isNullable})!,");
