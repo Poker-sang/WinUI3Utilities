@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Windows.Foundation;
 using Windows.Storage;
 
@@ -11,6 +12,11 @@ namespace WinUI3Utilities;
 /// </summary>
 public class SettingsValueConverter : ISettingsValueConverter
 {
+    /// <summary>
+    /// Must be set before use
+    /// </summary>
+    public static JsonSerializerContext Context { get; set; } = null!;
+
     /// <inheritdoc />
     public object? Convert<T>(T? value) =>
         value switch
@@ -18,7 +24,7 @@ public class SettingsValueConverter : ISettingsValueConverter
             null when typeof(T) == typeof(string) || typeof(T) == typeof(ApplicationDataCompositeValue) => null,
             null => ThrowHelper.ArgumentNull<object?, object?>(value),
             Enum e => e.GetHashCode(),
-            IEnumerable => JsonSerializer.Serialize(value),
+            IEnumerable => JsonSerializer.Serialize(value, typeof(T), Context),
             sbyte or byte or short or ushort or int or uint or long or ulong or nint or nuint or float or double or bool
                 or char or DateTimeOffset or TimeSpan or Guid or Point or Size or Rect
                 or ApplicationDataCompositeValue => value,
@@ -33,7 +39,7 @@ public class SettingsValueConverter : ISettingsValueConverter
         return value switch
         {
             null when !isNullable => ThrowHelper.ArgumentNull<object, T>(value),
-            string s when typeof(T).IsAssignableTo(typeof(IEnumerable)) => JsonSerializer.Deserialize<T>(s)!,
+            string s when typeof(T).IsAssignableTo(typeof(IEnumerable)) => (T)JsonSerializer.Deserialize(s, typeof(T), Context)!,
             _ => (T?)value
         };
     }

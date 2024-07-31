@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Xml.Linq;
@@ -98,6 +99,8 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
             $"""
              #nullable enable
              {(isSubProject ? "\r\nusing System.IO;" : "")}
+             using System.Collections.Frozen;
+             using System.Collections.Generic;
              using Microsoft.Windows.ApplicationModel.Resources;
 
              namespace {specifiedNamespace};
@@ -108,7 +111,7 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
         {
             if (excludedFiles.Contains(resource.Key))
                 continue;
-            _ = source.AppendLine(
+            _ = source.Append(
                 $$"""
 
                   public static class {{resource.Key}}Resources
@@ -116,28 +119,38 @@ public class LocalizedStringResourcesGenerator : IIncrementalGenerator
                       private static readonly ResourceLoader _resourceLoader = new({{(isSubProject
                               ? $@"Path.GetDirectoryName(ResourceLoader.GetDefaultResourceFilePath()) + ""\\{assemblyName}.pri"", ""ms-resource://{assemblyName}/{assemblyName}/{resource.Key}"""
                               : $@"ResourceLoader.GetDefaultResourceFilePath(), ""{resource.Key}""")}});
+                      
+                      public static string GetResourceFromId(string id) => _resourceLoader.GetString(id);
+                      
+                      public static string GetResource(string name) => _resourceLoader.GetString(MetadataTable[name]);
 
+                      public static FrozenDictionary<string, string> MetadataTable { get; } = new Dictionary<string, string> { 
                   """);
 
-            foreach (var p in resource.Value)
-                AppendSource(p, source);
+            var ids = resource.Value.Select(name =>
+            {
+                if (name.IndexOf('[') is var index and not -1)
+                {
+                    var endIndex = name.IndexOf(']');
+                    name = name.Remove(index, endIndex - index + 1);
+                }
+
+                return name.Replace('.', '/');
+            }).ToArray();
+
+            foreach (var id in ids)
+                _ = source.Append($"[nameof({id.Replace("/", "")})] = \"{id}\", ");
+
+            _ = source.Remove(source.Length - 2, 2)
+                .AppendLine(" }.ToFrozenDictionary();")
+                .AppendLine();
+
+            foreach (var id in ids)
+                _ = source.AppendLine($$"""{{Spacing(1)}}public static string {{id.Replace("/", "")}} { get; } = _resourceLoader.GetString("{{id}}");""");
 
             _ = source.AppendLine("}");
         }
 
         return source.ToString();
-
-        static void AppendSource(string name, StringBuilder sb)
-        {
-            if (name.IndexOf('[') is var index and not -1)
-            {
-                var endIndex = name.IndexOf(']');
-                name = name.Remove(index, endIndex - index + 1);
-            }
-
-            var uid = name.Replace('.', '/');
-
-            _ = sb.AppendLine($$"""{{Spacing(1)}}public static string {{uid.Replace("/", "")}} { get; } = _resourceLoader.GetString("{{uid}}");""");
-        }
     }
 }
