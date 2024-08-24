@@ -35,14 +35,14 @@ For more details, see the XAML docs of the corresponding attributes.
 | - | - |
 | DependencyPropertyAttribute | Generate a dependency property |
 | LocalizedStringResourcesAttribute | Generate for all the .resw and .resjson files in `PRIResource` under the specified namespace |
-| **SettingsViewModelAttribute*** | Generate property according to the properties of the settings class `T` for the specified viewmodel class |
-| **GenerateConstructorAttribute*** | Generate constructor like `record` for the specified type, according to the properties of it |
-| **AppContextAttribute*** | Generate field `_containerConfiguration` and methods `Initialize/Load/SaveConfiguration` for the specified class |
+| $\dagger$ SettingsViewModelAttribute | Generate property according to the properties of the settings class `T` for the specified viewmodel class |
+| $\dagger$ GenerateConstructorAttribute | Generate constructor like `record` for the specified type, according to the properties of it |
+| $\dagger$ AppContextAttribute | Generate field `_containerConfiguration` and methods `Initialize/Load/SaveConfiguration` for the specified class |
 | WindowSizeHelperAttribute | Generate helper properties to limit the window size (works with `WindowSizeHelper`) |
 | AttributeIgnoreAttribute | Ignores the effect of the specified attributes on this target |
 | DisableSourceGeneratorAttribute | Indicates that the source generator is disabled. This is usually used for debug purpose |
 
-* Asterisk ("*") or **boldness** indicates that the attribute supports `AttributeIgnoreAttribute`
+* $\dagger$: The attribute supports `AttributeIgnoreAttribute`
 
 ### Settings Persistence
 
