@@ -20,14 +20,8 @@ namespace WinUI3Utilities.Attributes;
 /// &lt;/<see langword="Target"/>&gt;
 /// &lt;<see langword="ItemGroup"/>&gt;
 ///     &lt;<see langword="CompilerVisibleItemMetadata"/> Include="AdditionalFiles" MetadataName="SourceItemGroup" /&gt;
-/// &lt;/<see langword="ItemGroup"/>&gt;
-/// </code>
-/// Then add this group for all of your .resw and .resjson files:
-/// <code>
-/// &lt;<see langword="ItemGroup"/>&gt;
 ///     &lt;<see langword="PRIResource"/> Include="**\*.resw" /&gt;
 ///     &lt;<see langword="PRIResource"/> Include="**\*.resjson" /&gt;
-///     ...
 /// &lt;/<see langword="ItemGroup"/>&gt;
 /// </code>
 /// And declare an attribute with a namespace provided:
@@ -40,15 +34,13 @@ namespace WinUI3Utilities.Attributes;
 /// <see langword="public static class"/> APageResource
 /// {
 ///     <see langword="private static readonly"/> <see cref="ResourceLoader"/> _resourceLoader = <see langword="new"/>(<see cref="ResourceLoader.GetDefaultResourceFilePath"/>, "APage");
-///     <see langword="public static readonly string"/> TextAPath = _resourceLoader.GetString("TextA/Path");
-///     <see langword="public static readonly string"/> TextBPath = _resourceLoader.GetString("TextB/Path");
+///     <see langword="public static string"/> GetResourceFromId(<see langword="string"/> id) => _resourceLoader.GetString(id);
+///     <see langword="public static string"/> GetResource(<see langword="string"/> name) => _resourceLoader.GetString(MetadataTable[name]);
+///     <see langword="public static"/> FrozenDictionary&lt;<see langword="string"/>, <see langword="string"/>&gt; MetadataTable { <see langword="get"/>; } = <see langword="new"/> Dictionary&lt;<see langword="string"/>, <see langword="string"/>&gt; 
+///          { [<see langword="nameof"/>(TextAPath)] = "TextA/Path", ... }.ToFrozenDictionary();
+///     <see langword="public static string"/> TextAPath { <see langword="get"/>; } = _resourceLoader.GetString("TextA/Path");
+///     ...
 /// }<br/>
-/// <see langword="public static class"/> BWindowResource
-/// {
-///     <see langword="private static readonly"/> <see cref="ResourceLoader"/> _resourceLoader = <see langword="new"/>(<see cref="ResourceLoader.GetDefaultResourceFilePath"/>, "BWindow");
-///     <see langword="public static readonly string"/> ResourceAPath = _resourceLoader.GetString("ResourceA/Path");
-///     <see langword="public static readonly string"/> ResourceBPath = _resourceLoader.GetString("ResourceB/Path");
-/// }
 /// ...
 /// </code>
 /// </remarks>
