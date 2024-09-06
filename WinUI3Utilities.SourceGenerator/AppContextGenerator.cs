@@ -33,6 +33,7 @@ public abstract class AppContextGenerator(string attributeName) : TypeWithAttrib
         var initializeMethods = new StringBuilder();
         var loadMethods = new StringBuilder();
         var saveMethods = new StringBuilder();
+        const string nsStorage = "Microsoft.Windows.Storage";
         foreach (var attribute in attributeList)
         {
             var converterTypeName = $"{nameof(WinUI3Utilities)}.SettingsValueConverter";
@@ -48,7 +49,6 @@ public abstract class AppContextGenerator(string attributeName) : TypeWithAttrib
 
             var configKey = "Configuration";
             var methodName = "Configuration";
-            var applicationDataContainerType = "LocalSettings";
             var createDispositionValue = "Always";
 
             foreach (var namedArgument in attribute.NamedArguments)
@@ -59,14 +59,6 @@ public abstract class AppContextGenerator(string attributeName) : TypeWithAttrib
                         break;
                     case ("MethodName", { Value: string value }):
                         methodName = value;
-                        break;
-                    case ("Type", { Kind: TypedConstantKind.Enum, Value: int containerType and (0 or 1) }):
-                        applicationDataContainerType =
-                            containerType switch
-                            {
-                                0 => "LocalSettings",
-                                _ => "RoamingSettings"
-                            };
                         break;
                     case ("CreateDisposition", { Kind: TypedConstantKind.Enum, Value: int createDisposition and (0 or 1) }):
                         createDispositionValue =
@@ -80,16 +72,16 @@ public abstract class AppContextGenerator(string attributeName) : TypeWithAttrib
 
             var typeName = type.ToDisplayString();
             /*-----Body Begin-----*/
-            _ = containers.AppendLine($"{Spacing(1)}private static Windows.Storage.ApplicationDataContainer _container{methodName} = null!;");
+            _ = containers.AppendLine($"{Spacing(1)}private static {nsStorage}.ApplicationDataContainer _container{methodName} = null!;");
             _ = keys.AppendLine($"{Spacing(1)}private const string {methodName}ContainerKey = \"{configKey}\";");
             _ = initializeMethods.AppendLine(
                 $$"""
                       public static void Initialize{{methodName}}()
                       {
-                          var settings = Windows.Storage.ApplicationData.Current.{{applicationDataContainerType}};
+                          var settings = {{nsStorage}}.ApplicationData.GetDefault().LocalSettings;
                           if (!settings.Containers.ContainsKey({{specificType}}.{{methodName}}ContainerKey))
                           {
-                              _ = settings.CreateContainer({{specificType}}.{{methodName}}ContainerKey, Windows.Storage.ApplicationDataCreateDisposition.{{createDispositionValue}});
+                              _ = settings.CreateContainer({{specificType}}.{{methodName}}ContainerKey, {{nsStorage}}.ApplicationDataCreateDisposition.{{createDispositionValue}});
                           }
                   
                           _container{{methodName}} = settings.Containers[{{specificType}}.{{methodName}}ContainerKey];

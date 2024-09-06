@@ -51,7 +51,7 @@ For more details, see the XAML docs of the corresponding attributes.
 AppContext.cs:
 
 ```csharp
-using Windows.Storage;
+using Microsoft.Windows.Storage;
 using WinUI3Utilities.Attributes;
 
 namespace Sample;
@@ -63,7 +63,7 @@ public static partial class AppContext
 
     public static void Initialize()
     {
-        AppLocalFolder = ApplicationData.Current.LocalFolder.Path;
+        AppLocalFolder = ApplicationData.GetDefault().LocalFolder.Path;
         InitializeConfiguration();
         AppConfig = LoadConfiguration() is not { } appConfigurations
             ? new() : appConfigurations;

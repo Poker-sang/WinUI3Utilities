@@ -1,40 +1,39 @@
 using System;
-using Windows.Storage;
+using Microsoft.Windows.Storage;
 
 namespace WinUI3Utilities.Attributes;
 
 /// <summary>
 /// <strong>Only for packaged applications</strong><br/>
-/// Generate field _container<see cref="MethodName"/> and methods Initialize/Load/Save<see cref="MethodName"/> for the specified class<br/>
+/// Generate field _container`MethodName` and methods Initialize/Load/Save`MethodName` for the specified class<br/>
 /// <strong>Use <see cref="AttributeIgnoreAttribute"/> to indicate which properties are ignored</strong><br/>
 /// Generate:
 /// <code>
 /// <see langword="partial class"/> SpecifiedClass
 /// {
-///     <see langword="private static"/> <see cref="ApplicationDataContainer"/> _container<see cref="MethodName"/> = <see langword="null"/>!;
+///     <see langword="private static"/> <see cref="ApplicationDataContainer"/> _container`MethodName` = <see langword="null"/>!;
 /// 
-///     <see langword="private const string"/> <see cref="MethodName"/>Key = <see cref="ConfigKey"/>;
+///     <see langword="private const string"/> `MethodName`Key = `ConfigKey`;
 /// 
-///     <see langword="public static void"/> Initialize<see cref="MethodName"/>()
+///     <see langword="public static void"/> Initialize`MethodName`()
 ///     {
-///         <see langword="var"/> settings = <see cref="ApplicationData"/>.Current.<see cref="Type"/>;
-///         <see langword="if"/> (!settings.Containers.ContainsKey(<see cref="MethodName"/>Key))
+///         <see langword="var"/> settings = <see cref="ApplicationData.GetDefault"/>.LocalSettings;
+///         <see langword="if"/> (!settings.Containers.ContainsKey(`MethodName`Key))
 ///         {
-///             _ = settings.CreateContainer(<see cref="MethodName"/>Key, <see cref="CreateDisposition"/>);
+///             _ = settings.CreateContainer(`MethodName`Key, `CreateDisposition`);
 ///         }
 /// 
-///         _container<see cref="MethodName"/> = settings.Containers[<see cref="MethodName"/>Key];
+///         _container`MethodName` = settings.Containers[`MethodName`Key];
 ///     }
 /// 
-///     <see langword="public static"/> <typeparamref name="T"/>? Load<see cref="MethodName"/>()
+///     <see langword="public static"/> <typeparamref name="T"/>? Load`MethodName`()
 ///     {
 ///         <see langword="try"/><br/>
 ///         {
-///             <see langword="var"/> values = _container<see cref="MethodName"/>.Values;
+///             <see langword="var"/> values = _container`MethodName`.Values;
 ///             <see langword="var"/> converter = <see langword="new"/> <typeparamref name="TConverter"/>();
 ///             <see langword="return new"/> <typeparamref name="T"/>(
 ///                 converter.ConvertBack&lt;Type1&gt;(values[<see langword="nameof"/>(<typeparamref name="T"/>.Property1)])
-///                 converter.ConvertBack&lt;Type2&gt;(values[<see langword="nameof"/>(<typeparamref name="T"/>.Property2)])
 ///                 ...
 ///             );
 ///         }
@@ -44,14 +43,13 @@ namespace WinUI3Utilities.Attributes;
 ///         }
 ///     }
 /// 
-///     <see langword="public static void"/> Save<see cref="MethodName"/>(<typeparamref name="T"/>? configuration)
+///     <see langword="public static void"/> Save`MethodName`(<typeparamref name="T"/>? configuration)
 ///     {
 ///         <see langword="if"/> (configuration <see langword="is"/> { } appConfiguration)
 ///         {
-///             <see langword="var"/> values = _container<see cref="MethodName"/>.Values;
+///             <see langword="var"/> values = _container`MethodName`.Values;
 ///             <see langword="var"/> converter = <see langword="new"/> <typeparamref name="TConverter"/>();
 ///             values[<see langword="nameof"/>(<typeparamref name="T"/>.Property1)] = converter.Convert(appConfiguration.Property1);
-///             values[<see langword="nameof"/>(<typeparamref name="T"/>.Property2)] = converter.Convert(appConfiguration.Property2);
 ///             ...
 ///         }
 ///     }
@@ -74,10 +72,6 @@ public class AppContextAttribute<T, TConverter> : Attribute where TConverter : I
     /// </summary>
     /// <remarks>Default: "Configuration"</remarks>
     public string MethodName { get; init; } = "Configuration";
-
-    /// <inheritdoc cref="ApplicationDataContainerType"/>
-    /// <remarks>Default: <see cref="ApplicationDataContainerType.Local"/></remarks>
-    public ApplicationDataContainerType Type { get; init; } = ApplicationDataContainerType.Local;
 
     /// <inheritdoc cref="ApplicationDataCreateDisposition"/>
     /// <remarks>Default: <see cref="ApplicationDataCreateDisposition.Always"/></remarks>
