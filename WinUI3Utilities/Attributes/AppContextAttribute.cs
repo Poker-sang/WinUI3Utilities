@@ -1,5 +1,5 @@
 using System;
-using Microsoft.Windows.Storage;
+using Windows.Storage;
 
 namespace WinUI3Utilities.Attributes;
 
@@ -11,13 +11,13 @@ namespace WinUI3Utilities.Attributes;
 /// <code>
 /// <see langword="partial class"/> SpecifiedClass
 /// {
-///     <see langword="private static"/> <see cref="ApplicationDataContainer"/> _container`MethodName` = <see langword="null"/>!;
+///     <see langword="private static"/> <see cref="Microsoft.Windows.Storage.ApplicationDataContainer"/> _container`MethodName` = <see langword="null"/>!;
 /// 
 ///     <see langword="private const string"/> `MethodName`Key = `ConfigKey`;
 /// 
 ///     <see langword="public static void"/> Initialize`MethodName`()
 ///     {
-///         <see langword="var"/> settings = <see cref="ApplicationData.GetDefault"/>.LocalSettings;
+///         <see langword="var"/> settings = <see cref="Microsoft.Windows.Storage.ApplicationData.GetDefault"/>.LocalSettings;
 ///         <see langword="if"/> (!settings.Containers.ContainsKey(`MethodName`Key))
 ///         {
 ///             _ = settings.CreateContainer(`MethodName`Key, `CreateDisposition`);
@@ -73,8 +73,8 @@ public class AppContextAttribute<T, TConverter> : Attribute where TConverter : I
     /// <remarks>Default: "Configuration"</remarks>
     public string MethodName { get; init; } = "Configuration";
 
-    /// <inheritdoc cref="ApplicationDataCreateDisposition"/>
-    /// <remarks>Default: <see cref="ApplicationDataCreateDisposition.Always"/></remarks>
+    /// <inheritdoc cref="Microsoft.Windows.Storage.ApplicationDataCreateDisposition"/>
+    /// <remarks>Default: <see cref="Microsoft.Windows.Storage.ApplicationDataCreateDisposition.Always"/></remarks>
     public ApplicationDataCreateDisposition CreateDisposition { get; init; } = ApplicationDataCreateDisposition.Always;
 }
 

@@ -31,6 +31,7 @@
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.240829007" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.3233" />
+        <!--<PackageReference Include="WinUI3Utilities" Version="1.1.7.8" />-->
         <Manifest Include="$(ApplicationManifest)" />
 
         <ProjectReference Include="..\WinUI3Utilities\WinUI3Utilities.csproj" />
@@ -67,11 +68,4 @@
     <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
         <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
     </PropertyGroup>
-
-    <ItemGroup>
-        <None Remove="**\*.xaml" />
-        <Page Update="**\*.xaml">
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-    </ItemGroup>
 </Project>

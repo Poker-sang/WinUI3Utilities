@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
+# 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinUI3Utilities", "WinUI3Utilities\WinUI3Utilities.csproj", "{F3C47BCA-543F-42D6-B540-529A2CAE6145}"
@@ -20,7 +20,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinUI3Utilities.Analyzer", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinUI3Utilities.CodeFix", "WinUI3Utilities.CodeFix\WinUI3Utilities.CodeFix.csproj", "{F351B22E-04FC-4015-8ECE-0F6814EABD7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinUI3Utilities.Samples", "WinUI3Utilities.Samples\WinUI3Utilities.Samples.csproj", "{EF464546-AA74-4BF1-820D-CFF6E35D3BCB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinUI3Utilities.Samples", "WinUI3Utilities.Samples\WinUI3Utilities.Samples.csproj", "{EF464546-AA74-4BF1-820D-CFF6E35D3BCB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{FDFB5B53-CA5D-4299-B611-31B5CB709173}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build.yml = .github\workflows\build.yml
+		.github\workflows\check-xaml-formatting.yml = .github\workflows\check-xaml-formatting.yml
+		.github\workflows\release.yml = .github\workflows\release.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -125,6 +132,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FDFB5B53-CA5D-4299-B611-31B5CB709173} = {D57D6AFD-2C9C-4A0B-BAB8-0C0AD0E624C1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DD4BCFD9-2898-4586-A89C-90F1CC9BDB71}
