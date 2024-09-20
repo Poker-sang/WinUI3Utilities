@@ -15,10 +15,10 @@ public class DefaultBrushBackdrop(bool isDarkMode) : SystemBackdrop
     /// </summary>
     public bool IsDarkMode
     {
-        get => isDarkMode;
+        get => _isDarkMode;
         set
         {
-            isDarkMode = value;
+            _isDarkMode = value;
             if (_brush is not null)
                 _brush.Color = value ? Colors.Black : Colors.White;
         }
@@ -33,6 +33,7 @@ public class DefaultBrushBackdrop(bool isDarkMode) : SystemBackdrop
         _brush = compositor.CreateColorBrush(IsDarkMode ? Colors.Black : Colors.White);
 
     private Windows.UI.Composition.CompositionColorBrush? _brush;
+    private bool _isDarkMode = isDarkMode;
 
     /// <inheritdoc />
     protected override void OnDefaultSystemBackdropConfigurationChanged(ICompositionSupportsSystemBackdrop? target, XamlRoot xamlRoot)

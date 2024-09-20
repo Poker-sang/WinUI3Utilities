@@ -159,12 +159,12 @@ public static class WindowHelper
         window.AppWindow.TitleBar.ButtonForegroundColor = actualTheme is ElementTheme.Dark ? Colors.White : Colors.Black;
     }
 
-    private static void EnsureDispatcherQueueController()
+    private static unsafe void EnsureDispatcherQueueController()
     {
         if (Windows.System.DispatcherQueue.GetForCurrentThread() is null && _dispatcherQueueController is 0)
         {
             DispatcherQueueOptions options;
-            options.dwSize = Marshal.SizeOf(typeof(DispatcherQueueOptions));
+            options.dwSize = sizeof(DispatcherQueueOptions);
             options.threadType = 2; // DQTYPE_THREAD_CURRENT
             options.apartmentType = 2; // DQTAT_COM_STA
 

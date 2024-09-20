@@ -5,7 +5,7 @@ namespace WinUI3Utilities.Internal.PlatformInvoke;
 
 [StructLayout(LayoutKind.Sequential)]
 [SuppressMessage("Style", "IDE1006:命名样式")]
-internal struct DispatcherQueueOptions
+internal ref struct DispatcherQueueOptions
 {
     internal int dwSize;
     internal int threadType;
