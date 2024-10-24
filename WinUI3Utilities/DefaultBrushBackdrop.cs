@@ -8,7 +8,7 @@ namespace WinUI3Utilities;
 /// <summary>
 /// Helper class for creating composition-brush based backdrops.
 /// </summary>
-public class DefaultBrushBackdrop(bool isDarkMode) : SystemBackdrop
+public partial class DefaultBrushBackdrop(bool isDarkMode) : SystemBackdrop
 {
     /// <summary>
     /// Is dark mode.

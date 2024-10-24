@@ -5,40 +5,40 @@ namespace WinUI3Utilities;
 /// <summary>
 /// Snack bar severity on <see cref="TeachingTip.IconSource"/> (Segoe Fluent Icons font)
 /// </summary>
-public enum TeachingTipSeverity
+public enum TeachingTipSeverity : ushort
 {
     /// <summary>
     /// Accept (E10B)
     /// </summary>
-    Ok,
+    Ok = 0xE10B,
 
     /// <summary>
     /// Info (E946)
     /// </summary>
-    Information,
+    Information = 0xE946,
 
     /// <summary>
     /// Important (E171)
     /// </summary>
-    Important,
+    Important = 0xE171,
 
     /// <summary>
     /// Warning (E7BA)
     /// </summary>
-    Warning,
+    Warning = 0xE7BA,
 
     /// <summary>
     /// ErrorBadge (EA39)
     /// </summary>
-    Error,
+    Error = 0xEA39,
 
     /// <summary>
     /// Processing (E9F5)
     /// </summary>
-    Processing,
+    Processing = 0xE9F5,
 
     /// <summary>
     /// <see langword="null"/>
     /// </summary>
-    None
+    None = 0
 }

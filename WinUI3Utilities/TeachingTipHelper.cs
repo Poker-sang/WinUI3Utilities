@@ -13,7 +13,8 @@ namespace WinUI3Utilities;
 public static class TeachingTipHelper
 {
     /// <summary>
-    /// Create a <see cref="TeachingTip"/> with <paramref name="frameworkElement"/> and <paramref name="target"/>
+    /// Create a <see cref="TeachingTip"/> with <paramref name="frameworkElement"/> and <paramref name="target"/>.
+    /// Will be removed from <see cref="FrameworkElement.Resources"/> when <see cref="TeachingTip.Closed"/>
     /// </summary>
     /// <param name="frameworkElement"></param>
     /// <param name="target"></param>
@@ -165,16 +166,7 @@ public static class TeachingTipHelper
             ? null
             : new FontIconSource
             {
-                Glyph = severity switch
-                {
-                    TeachingTipSeverity.Ok => "\xE10B", // Accept
-                    TeachingTipSeverity.Information => "\xE946", // Info
-                    TeachingTipSeverity.Important => "\xE171", // Important
-                    TeachingTipSeverity.Warning => "\xE7BA", // Warning
-                    TeachingTipSeverity.Error => "\xEA39", // ErrorBadge
-                    TeachingTipSeverity.Processing => "\xE9F5", // Processing
-                    _ => ThrowHelper.ArgumentOutOfRange<TeachingTipSeverity, string>(severity)
-                }
+                Glyph = ((char)severity).ToString()
             };
     }
 }

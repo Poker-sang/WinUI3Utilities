@@ -79,12 +79,7 @@ public abstract class AppContextGenerator(string attributeName) : TypeWithAttrib
                       public static void Initialize{{methodName}}()
                       {
                           var settings = {{nsStorage}}.ApplicationData.GetDefault().LocalSettings;
-                          if (!settings.Containers.ContainsKey({{specificType}}.{{methodName}}ContainerKey))
-                          {
-                              _ = settings.CreateContainer({{specificType}}.{{methodName}}ContainerKey, {{nsStorage}}.ApplicationDataCreateDisposition.{{createDispositionValue}});
-                          }
-                  
-                          _container{{methodName}} = settings.Containers[{{specificType}}.{{methodName}}ContainerKey];
+                          _container{{methodName}} = settings.CreateContainer({{specificType}}.{{methodName}}ContainerKey, {{nsStorage}}.ApplicationDataCreateDisposition.{{createDispositionValue}});
                       }
                   """).AppendLine();
             _ = loadMethods.AppendLine(

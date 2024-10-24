@@ -18,7 +18,7 @@
         <Title>$(AssemblyName)</Title>
         <RepositoryUrl>git@github.com:Poker-sang/WinUI3Utilities.git</RepositoryUrl>
         <PackageProjectUrl>https://github.com/Poker-sang/WinUI3Utilities</PackageProjectUrl>
-        <AssemblyVersion>1.1.7.9</AssemblyVersion>
+        <AssemblyVersion>1.1.7.10</AssemblyVersion>
         <FileVersion>$(AssemblyVersion)</FileVersion>
         <VersionPrefix>$(AssemblyVersion)</VersionPrefix>
         <Version>$(AssemblyVersion)</Version>
@@ -26,13 +26,13 @@
         <IsAotCompatible>true</IsAotCompatible>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-        <NoWarn>IDE0060</NoWarn>
+        <NoWarn>$(NoWarn);IDE0060</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240802000" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.240923002" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.3233" />
-        <PackageReference Include="System.Text.Json" Version="8.0.4" GeneratePathProperty="true" PrivateAssets="all" ReferenceOutputAssembly="false" />
+        <PackageReference Include="System.Text.Json" Version="8.0.5" GeneratePathProperty="true" PrivateAssets="all" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <ItemGroup>
