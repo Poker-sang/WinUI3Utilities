@@ -18,7 +18,7 @@
         <Title>$(AssemblyName)</Title>
         <RepositoryUrl>git@github.com:Poker-sang/WinUI3Utilities.git</RepositoryUrl>
         <PackageProjectUrl>https://github.com/Poker-sang/WinUI3Utilities</PackageProjectUrl>
-        <AssemblyVersion>1.1.7.10</AssemblyVersion>
+        <AssemblyVersion>1.1.7.11</AssemblyVersion>
         <FileVersion>$(AssemblyVersion)</FileVersion>
         <VersionPrefix>$(AssemblyVersion)</VersionPrefix>
         <Version>$(AssemblyVersion)</Version>
@@ -30,14 +30,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.240923002" />
-        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.3233" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.241114003" />
+        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
         <PackageReference Include="System.Text.Json" Version="8.0.5" GeneratePathProperty="true" PrivateAssets="all" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <ItemGroup>
         <Folder Include="NuGet Info\" />
-        <ProjectReference Include="..\$(AssemblyName).SourceGenerator\$(AssemblyName).SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\$(AssemblyName).SourceGenerator\$(AssemblyName).SourceGenerator.csproj" ReferenceOutputAssembly="false" />
         <ProjectReference Include="..\$(AssemblyName).Analyzer\$(AssemblyName).Analyzer.csproj" ReferenceOutputAssembly="false" />
         <ProjectReference Include="..\$(AssemblyName).CodeFix\$(AssemblyName).CodeFix.csproj" ReferenceOutputAssembly="false" />
         <None Include="..\$(AssemblyName).SourceGenerator\$(OutputPath)\..\netstandard2.0\$(AssemblyName).SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />

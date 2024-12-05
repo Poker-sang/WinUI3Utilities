@@ -1,6 +1,5 @@
 using Microsoft.UI.Composition.SystemBackdrops;
-using System.Runtime.InteropServices;
-using System;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using Windows.Graphics;
@@ -174,23 +173,22 @@ public static class WindowHelper
 
     private static nint _dispatcherQueueController;
 
-    private static Windows.UI.Composition.Compositor? _compositor;
-
     private static readonly object _compositorLock = new();
 
+    [field: AllowNull, MaybeNull]
     internal static Windows.UI.Composition.Compositor Compositor
     {
         get
         {
-            if (_compositor is null)
+            if (field is null)
                 lock (_compositorLock)
-                    if (_compositor is null)
+                    if (field is null)
                     {
                         EnsureDispatcherQueueController();
-                        _compositor = new();
+                        field = new();
                     }
 
-            return _compositor;
+            return field;
         }
     }
 }

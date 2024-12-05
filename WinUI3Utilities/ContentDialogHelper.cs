@@ -10,18 +10,22 @@ namespace WinUI3Utilities;
 public static class ContentDialogHelper
 {
     /// <summary>
-    /// Create a <see cref="ContentDialog"/> with <paramref name="uiElement"/>
+    /// Create a <see cref="ContentDialog"/> with <paramref name="frameworkElement"/>
     /// </summary>
-    /// <param name="uiElement"></param>
+    /// <param name="frameworkElement"></param>
     /// <returns></returns>
-    public static ContentDialog CreateContentDialog(this UIElement uiElement)
+    public static ContentDialog CreateContentDialog(this FrameworkElement frameworkElement)
     {
-        return new() { XamlRoot = uiElement.XamlRoot };
+        return new()
+        {
+            RequestedTheme = frameworkElement.ActualTheme,
+            XamlRoot = frameworkElement.XamlRoot
+        };
     }
 
     /// <inheritdoc cref="ShowAsync"/>
     public static IAsyncOperation<ContentDialogResult> ShowContentDialogAsync(
-        this UIElement uiElement,
+        this FrameworkElement frameworkElement,
         object? title,
         object? content,
         string primaryButtonText = "",
@@ -30,7 +34,7 @@ public static class ContentDialogHelper
         ContentDialogButton defaultButton = ContentDialogButton.Primary,
         bool fullSizeDesired = false)
     {
-        return uiElement.CreateContentDialog().ShowAsync(title, content, primaryButtonText, secondaryButtonText, closeButtonText, defaultButton, fullSizeDesired);
+        return frameworkElement.CreateContentDialog().ShowAsync(title, content, primaryButtonText, secondaryButtonText, closeButtonText, defaultButton, fullSizeDesired);
     }
 
     /// <summary>

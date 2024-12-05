@@ -15,7 +15,7 @@ internal static partial class User32
     internal static partial nint GetActiveWindow();
 
     [LibraryImport(nameof(User32), SetLastError = true)]
-    [UnmanagedCallConv(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvStdcall) })]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvStdcall)])]
     internal static partial int UnhookWindowsHookEx(int idHook);
 
 #pragma warning disable SYSLIB1054 // 使用 “LibraryImportAttribute” 而不是 “DllImportAttribute” 在编译时生成 P/Invoke 封送代码
