@@ -32,8 +32,9 @@ namespace WinUI3Utilities.Attributes;
 ///         {
 ///             <see langword="var"/> values = _container`MethodName`.Values;
 ///             <see langword="var"/> converter = <see langword="new"/> <typeparamref name="TConverter"/>();
-///             <see langword="return new"/> <typeparamref name="T"/>(
-///                 converter.ConvertBack&lt;Type1&gt;(values[<see langword="nameof"/>(<typeparamref name="T"/>.Property1)])
+///             <see langword="return new"/> <typeparamref name="T"/>()
+///             {
+///                 Property1 = converter.ConvertBack&lt;Type1&gt;(values[<see langword="nameof"/>(<typeparamref name="T"/>.Property1)]),
 ///                 ...
 ///             );
 ///         }

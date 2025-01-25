@@ -90,7 +90,8 @@ public abstract class AppContextGenerator(string attributeName) : TypeWithAttrib
                           {
                               var values = _container{{methodName}}.Values;
                               var converter = new {{converterTypeName}}();
-                              return new {{typeName}}(
+                              return new {{typeName}}()
+                              {
                   """);
             _ = saveMethods.AppendLine(
                   $$"""
@@ -104,7 +105,7 @@ public abstract class AppContextGenerator(string attributeName) : TypeWithAttrib
             foreach (var property in type.GetProperties(attributeList[0].AttributeClass!).Where(t => !t.IsReadOnly && !t.IsStatic))
             {
                 var isNullable = property.Type.NullableAnnotation is NullableAnnotation.Annotated ? "true" : "false";
-                _ = loadMethods.AppendLine($"{Spacing(4)}converter.ConvertBack<{property.Type.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString()}>(values[nameof({typeName}.{property.Name})], {isNullable})!,");
+                _ = loadMethods.AppendLine($"{Spacing(4)}{property.Name} = converter.ConvertBack<{property.Type.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString()}>(values[nameof({typeName}.{property.Name})], {isNullable})!,");
                 _ = saveMethods.AppendLine($"{Spacing(3)}values[nameof({typeName}.{property.Name})] = converter.Convert(appConfiguration.{property.Name});");
             }
 
@@ -112,7 +113,7 @@ public abstract class AppContextGenerator(string attributeName) : TypeWithAttrib
             _ = loadMethods.Remove(loadMethods.Length - 3, 1);
             _ = loadMethods.AppendLine(
                 """
-                           );
+                            };
                         }
                         catch
                         {

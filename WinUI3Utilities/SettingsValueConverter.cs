@@ -24,10 +24,10 @@ public class SettingsValueConverter : ISettingsValueConverter
             null when typeof(T) == typeof(string) || typeof(T) == typeof(ApplicationDataCompositeValue) => null,
             null => ThrowHelper.ArgumentNull<object?, object?>(value),
             Enum e => e.GetHashCode(),
-            IEnumerable => JsonSerializer.Serialize(value, typeof(T), Context),
             sbyte or byte or short or ushort or int or uint or long or ulong or nint or nuint or float or double or bool
-                or char or DateTimeOffset or TimeSpan or Guid or Point or Size or Rect
+                or char or string or DateTimeOffset or TimeSpan or Guid or Point or Size or Rect
                 or ApplicationDataCompositeValue => value,
+            IEnumerable => JsonSerializer.Serialize(value, typeof(T), Context),
             _ => ThrowHelper.ArgumentOutOfRange<object?, object?>(typeof(T),
                 "Only primitive, enumerable, enum and some other types are supported. " +
                 "For more information, see: https://learn.microsoft.com/windows/apps/design/app-settings/store-and-retrieve-app-data.")
@@ -39,7 +39,7 @@ public class SettingsValueConverter : ISettingsValueConverter
         return value switch
         {
             null when !isNullable => ThrowHelper.ArgumentNull<object, T>(value),
-            string s when typeof(T).IsAssignableTo(typeof(IEnumerable)) => (T)JsonSerializer.Deserialize(s, typeof(T), Context)!,
+            string s when typeof(T) != typeof(string) && typeof(T).IsAssignableTo(typeof(IEnumerable)) => (T)JsonSerializer.Deserialize(s, typeof(T), Context)!,
             _ => (T?)value
         };
     }

@@ -18,7 +18,7 @@
         <Title>$(AssemblyName)</Title>
         <RepositoryUrl>git@github.com:Poker-sang/WinUI3Utilities.git</RepositoryUrl>
         <PackageProjectUrl>https://github.com/Poker-sang/WinUI3Utilities</PackageProjectUrl>
-        <AssemblyVersion>1.1.7.14</AssemblyVersion>
+        <AssemblyVersion>1.1.7.16</AssemblyVersion>
         <FileVersion>$(AssemblyVersion)</FileVersion>
         <VersionPrefix>$(AssemblyVersion)</VersionPrefix>
         <Version>$(AssemblyVersion)</Version>
@@ -46,5 +46,4 @@
         <None Include="..\README.md" Link="NuGet Info\README.md" Pack="true" PackagePath="/" />
         <None Include="$(PkgSystem_Text_Json)\lib\netstandard2.0\System.Text.Json.dll" Pack="true" PackagePath="analyzers\dotnet\cs\System.Text.Json.dll" Visible="false" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
-
 </Project>
