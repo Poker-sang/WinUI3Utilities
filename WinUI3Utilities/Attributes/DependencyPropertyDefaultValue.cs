@@ -11,10 +11,12 @@ public enum DependencyPropertyDefaultValue
     /// <see cref="DependencyProperty.UnsetValue"/>
     /// </summary>
     UnsetValue,
+
     /// <summary>
     /// <see langword="default"/>(T)
     /// </summary>
     Default,
+
     /// <summary>
     /// <see langword="new"/> T()
     /// </summary>

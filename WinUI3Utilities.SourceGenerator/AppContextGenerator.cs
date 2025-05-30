@@ -86,46 +86,39 @@ public abstract class AppContextGenerator(string attributeName) : TypeWithAttrib
                 $$"""
                       public static {{typeName}}? Load{{methodName}}()
                       {
-                          try
-                          {
-                              var values = _container{{methodName}}.Values;
-                              var converter = new {{converterTypeName}}();
-                              return new {{typeName}}()
-                              {
+                          var values = _container{{methodName}}.Values;
+                          var converter = new {{converterTypeName}}();
+                          var settings = new {{typeName}}();
                   """);
             _ = saveMethods.AppendLine(
                   $$"""
                       public static void Save{{methodName}}({{typeName}}? configuration)
                       {
-                          if (configuration is { } appConfiguration)
-                          {
-                              var values = _container{{methodName}}.Values;
-                              var converter = new {{converterTypeName}}();
+                          if (configuration is not { } appConfiguration)
+                              return;
+                          var values = _container{{methodName}}.Values;
+                          var converter = new {{converterTypeName}}();
                   """);
             foreach (var property in type.GetProperties(attributeList[0].AttributeClass!).Where(t => !t.IsReadOnly && !t.IsStatic))
             {
                 var isNullable = property.Type.NullableAnnotation is NullableAnnotation.Annotated ? "true" : "false";
-                _ = loadMethods.AppendLine($"{Spacing(4)}{property.Name} = converter.ConvertBack<{property.Type.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString()}>(values[nameof({typeName}.{property.Name})], {isNullable})!,");
-                _ = saveMethods.AppendLine($"{Spacing(3)}values[nameof({typeName}.{property.Name})] = converter.Convert(appConfiguration.{property.Name});");
+                _ = loadMethods.AppendLine(
+                    $"""
+                             if (values.TryGetValue(nameof({typeName}.{property.Name}), out var value{property.Name}) && converter.TryConvertBack<{property.Type.WithNullableAnnotation(NullableAnnotation.NotAnnotated).ToDisplayString()}>(value{property.Name}, {isNullable}, out var result{property.Name}))
+                                 settings.{property.Name} = result{property.Name}!;
+                     """);
+                _ = saveMethods.AppendLine(
+                    $"""
+                             if (converter.TryConvert(appConfiguration.{property.Name}, out var result{property.Name}))
+                                 values[nameof({typeName}.{property.Name})] = result{property.Name};
+                     """);
             }
-
-            // 去除','
-            _ = loadMethods.Remove(loadMethods.Length - 3, 1);
             _ = loadMethods.AppendLine(
                 """
-                            };
-                        }
-                        catch
-                        {
-                            return default;
-                        }
+                        return settings;
                     }
                 """).AppendLine();
-            _ = saveMethods.AppendLine(
-                """
-                        }
-                    }
-                """).AppendLine();
+            _ = saveMethods.AppendLine("    }").AppendLine();
         }
 
         _ = saveMethods.Remove(saveMethods.Length - 2, 2);

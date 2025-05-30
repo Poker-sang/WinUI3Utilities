@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace WinUI3Utilities;
 
 /// <summary>
@@ -13,8 +15,9 @@ public interface ISettingsValueConverter
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="value"></param>
+    /// <param name="result"></param>
     /// <returns>Only primitive types are allowed</returns>
-    object? Convert<T>(T? value);
+    bool TryConvert<T>(T? value, out object? result);
 
     /// <summary>
     /// Convert <paramref name="value"/> to type <typeparamref name="T"/>
@@ -22,6 +25,7 @@ public interface ISettingsValueConverter
     /// <typeparam name="T"></typeparam>
     /// <param name="value"></param>
     /// <param name="isNullable"><typeparamref name="T"/>is nullable</param>
+    /// <param name="result"></param>
     /// <returns></returns>
-    T? ConvertBack<T>(object? value, bool isNullable) where T : notnull;
+    bool TryConvertBack<T>(object? value, bool isNullable, out T? result) where T : notnull;
 }

@@ -1,11 +1,9 @@
 using Microsoft.UI.Composition.SystemBackdrops;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using Windows.Graphics;
 using Microsoft.UI.Windowing;
 using WinUI3Utilities.Internal.PlatformInvoke;
-using Microsoft.UI;
 
 namespace WinUI3Utilities;
 
@@ -110,8 +108,8 @@ public static class WindowHelper
 
         if (info.IsMaximized && window.AppWindow.Presenter is OverlappedPresenter presenter)
             presenter.Maximize();
-
-        window.SetBackdrop(info.BackdropType, info.Theme is ElementTheme.Dark);
+        
+        window.SetBackdrop(info.BackdropType);
 
         window.SetTheme(info.Theme);
     }
@@ -122,16 +120,14 @@ public static class WindowHelper
     /// </summary>
     /// <param name="window"></param>
     /// <param name="backdropType"></param>
-    /// <param name="isDarkMode">Set <see cref="DefaultBrushBackdrop.IsDarkMode"/>, use <paramref name="window"/>.Content.ActualTheme when <see langword="null"/></param>
-    public static void SetBackdrop(this Window window, BackdropType backdropType, bool? isDarkMode = null)
+    public static void SetBackdrop(this Window window, BackdropType backdropType)
     {
         window.SystemBackdrop = backdropType switch
         {
             BackdropType.Acrylic when DesktopAcrylicController.IsSupported() => new DesktopAcrylicBackdrop(),
             BackdropType.Mica when MicaController.IsSupported() => new MicaBackdrop(),
             BackdropType.MicaAlt when MicaController.IsSupported() => new MicaBackdrop { Kind = MicaKind.BaseAlt },
-            BackdropType.Maintain => window.SystemBackdrop,
-            _ => new DefaultBrushBackdrop(isDarkMode ?? window.Content?.To<FrameworkElement>().ActualTheme is ElementTheme.Dark)
+            _ => window.SystemBackdrop
         };
     }
 
@@ -151,44 +147,8 @@ public static class WindowHelper
         if (window.Content is FrameworkElement framework)
         {
             framework.RequestedTheme = actualTheme;
-            if (window.SystemBackdrop is DefaultBrushBackdrop backdrop) 
-                backdrop.IsDarkMode = actualTheme is ElementTheme.Dark;
         }
 
-        window.AppWindow.TitleBar.ButtonForegroundColor = actualTheme is ElementTheme.Dark ? Colors.White : Colors.Black;
-    }
-
-    private static unsafe void EnsureDispatcherQueueController()
-    {
-        if (Windows.System.DispatcherQueue.GetForCurrentThread() is null && _dispatcherQueueController is 0)
-        {
-            DispatcherQueueOptions options;
-            options.dwSize = sizeof(DispatcherQueueOptions);
-            options.threadType = 2; // DQTYPE_THREAD_CURRENT
-            options.apartmentType = 2; // DQTAT_COM_STA
-
-            _ = CoreMessaging.CreateDispatcherQueueController(options, out _dispatcherQueueController);
-        }
-    }
-
-    private static nint _dispatcherQueueController;
-
-    private static readonly object _compositorLock = new();
-
-    [field: AllowNull, MaybeNull]
-    internal static Windows.UI.Composition.Compositor Compositor
-    {
-        get
-        {
-            if (field is null)
-                lock (_compositorLock)
-                    if (field is null)
-                    {
-                        EnsureDispatcherQueueController();
-                        field = new();
-                    }
-
-            return field;
-        }
+        window.AppWindow.TitleBar.PreferredTheme = actualTheme is ElementTheme.Dark ? TitleBarTheme.Dark : TitleBarTheme.Light;
     }
 }

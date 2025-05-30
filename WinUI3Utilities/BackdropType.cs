@@ -25,10 +25,5 @@ public enum BackdropType
     /// Mica Base Alt
     /// </summary>
     /// <remarks>Mica isn't supported on all systems. Where it's not supported, a solid color is used instead of the Mica effect.</remarks>
-    MicaAlt,
-
-    /// <summary>
-    /// Maintaining the status quo
-    /// </summary>
-    Maintain
+    MicaAlt
 }
