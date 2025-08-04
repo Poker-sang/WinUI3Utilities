@@ -49,9 +49,8 @@ public static class TitleBarHelper
     /// <returns>Whether customization of title bar is supported</returns>
     public static void SetWindowTitleBar(this Window window)
     {
-        if (!AppWindowTitleBar.IsCustomizationSupported())
-            return;
-        window.ExtendsContentIntoTitleBar = true;
+        if (AppWindowTitleBar.IsCustomizationSupported())
+            window.ExtendsContentIntoTitleBar = true;
     }
 
     #region For theme

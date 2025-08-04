@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -72,16 +71,16 @@ public class DependencyPropertyAnalyzer : DiagnosticAnalyzer
                     },
                     ArgumentList.Arguments:
                     [
-                    { Expression: { } propertyNameExpression },
-                    { Expression: TypeOfExpressionSyntax { Type: { } propertyType } },
-                    { Expression: TypeOfExpressionSyntax { Type: { } classType } },
-                    {
-                        Expression: ImplicitObjectCreationExpressionSyntax
-                        or ObjectCreationExpressionSyntax
+                        { Expression: { } propertyNameExpression },
+                        { Expression: TypeOfExpressionSyntax { Type: { } propertyType } },
+                        { Expression: TypeOfExpressionSyntax { Type: { } classType } },
                         {
-                            Type: IdentifierNameSyntax { Identifier.ValueText: "PropertyMetadata" }
+                            Expression: ImplicitObjectCreationExpressionSyntax
+                            or ObjectCreationExpressionSyntax
+                            {
+                                Type: IdentifierNameSyntax { Identifier.ValueText: "PropertyMetadata" }
+                            }
                         }
-                    }
                     ]
                 }
             })
@@ -146,20 +145,20 @@ public class DependencyPropertyAnalyzer : DiagnosticAnalyzer
                 Body.Statements:
                 [
                     ReturnStatementSyntax
-                {
-                    Expression: CastExpressionSyntax
                     {
-                        Type: var tempType,
-                        Expression: InvocationExpressionSyntax
+                        Expression: CastExpressionSyntax
                         {
-                            Expression: IdentifierNameSyntax { Identifier.ValueText: "GetValue" },
-                            ArgumentList.Arguments:
+                            Type: var tempType,
+                            Expression: InvocationExpressionSyntax
+                            {
+                                Expression: IdentifierNameSyntax { Identifier.ValueText: "GetValue" },
+                                ArgumentList.Arguments:
                                 [
                                     { Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } }
                                 ]
+                            }
                         }
                     }
-                }
                 ]
             } => (tempName, tempType),
             // get => (x)GetValue(xxx); 
@@ -194,17 +193,17 @@ public class DependencyPropertyAnalyzer : DiagnosticAnalyzer
                 Body.Statements:
                 [
                     ExpressionStatementSyntax
-                {
-                    Expression: InvocationExpressionSyntax
                     {
-                        Expression: IdentifierNameSyntax { Identifier.ValueText: "SetValue" },
-                        ArgumentList.Arguments:
+                        Expression: InvocationExpressionSyntax
+                        {
+                            Expression: IdentifierNameSyntax { Identifier.ValueText: "SetValue" },
+                            ArgumentList.Arguments:
                             [
-                            { Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } },
-                            { Expression: IdentifierNameSyntax { Identifier.ValueText: "value" } }
+                                { Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } },
+                                { Expression: IdentifierNameSyntax { Identifier.ValueText: "value" } }
                             ]
+                        }
                     }
-                }
                 ]
             } => tempName,
             // set => SetValue(xxx, value);
@@ -214,8 +213,8 @@ public class DependencyPropertyAnalyzer : DiagnosticAnalyzer
                     Expression: IdentifierNameSyntax { Identifier.ValueText: "SetValue" },
                     ArgumentList.Arguments:
                     [
-                    { Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } },
-                    { Expression: IdentifierNameSyntax { Identifier.ValueText: "value" } }
+                        { Expression: IdentifierNameSyntax { Identifier.ValueText: var tempName } },
+                        { Expression: IdentifierNameSyntax { Identifier.ValueText: "value" } }
                     ]
                 }
             } => tempName,

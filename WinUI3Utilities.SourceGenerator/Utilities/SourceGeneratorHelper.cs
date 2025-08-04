@@ -280,8 +280,7 @@ internal static class SourceGeneratorHelper
     /// <returns>CompilationUnit</returns>
     internal static TypeSyntax GetTypeSyntax(this ITypeSymbol typeSymbol, bool isNullable)
     {
-        var typeName = ParseTypeName(typeSymbol.ToDisplayString());
-        return isNullable ? NullableType(typeName) : typeName;
+        return ParseTypeName(typeSymbol.ToDisplayString(isNullable ? NullableFlowState.MaybeNull : NullableFlowState.NotNull));
     }
 
     private static MemberAccessExpressionSyntax GetThisMemberAccessExpression(string name)
